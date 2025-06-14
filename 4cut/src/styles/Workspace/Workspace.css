@@ -1,0 +1,21 @@
+.main-layout{
+    height: 100vh;
+    display: flex;
+    padding: 15px 30px;
+    background-color: hsl(0, 0%, 80%);
+}
+
+.main-layout .tools-panel{
+    display: flex;
+    flex-direction: column;
+    flex-basis: 40%;
+    margin-right: 15px;
+}
+
+.main-layout .canvas-area{
+    flex-basis: 0;
+    flex-grow: 1; 
+    background-color: #F9FAFB;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}

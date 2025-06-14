@@ -1,6 +1,11 @@
-html, body{
+*{
   box-sizing: border-box;
+}
+
+html, body{
   margin: 0;
+  padding: 0;
+  height: 100%; /* 부모 컨테이너가 높이를 가질 수 있도록 */
 }
 
 
