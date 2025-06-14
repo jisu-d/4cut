@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/MainPage.css';
+import '../styles/MainPage/MainPage.css';
 
 const MainPage: React.FC = () => {
   return (
