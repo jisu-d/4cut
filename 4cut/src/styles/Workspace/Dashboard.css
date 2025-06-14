@@ -1,0 +1,43 @@
+.tool-header{
+    display: flex;
+    width: 100%;
+    padding: 13px;
+    padding-left: 30px;
+    /* flex-basis: 50px; */
+    justify-content: space-between;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    background-color: #F9FAFB;
+}
+
+.tool-header > div:nth-child(1){
+    display: flex;
+    align-items: center;
+    gap: 36px; 
+}
+
+.tool-header > div:nth-child(2){
+    display: flex;
+    align-items: center;
+    gap: 18px; 
+}
+
+.img-icon-img{
+    width: 20px;
+    height: 20px;
+}
+
+.tool-header .color-icon{
+    width: 30px;
+    height: 30px;
+    background-color: #374151;
+    border-radius: 8px;
+}
+
+.tool-content{
+    width: 100%;
+    flex-basis: 0;
+    flex-grow: 1; 
+    border-radius: 10px;
+    background-color: #F9FAFB;
+}
