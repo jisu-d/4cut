@@ -2,7 +2,7 @@
 import ImageRatioSelector from './ImageRatioSelector';
 import LayerList from './LayerList';
 
-import '../../styles/Workspace/LayersContent.css'
+import '../../../styles/Workspace/layers/LayersContent.css'
 
 function LayersContent(){
     return (
