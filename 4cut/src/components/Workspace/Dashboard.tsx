@@ -12,7 +12,7 @@ import brushIconOn from '../../assets/Icon/brushOn.svg';
 import layerIcon from '../../assets/Icon/layer.svg';
 import layerIconOn from '../../assets/Icon/layerOn.svg';
 
-import LayersContent from './LayersContent';
+import LayersContent from './layers/LayersContent';
 
 const PreviewContent = () => <div>Add Image Content</div>;
 const SettingsContent = () => <div>Export Content</div>;

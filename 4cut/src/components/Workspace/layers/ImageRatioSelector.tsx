@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import '../../styles/Workspace/ImageRatioSelector.css';
+import '../../../styles/Workspace/layers/ImageRatioSelector.css';
 
-import type {AspectRatio} from '../../types/types'
+import type {AspectRatio} from '../../../types/types'
 
 import AspectRatioButton from './AspectRatioButton'
 
-import addIcon from '../../assets/Icon/add.svg'
+import addIcon from '../../../assets/Icon/add.svg'
 
 function ImageRatioSelector() {
 
