@@ -1,0 +1,36 @@
+.aspect-ratio-buttons-container .aspect-ratio-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 19px;
+  font-family: 'Pretendard-Medium', sans-serif;
+  color: #4a4a4a;
+  background-color: #ffffff;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: all 0.3s ease-in-out;
+  flex: 1 1 auto;
+}
+
+.aspect-ratio-buttons-container .active {
+  border: 2px solid #4F46E5; /* Your desired border color */
+  color: #4F46E5; /* Optional: change text color when active */
+  background-color: #E0E7FF; /* Optional: subtle background color when active */
+}
+
+.aspect-ratio-buttons-container .ratio-4-3 {
+  aspect-ratio: 4 / 3;
+}
+
+.aspect-ratio-buttons-container .ratio-3-4 {
+  aspect-ratio: 3 / 4;
+}
+
+.aspect-ratio-buttons-container .ratio-1-1 {
+  aspect-ratio: 1 / 1;
+}
+
+.aspect-ratio-buttons-container .ratio-16-9 {
+  aspect-ratio: 16 / 9;
+}
