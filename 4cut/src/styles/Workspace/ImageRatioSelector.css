@@ -1,0 +1,23 @@
+.image-ratio-selector-section{
+    display: flex;
+    flex-direction: column;
+    flex-basis: 30%;
+}
+
+.image-ratio-selector-section > div:nth-child(1){
+  font-size: 32px;
+  font-family: 'Pretendard-Black', sans-serif;
+}
+
+/* AspectRatioButton들을 감싸는 컨테이너의 스타일 */
+.aspect-ratio-buttons-container {
+  flex-basis: 0;
+  flex-grow: 1;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+
