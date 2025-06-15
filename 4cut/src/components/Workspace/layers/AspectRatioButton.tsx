@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import '../../styles/Workspace/AspectRatioButton.css';
+import '../../../styles/Workspace/layers/AspectRatioButton.css';
 
-import type {AspectRatio} from '../../types/types'
+import type {AspectRatio} from '../../../types/types'
 
 
 interface AspectRatioButtonProps {
