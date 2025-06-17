@@ -1,0 +1,13 @@
+version: '3.8' # Docker Compose 파일 형식 버전
+
+services:
+  app: 
+    build: . 
+    ports:
+      - "3000:5173" 
+    volumes:
+      - .:/app # 프로젝트 코드 동기화 (실시간 반영)
+      - /app/node_modules # 컨테이너 내부의 node_modules 보존
+    stdin_open: true # 표준 입력 활성화
+    tty: true # 터미널 활성화 (색상 등)
+    command: ["pnpm", "dev", "--host"] # 컨테이너 시작 시 실행할 명령어
