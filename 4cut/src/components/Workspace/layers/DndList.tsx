@@ -1,4 +1,3 @@
-// src/components/DndList.tsx
 import '../../../styles/Workspace/layers/DndList.css';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import type { DndListProps } from '../../../types/types';
@@ -26,6 +25,8 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
 
   // ⭐ 새로 추가된 상태: 삭제 애니메이션이 진행 중인 항목들의 ID를 저장합니다.
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+  // ⭐ 새로 추가된 상태: 현재 텍스트를 편집 중인 항목의 ID를 저장합니다.
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const itemRects = useRef<Map<string, DOMRect>>(new Map());
@@ -55,18 +56,27 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
         document.body.style.cursor = '';
         document.body.style.overflow = '';
       }
+      // 삭제 후 편집 상태 초기화
+      if (editingId === id) {
+        setEditingId(null);
+      }
     }, TRANSITION_DURATION); // CSS transition 시간과 일치시킵니다.
-  }, [setItems, draggingId]);
+  }, [setItems, draggingId, editingId]);
 
 
   // 드래그/터치 시작 시 공통 로직
   const commonDragStartLogic = useCallback((clientX: number, clientY: number, id: string, targetElement: EventTarget) => {
     const target = targetElement as HTMLElement;
 
+    // 편집 모드일 때는 드래그 방지
+    if (editingId === id) {
+      return;
+    }
+
     let currentTarget: HTMLElement | null = target;
     while (currentTarget && currentTarget !== null && currentTarget.classList[0] !== 'list-item') {
       if (currentTarget.tagName === 'INPUT' || currentTarget.tagName === 'IMG' || currentTarget.classList.contains('list-item-controls')) {
-        return; // 컨트롤 요소 클릭 시 DND 방지
+        return; // 컨트롤 요소 클릭 시 DND 방지 (체크박스, 삭제 버튼, 텍스트 인풋 등)
       }
       currentTarget = currentTarget.parentElement;
     }
@@ -103,7 +113,7 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
     document.body.style.userSelect = 'none';
     document.body.style.cursor = 'grabbing';
     document.body.style.overflow = 'hidden';
-  }, [items, deletingIds]); // deletingIds를 의존성 배열에 추가
+  }, [items, deletingIds, editingId]); // editingId를 의존성 배열에 추가
 
   // 마우스 드래그 시작
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>, id: string) => {
@@ -227,6 +237,33 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
     );
   };
 
+  // ⭐ 텍스트 편집 관련 핸들러
+  const handleTextClick = useCallback((id: string) => {
+    // 드래그 중이거나 삭제 애니메이션 중이 아닐 때만 편집 모드로 전환
+    if (!draggingId && !deletingIds.has(id)) {
+      setEditingId(id);
+    }
+  }, [draggingId, deletingIds]);
+
+  const handleTextInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>, id: string) => {
+    setItems(prevItems =>
+      prevItems.map(item =>
+        item.id === id ? { ...item, text: e.target.value } : item
+      )
+    );
+  }, [setItems]);
+
+  const handleTextBlur = useCallback(() => {
+    setEditingId(null); // 편집 모드 종료
+  }, []);
+
+  const handleTextKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === 'Escape') {
+      e.currentTarget.blur(); // Enter 또는 Escape 키를 누르면 blur 이벤트 발생시켜 편집 모드 종료
+    }
+  }, []);
+
+
   // 전역 이벤트 리스너 등록 및 해제 (마우스)
   useEffect(() => {
     if (draggingId) {
@@ -262,6 +299,7 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
       {items.map(item => {
         const isDeleting = deletingIds.has(item.id);
         const isCurrentlyDragging = item.id === draggingId;
+        const isEditing = item.id === editingId; // ⭐ 편집 모드 상태
 
         return (
           <div
@@ -273,16 +311,39 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
             className={`list-item ${isCurrentlyDragging ? 'is-dragging' : ''} ${isDeleting ? 'is-deleting' : ''}`}
             onMouseDown={(e) => handleMouseDown(e, item.id)}
             onTouchStart={(e) => handleTouchStart(e, item.id)}
-            // ⭐ 애니메이션 완료 후 DOM에서 제거하는 로직 추가 (선택 사항, 더 견고한 구현을 위해)
             onTransitionEnd={(e) => {
-              // opacity나 height 트랜지션이 끝났을 때만 실행 (다양한 트랜지션이 있을 수 있으므로)
               if (e.propertyName === 'opacity' && isDeleting) {
-                // setItems(prevItems => prevItems.filter(i => i.id !== item.id)); // 여기서 직접 삭제하면 setTimeout과 중복
                 console.log(`Item ${item.id} animation ended, ready for removal`);
               }
             }}
           >
-            {item.text}
+            {/* ⭐ 조건부 렌더링: 편집 모드에 따라 input 또는 span 표시 */}
+            {isEditing ? (
+              <input
+                type="text"
+                value={item.text}
+                onChange={(e) => handleTextInputChange(e, item.id)}
+                onBlur={handleTextBlur}
+                onKeyDown={handleTextKeyDown}
+                className="list-item-input"
+                autoFocus // 편집 모드 진입 시 자동으로 포커스
+                // 드래그 시작 방지를 위해 mousedown/touchstart 이벤트 전파 중지
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <span
+                onClick={() => handleTextClick(item.id)}
+                // 드래그 시작 방지를 위해 mousedown/touchstart 이벤트 전파 중지 (선택 사항, 필요 시)
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+                style={{
+                  cursor: 'pointer'
+                }}
+              >
+                {item.text}
+              </span>
+            )}
             <div className="list-item-controls">
               <CustomCheckbox id={item.id} checked={item.checked} onToggle={onToggle} />
               <img

@@ -25,14 +25,16 @@ const LayerList = () => {
       checked: true,
     };
 
-    setLayerData((prevLayerData: ListItem[]) => [...prevLayerData, newLayer]);
+    setLayerData((prevLayerData: ListItem[]) => [newLayer, ...prevLayerData]);
   };
 
   return (
     <div className='layer-control-section'>
       <div>
         <div>레이어 변경</div>
-        <img src={addIcon} onClick={handleAddLayer} alt="" />
+        <img src={addIcon} onClick={handleAddLayer} style={{
+          cursor: "pointer"
+        }} alt="" />
       </div>
       <DndList
         items={layerData}
