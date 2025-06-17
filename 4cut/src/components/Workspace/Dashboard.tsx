@@ -40,8 +40,6 @@ function Dashboard() {
     }
   };
 
-  // 조건 ? 참일 때의 값 : 거짓일 때의 값
-
   return (
     <>
       <div className='tool-header'>
