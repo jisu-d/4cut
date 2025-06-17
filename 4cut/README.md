@@ -19,3 +19,11 @@ docker-compose build
 ```ssh
 docker-compose up
 ```
+
+**종료하기**
+```ssh
+docker-compose down
+```
+
+-> 기본적으로 ctrl + c 종료 가능함
+에러 나는 경우
