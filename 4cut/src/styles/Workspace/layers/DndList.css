@@ -4,58 +4,73 @@
   gap: 4px;
   background-color: #f9f9f9;
   border-radius: 8px;
-  flex-basis: 0;  
+  flex-basis: 0;
   flex-grow: 1;
   overflow-y: auto;
   /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
-  position: relative; 
+  position: relative;
 }
 
 .list-item {
-    display: flex;
-    align-items: center;
-    font-family: 'Pretendard-Medium', sans-serif;
-    color: #374151;
-    justify-content: space-between;
-    background-color: white;
-    padding: 25px 20px;
-    font-size: 20px;
-    border-radius: 5px;
-    border: 1.5px solid #E5E7EB;
-    cursor: grab;
-    user-select: none; 
+  display: flex;
+  align-items: center;
+  font-family: 'Pretendard-Medium', sans-serif;
+  color: #374151;
+  justify-content: space-between;
+  background-color: white;
+  padding: 25px 20px;
+  font-size: 20px;
+  border-radius: 5px;
+  border: 1.5px solid #E5E7EB;
+  cursor: grab;
+  user-select: none;
 
-    transition: transform 0.2s ease-in-out, /* 기존 DND 트랜지션 */
-                opacity 0.3s ease-out, /* 투명도 애니메이션만 유지 */
-                box-shadow 0.2s ease-in-out; /* 기존 box-shadow 트랜지션 */
+  transition: transform 0.2s ease-in-out,
+              opacity 0.3s ease-out,
+              box-shadow 0.2s ease-in-out;
 
 }
 
 .is-deleting {
-  opacity: 0; /* 투명도를 0으로 만들어 사라지게 함 */
+  opacity: 0;
 }
 
-/* 드래그 중인 원본 아이템 (시각적으로 숨기기) */
 .is-dragging {
-  opacity: 0; /* 완전히 투명하게 만들어서 오버레이만 보이게 함 */
+  opacity: 0;
+  height: 10px;
 }
 
-.list-item > div:nth-child(1){
+.list-item-controls {
   display: flex;
   gap: 16px;
 }
 
+.list-item-input {
+  height: 30px; 
+  font-size: 20px;
+  max-width: 30%;
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  margin-right: auto;
+  z-index: 2px;
+}
+
+.list-item-input:focus {
+  outline: none;
+  border-bottom: 2px solid #E5E7EB;
+}
+
 /* 드래그 중인 아이템의 복사본 (마우스를 따라다님) */
 .dragged-overlay {
-  position: fixed; /* 뷰포트 기준으로 움직이도록 */
-  width: 50px;
-  pointer-events: none; /* 오버레이 아래 요소 클릭 불가능하도록 */
+  position: fixed;
+  pointer-events: none;
   background-color: white;
   padding: 15px 20px;
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  z-index: 100; /* 최상위로 */
-  width: var(--dragged-width); /* JavaScript에서 너비 설정 */
-  height: var(--dragged-height); /* JavaScript에서 높이 설정 */
-  cursor: grabbing; /* 드래그 중 커서 */
+  z-index: 100;
+  width: var(--dragged-width);
+  height: var(--dragged-height);
+  cursor: grabbing;
 }
