@@ -1,0 +1,34 @@
+.export-textarea-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.export-textarea-label {
+  font-size: 16px;
+  color: #374151;
+  font-family: 'Pretendard-SemiBold', sans-serif;
+  margin-bottom: 2px;
+}
+
+.export-textarea {
+  width: 100%;
+  height: 120px;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: 'Pretendard-Medium', sans-serif;
+  background: #F8F8F7;
+  color: #A1A5AC;
+  outline: none;
+  resize: none;
+  transition: border 0.2s;
+}
+
+.export-textarea:focus {
+  border: 1px solid #6366f1;
+  background-color: #FAFAF8;
+  color: #374151;
+}

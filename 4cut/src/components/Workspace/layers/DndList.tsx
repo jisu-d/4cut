@@ -23,9 +23,9 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
   const [offset, setOffset] = useState<{ x: number; y: number } | null>(null);
   const [originalIndex, setOriginalIndex] = useState<number | null>(null);
 
-  // ⭐ 새로 추가된 상태: 삭제 애니메이션이 진행 중인 항목들의 ID를 저장합니다.
+  // 삭제 애니메이션이 진행 중인 항목들의 ID를 저장합니다.
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
-  // ⭐ 새로 추가된 상태: 현재 텍스트를 편집 중인 항목의 ID를 저장합니다.
+  // 현재 텍스트를 편집 중인 항목의 ID를 저장합니다.
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -237,7 +237,7 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
     );
   };
 
-  // ⭐ 텍스트 편집 관련 핸들러
+  // 텍스트 편집 관련 핸들러
   const handleTextClick = useCallback((id: string) => {
     // 드래그 중이거나 삭제 애니메이션 중이 아닐 때만 편집 모드로 전환
     if (!draggingId && !deletingIds.has(id)) {

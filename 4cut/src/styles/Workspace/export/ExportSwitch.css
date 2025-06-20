@@ -1,0 +1,53 @@
+.export-switch-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.export-switch-label {
+  font-size: 15px;
+  color: #bdbdbd;
+  font-family: 'Pretendard-SemiBold', sans-serif;
+  transition: color 0.2s;
+}
+.export-switch-label.active {
+  color: #4F46E5;
+}
+
+.export-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+.export-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.export-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #e5e7eb;
+  border-radius: 24px;
+  transition: background 0.2s;
+}
+.export-switch input:checked + .export-switch-slider {
+  background: #4F46E5;
+}
+.export-switch-slider:before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+.export-switch input:checked + .export-switch-slider:before {
+  transform: translateX(20px);
+} 
