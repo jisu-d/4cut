@@ -47,6 +47,7 @@ const AlphaPicker= () => {
                 className="alpha-picker-range"
                 ref={rangeRef}
                 onMouseUp={() => { if (addHistoryColor) addHistoryColor(); }}
+                onTouchEnd={() => { if (addHistoryColor) addHistoryColor(); }}
             />
         </div>
     );
