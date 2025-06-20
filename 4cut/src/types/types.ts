@@ -18,9 +18,23 @@ export interface ListCutImage {
   checked: boolean;
 }
 
-// 각각의 컴포넌트 만들때 타입 정의 하는 걸로
+export interface HSL {
+  h: number;
+  s: number;
+  l: number;
+}
+
+export interface HistoryColor {
+  hslData: {
+    hsl: HSL
+  }
+  alphaData: {
+    alpha: number;
+  }
+}
+
 export interface AppContextType {
-  addImg : null,
+  addImg: null,
   export: null,
   brush: null,
   layer: {
@@ -33,5 +47,21 @@ export interface AppContextType {
       setLayerData: React.Dispatch<React.SetStateAction<ListItem[]>>;
     }
   } | null,
-  colors: null
+  colors: {
+    chosenColor: {
+      hslData: {
+        hsl: HSL
+        setHsl: React.Dispatch<React.SetStateAction<HSL>>;
+      }
+      alphaData: {
+        alpha: number;
+        setAlpha: React.Dispatch<React.SetStateAction<number>>;
+      }
+    }
+    history:{
+      historyColor: HistoryColor[];
+      setHistoryColor: React.Dispatch<React.SetStateAction<HistoryColor[]>>;
+      addHistoryColor: () => void;
+    }
+  } | null,
 }

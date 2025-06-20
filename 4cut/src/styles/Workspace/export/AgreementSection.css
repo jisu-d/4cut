@@ -1,0 +1,47 @@
+.agreement-section {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 18px 0;
+  border: 1px solid #e5e7eb;
+}
+
+.agreement-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.agreement-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.agreement-label {
+  font-family: 'Pretendard-Regular', sans-serif;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.all-agreement {
+  padding-bottom: 12px;
+}
+
+.all-label {
+  font-family: 'Pretendard-SemiBold', sans-serif;
+  font-size: 16px;
+  color: #1f2937;
+}
+
+.agreement-divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 4px 0;
+}
+
+.agreement-arrow {
+  display: none;
+} 
