@@ -27,6 +27,7 @@ const HslPicker = () => {
         className="color-picker-range" // CSS 파일에서 이 클래스를 사용합니다
         ref={rangeRef}
         onMouseUp={() => { if (addHistoryColor) addHistoryColor(); }}
+        onTouchEnd={() => { if (addHistoryColor) addHistoryColor(); }}
       />
     </div>
   );
