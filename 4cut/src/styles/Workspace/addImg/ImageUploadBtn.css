@@ -1,0 +1,11 @@
+button{
+    cursor: pointer;
+    flex-basis: 0;
+    flex-grow: 1;
+    border-radius: 10px;
+    border: none;
+    font-size: 20px;
+    color: white;
+    font-family: 'Pretendard-Bold', sans-serif;
+    background-color: #4F46E5;
+}

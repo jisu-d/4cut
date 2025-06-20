@@ -1,0 +1,90 @@
+.export-content-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 650px; /* 팝업의 최소 높이 지정 */
+}
+
+.export-content-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    font-size: 28px;
+    font-family: 'Pretendard-Bold', sans-serif;
+    color: #111827;
+    flex-shrink: 0;
+}
+
+.export-content-header > div:nth-child(1){
+    font-size: 32px;
+    font-family: 'Pretendard-Black';
+    color: #111827;
+}
+
+.export-content-header > div:nth-child(2){
+    display: flex;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.export-content-input{
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+}
+
+.export-content-button{
+    flex-grow: 1; /* 남은 세로 공간을 모두 차지 */
+    display: flex; /* 자식인 버튼에 margin:auto를 적용하기 위함 */
+}
+
+.agreement-section {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 18px 0;
+  border: 1px solid #e5e7eb;
+}
+
+.agreement-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.agreement-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.agreement-label {
+  font-family: 'Pretendard-Regular', sans-serif;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.all-agreement {
+  padding-bottom: 12px;
+}
+
+.all-label {
+  font-family: 'Pretendard-SemiBold', sans-serif;
+  font-size: 16px;
+  color: #1f2937;
+}
+
+.agreement-divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 4px 0;
+}
+
+.agreement-arrow {
+  display: none;
+}

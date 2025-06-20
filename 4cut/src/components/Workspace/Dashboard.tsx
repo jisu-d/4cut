@@ -1,7 +1,9 @@
 // src/components/Dashboard.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 
 import '../../styles/Workspace/Dashboard.css';
+
+import AppContext from '../../contexts/AppContext';
 
 import imgIcon from '../../assets/Icon/img.svg';
 import uploadIcon from '../../assets/Icon/upload.svg';
@@ -13,28 +15,33 @@ import layerIcon from '../../assets/Icon/layer.svg';
 import layerIconOn from '../../assets/Icon/layerOn.svg';
 
 import LayersContent from './layers/LayersContent';
+import AddImgContent from './addImg/AddImgContent';
+import ColorsContent from './colors/ColorsContent';
+//import ExportContent from './export/ExportContent';
 
-const PreviewContent = () => <div>Add Image Content</div>;
+// const PreviewContent = () => <div>Add Image Content</div>;
 const SettingsContent = () => <div>Export Content</div>;
-const TemplateSelectionContent = () => <div>Brushes Content</div>;
-const ExportContent = () => <div>Layers/Colors Content</div>;
+const ExportContent = () => <div>업로드중...</div>;
 
 
-function Dashboard() {
-  const [selectedMenu, setSelectedMenu] = useState('layers'); // 초기값
+function Dashboard({ openExportPopup, isExportPopupOpen }: { openExportPopup: () => void, isExportPopupOpen: boolean }) {
+  const [selectedMenu, setSelectedMenu] = useState('colors'); // 초기값
+  const context = useContext(AppContext);
+  if (!context.colors) return null;
+  const { hsl } = context.colors.chosenColor.hslData;
 
   const renderContent = () => {
     switch (selectedMenu) {
       case 'addImg':
-        return <PreviewContent />;
-      case 'export':
-        return <SettingsContent />;
+        return <AddImgContent />;
       case 'brushes':
-        return <TemplateSelectionContent />;
+        return <SettingsContent />;
+      case 'export':
+        return <ExportContent />;
       case 'layers':
         return <LayersContent />;
       case 'colors':
-        return <ExportContent />;
+        return <ColorsContent />;
       default:
         return (<div>Error: Content not found.</div>); // 기본값 또는 에러 처리
     }
@@ -51,8 +58,11 @@ function Dashboard() {
             <img src={imgIcon} alt="img" className="img-icon-img" />
           </span>
           <span
-            className={selectedMenu === 'export' ? 'selected' : ''}
-            onClick={() => setSelectedMenu('export')}
+            className={isExportPopupOpen ? 'selected' : ''}
+            onClick={() => {
+              openExportPopup();
+              setSelectedMenu('export');
+            }}
           >
             <img src={uploadIcon} alt="upload" className="upload-icon-img" />
           </span>
@@ -73,6 +83,9 @@ function Dashboard() {
           <div
             className={`color-icon ${selectedMenu === 'colors' ? 'selected' : ''}`}
             onClick={() => setSelectedMenu('colors')}
+            style={{
+              backgroundColor: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`
+            }}
           ></div>
         </div>
       </div>

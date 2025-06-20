@@ -1,17 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import '../../../styles/Workspace/layers/AspectRatioButton.css';
 
 import type {AspectRatio} from '../../../types/types'
 
-
 interface AspectRatioButtonProps {
-    initialRatio: AspectRatio; 
-    isActive: boolean // 선택 되어 있는지 유무
+    currentRatio: AspectRatio;
+    isActive: boolean;
+    onClick: () => void;
 }
 
-const AspectRatioButton: React.FC<AspectRatioButtonProps> = ({ initialRatio, isActive }) => {
-    const [currentRatio, setCurrentRatio] = useState<AspectRatio>(initialRatio);
-    
+const AspectRatioButton: React.FC<AspectRatioButtonProps> = ({ currentRatio, isActive, onClick }) => {
     const getRatioClassName = (ratio: AspectRatio): string => {
         switch (ratio) {
             case '4:3': 
@@ -27,30 +25,9 @@ const AspectRatioButton: React.FC<AspectRatioButtonProps> = ({ initialRatio, isA
         }
     };
 
-    const goToNextRatio = () => {
-        let nextRatio: AspectRatio;
-        switch (currentRatio) {
-            case '4:3':
-                nextRatio = '3:4';
-                break;
-            case '3:4':
-                nextRatio = '1:1';
-                break;
-            case '1:1':
-                nextRatio = '16:9';
-                break;
-            case '16:9':
-                nextRatio = '4:3';
-                break;
-            default:
-                nextRatio = '4:3';
-        }
-        setCurrentRatio(nextRatio);
-    };
-
     return (
         <div
-            onClick={goToNextRatio}
+            onClick={onClick}
             className={`aspect-ratio-button ${getRatioClassName(currentRatio)} ${isActive ? 'active' : ''}`}
         >
             {currentRatio}
@@ -58,4 +35,4 @@ const AspectRatioButton: React.FC<AspectRatioButtonProps> = ({ initialRatio, isA
     );
 };
 
-export default AspectRatioButton
+export default AspectRatioButton;

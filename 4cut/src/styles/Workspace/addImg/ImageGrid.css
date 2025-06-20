@@ -1,0 +1,32 @@
+/* image-preview-container에 필요한 스타일 */
+
+/* Masonry Grid 컨테이너 자체 스타일 */
+.my-masonry-grid {
+  display: -webkit-box; /* Safari workaround */
+  display: -ms-flexbox; /* IE10 workaround */
+  display: flex;
+  padding: 0 12px;
+  margin-left: -16px; /* gap과 동일한 값으로 음수 마진 (Masonry 라이브러리 공식 예시에서 보통 이렇게 사용) */
+  width: auto; /* 너비 자동 */
+  overflow-y: auto;
+}
+
+
+.my-masonry-grid_column {
+  padding-left: 10px; /* gap과 동일한 값으로 패딩 */
+  /* background-clip: padding-box; */
+}
+
+/* 각 이미지 아이템 (Masonry 컬럼 내부) */
+.image-item {
+  background-color: #D9D9D9;
+  margin-bottom: 10px; /* 각 아이템 아래 간격 */
+  border-radius: 10px; /* 둥근 모서리 (선택 사항) */
+  overflow: hidden; /* 이미지가 컨테이너를 넘어가지 않도록 */
+}
+
+.image-item img {
+  width: 100%; /* 부모 div의 너비를 꽉 채움 */
+  height: auto; /* 핵심: 이미지의 원본 비율을 유지하며 높이를 자동 조절 */
+  display: block; /* 이미지 하단 공백 제거 */
+}
