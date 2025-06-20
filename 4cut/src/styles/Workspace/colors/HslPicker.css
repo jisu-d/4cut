@@ -8,6 +8,7 @@
     appearance: none;
     outline: none;
     cursor: pointer;
+    touch-action: none;
 }
 
 /* 웹킷 기반 브라우저 (Chrome, Safari, Edge)의 슬라이더 썸 스타일 */

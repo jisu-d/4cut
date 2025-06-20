@@ -1,10 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
 import '../../../styles/Workspace/colors/ColorHistoryBar.css';
-import type { HistoryColor } from '../../../types/types';
 
 interface ColorHistoryBarProps {
-  historyColor: HistoryColor[];
-  onSelectColor?: (color: HistoryColor) => void;
+  historyColor: {
+    hslData: { hsl: { h: number; s: number; l: number } };
+    alphaData: { alpha: number };
+  }[];
+  onSelectColor?: (color: { hslData: { hsl: { h: number; s: number; l: number } }, alphaData: { alpha: number } }) => void;
 }
 
 const ColorHistoryBar: React.FC<ColorHistoryBarProps> = ({ historyColor, onSelectColor }) => {
@@ -31,6 +33,7 @@ const ColorHistoryBar: React.FC<ColorHistoryBarProps> = ({ historyColor, onSelec
             className='color-history-item-color'
             style={{ backgroundColor: `hsl(${color.hslData.hsl.h}, ${color.hslData.hsl.s}%, ${color.hslData.hsl.l}%)` }}
             onClick={e => { e.stopPropagation(); onSelectColor && onSelectColor(color); }}
+            onTouchEnd={e => { e.stopPropagation(); onSelectColor && onSelectColor(color); }}
             title={`hsl(${color.hslData.hsl.h}, ${color.hslData.hsl.s}%, ${color.hslData.hsl.l}%)`}
           ></div>
         </div>
