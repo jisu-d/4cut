@@ -1,0 +1,46 @@
+.export-checkbox-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-family: 'Pretendard-Medium', sans-serif;
+}
+
+.export-checkbox-input {
+  display: none;
+}
+
+.export-checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e5e7eb;
+  border-radius: 4px;
+  background: #fff;
+  position: relative;
+  transition: border 0.2s, background 0.2s;
+  margin-top: 2px;
+}
+
+.export-checkbox-input:checked + .export-checkbox-custom {
+  background: #6366f1;
+  border-color: #6366f1;
+}
+
+.export-checkbox-input:checked + .export-checkbox-custom::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 6px;
+  height: 12px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.export-checkbox-label {
+  font-size: 15px;
+  color: #374151;
+  line-height: 1.5;
+} 
