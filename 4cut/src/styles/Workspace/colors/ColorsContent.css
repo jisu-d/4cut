@@ -1,0 +1,71 @@
+.colors-panel-container{
+    height: 100%;
+    padding: 32px 20px;
+}
+
+.colors-section-header{
+    color: #111827;
+    font-size: 32px;
+    font-family: 'Pretendard-Black', sans-serif;
+    margin-bottom: 20px;
+}
+
+.color-pickers-group{
+    padding: 0 12px;
+}
+
+.color-history-wrapper{
+    display: flex;
+    justify-content: space-between;
+}
+
+.usage-history-header{
+    color: #374151;
+    font-size: 20px;
+    font-family: 'Pretendard-Black', sans-serif;
+}
+
+
+.current-hex-display{
+    color: #374151;
+    font-size: 16px;
+    font-family: 'Pretendard-Medium', sans-serif;
+}
+
+.current-hex-alpha-display{
+    width: 98px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.current-hex-alpha-display > span:nth-child(2){
+    text-align: end;
+    width: 30px;
+}
+
+.color-history-list {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    max-width: 100%;
+    margin-top: 12px;
+}
+
+.color-history-item {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.color-history-item-color {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    margin: 0;
+}
