@@ -1,5 +1,6 @@
 import React, { useRef, useContext, useState, useEffect } from 'react';
 import AppContext from '../../../contexts/AppContext';
+import '../../../styles/Workspace/colors/GradientColorPicker.css';
 
 
 const GradientColorPicker: React.FC = () => {
@@ -58,6 +59,30 @@ const GradientColorPicker: React.FC = () => {
     addHistoryColor();
   };
 
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!boxRef.current) return;
+    const rect = boxRef.current.getBoundingClientRect();
+    const nx = (e.touches[0].clientX - rect.left) / rect.width;
+    const ny = (e.touches[0].clientY - rect.top) / rect.height;
+    handleChange(nx, ny);
+  };
+
+  const handleTouchUp = () => {
+    window.removeEventListener('touchmove', handleTouchMove);
+    window.removeEventListener('touchend', handleTouchUp);
+    addHistoryColor();
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!boxRef.current) return;
+    const rect = boxRef.current.getBoundingClientRect();
+    const nx = (e.touches[0].clientX - rect.left) / rect.width;
+    const ny = (e.touches[0].clientY - rect.top) / rect.height;
+    handleChange(nx, ny);
+    window.addEventListener('touchmove', handleTouchMove);
+    window.addEventListener('touchend', handleTouchUp);
+  };
+
   // 마커 위치: 항상 마지막 마우스 위치로 계산
   const x = markerPos.x;
   const y = markerPos.y;
@@ -94,6 +119,7 @@ const GradientColorPicker: React.FC = () => {
   return (
     <div
       ref={boxRef}
+      className="gradient-picker-box"
       style={{
         height: 200,
         borderRadius: '10px',
@@ -107,6 +133,7 @@ const GradientColorPicker: React.FC = () => {
         userSelect: 'none',
       }}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
     >
       <div
         style={{
