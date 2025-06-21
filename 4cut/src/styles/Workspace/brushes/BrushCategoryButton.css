@@ -1,0 +1,17 @@
+.category-button {
+    background-color: transparent;
+    font-family: 'Pretendard-Bold', sans-serif;
+    border: none;
+    padding: 7px 12px;
+    text-align: left;
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    color: #374151;
+    width: 100%;
+    transition: all 0.2s ease-in-out;
+}
+
+.category-button.selected {
+    background-color: #F2F2F2;
+} 
