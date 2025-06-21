@@ -63,7 +63,7 @@
     border-radius: 8px;
 }
 
-.selected{
+.selectedIcon{
     background-color: #E5E7EB;
     border-radius: 50%;
     transform: scale(1.05);
@@ -78,3 +78,4 @@
     border-radius: 10px;
     background-color: #F9FAFB;
 }
+
