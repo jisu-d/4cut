@@ -3,50 +3,50 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
-  min-height: 650px; /* 팝업의 최소 높이 지정 */
+  min-height: 650px;
+  /* 팝업의 최소 높이 지정 */
 }
 
-.export-content-header{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 28px;
-    font-size: 28px;
-    font-family: 'Pretendard-Bold', sans-serif;
-    color: #111827;
-    flex-shrink: 0;
+.export-content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 45px;
+  font-size: 28px;
+  font-family: 'Pretendard-Bold', sans-serif;
+  color: #111827;
+  flex-shrink: 0;
 }
 
-.export-content-header > div:nth-child(1){
-    font-size: 32px;
-    font-family: 'Pretendard-Black';
-    color: #111827;
+.export-content-header>div:nth-child(1) {
+  font-size: 32px;
+  font-family: 'Pretendard-Black';
+  color: #111827;
 }
 
-.export-content-header > div:nth-child(2){
-    display: flex;
-    gap: 16px;
-    margin-bottom: 18px;
+.export-content-header>div:nth-child(2) {
+  display: flex;
+  gap: 16px;
+  /* margin-bottom: 18px; */
 }
 
-.export-content-input{
-    display: flex;
-    gap: 16px;
-    margin-bottom: 16px;
-    flex-shrink: 0;
+.export-content-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex-grow: 1;
 }
 
-.export-content-button{
-    flex-grow: 1; /* 남은 세로 공간을 모두 차지 */
-    display: flex; /* 자식인 버튼에 margin:auto를 적용하기 위함 */
+.export-content-input {
+  display: flex;
+  gap: 16px;
+  flex-shrink: 0;
 }
 
-.agreement-section {
-  background: #f9fafb;
-  border-radius: 8px;
-  padding: 16px;
-  margin: 18px 0;
-  border: 1px solid #e5e7eb;
+.export-content-button {
+  display: flex;
+  margin-top: 35px;
+  /* 자식인 버튼에 margin:auto를 적용하기 위함 */
 }
 
 .agreement-item {
