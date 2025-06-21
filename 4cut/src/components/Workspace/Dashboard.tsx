@@ -1,5 +1,5 @@
 // src/components/Dashboard.js
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 
 import '../../styles/Workspace/Dashboard.css';
 
@@ -17,15 +17,15 @@ import layerIconOn from '../../assets/Icon/layerOn.svg';
 import LayersContent from './layers/LayersContent';
 import AddImgContent from './addImg/AddImgContent';
 import ColorsContent from './colors/ColorsContent';
+import BrushesContent from './brushes/BrushesContent';
+import ExportingSkeleton from './ExportingSkeleton';
 //import ExportContent from './export/ExportContent';
 
 // const PreviewContent = () => <div>Add Image Content</div>;
-const SettingsContent = () => <div>Export Content</div>;
-const ExportContent = () => <div>업로드중...</div>;
 
 
 function Dashboard({ openExportPopup, isExportPopupOpen }: { openExportPopup: () => void, isExportPopupOpen: boolean }) {
-  const [selectedMenu, setSelectedMenu] = useState('colors'); // 초기값
+  const [selectedMenu, setSelectedMenu] = useState('layers'); // 초기값
   const context = useContext(AppContext);
   if (!context.colors) return null;
   const { hsl } = context.colors.chosenColor.hslData;
@@ -35,9 +35,9 @@ function Dashboard({ openExportPopup, isExportPopupOpen }: { openExportPopup: ()
       case 'addImg':
         return <AddImgContent />;
       case 'brushes':
-        return <SettingsContent />;
+        return <BrushesContent />;
       case 'export':
-        return <ExportContent />;
+        return <ExportingSkeleton />;
       case 'layers':
         return <LayersContent />;
       case 'colors':
@@ -47,18 +47,24 @@ function Dashboard({ openExportPopup, isExportPopupOpen }: { openExportPopup: ()
     }
   };
 
+  useEffect(() => {
+    if (!isExportPopupOpen){
+      setSelectedMenu('layers');
+    }
+  }, [isExportPopupOpen])
+
   return (
     <>
       <div className='tool-header'>
         <div>
           <span
-            className={selectedMenu === 'addImg' ? 'selected' : ''} 
+            className={selectedMenu === 'addImg' ? 'selectedIcon' : ''}
             onClick={() => setSelectedMenu('addImg')}
           >
             <img src={imgIcon} alt="img" className="img-icon-img" />
           </span>
           <span
-            className={isExportPopupOpen ? 'selected' : ''}
+            className={isExportPopupOpen ? 'selectedIcon' : ''}
             onClick={() => {
               openExportPopup();
               setSelectedMenu('export');
@@ -81,7 +87,7 @@ function Dashboard({ openExportPopup, isExportPopupOpen }: { openExportPopup: ()
             onClick={() => setSelectedMenu('layers')}
           />
           <div
-            className={`color-icon ${selectedMenu === 'colors' ? 'selected' : ''}`}
+            className={`color-icon ${selectedMenu === 'colors' ? 'selectedIcon' : ''}`}
             onClick={() => setSelectedMenu('colors')}
             style={{
               backgroundColor: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`

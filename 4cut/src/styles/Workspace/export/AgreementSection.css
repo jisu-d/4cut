@@ -1,9 +1,8 @@
 .agreement-section {
-  background: #f9fafb;
-  border-radius: 8px;
+  background: #F8F8F7;
+  border-radius: 10px;
   padding: 16px;
-  margin: 18px 0;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #E5E7EB;
 }
 
 .agreement-item {
@@ -23,7 +22,7 @@
 .agreement-label {
   font-family: 'Pretendard-Regular', sans-serif;
   font-size: 14px;
-  color: #4b5563;
+  color: #374151;
 }
 
 .all-agreement {
@@ -33,7 +32,7 @@
 .all-label {
   font-family: 'Pretendard-SemiBold', sans-serif;
   font-size: 16px;
-  color: #1f2937;
+  color: #A1A5AC;
 }
 
 .agreement-divider {

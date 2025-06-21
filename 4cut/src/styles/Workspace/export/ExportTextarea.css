@@ -17,7 +17,7 @@
   box-sizing: border-box;
   padding: 10px 14px;
   border: 1px solid #E5E7EB;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 15px;
   font-family: 'Pretendard-Medium', sans-serif;
   background: #F8F8F7;
@@ -31,4 +31,10 @@
   border: 1px solid #6366f1;
   background-color: #FAFAF8;
   color: #374151;
+}
+
+.export-password-input::placeholder {
+  color: #A1A5AC;
+  font-size: 15px;
+  font-family: 'Pretendard-Medium', sans-serif;
 }
