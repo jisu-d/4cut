@@ -1,8 +1,9 @@
 .export-button {
-  padding: 10px 24px;
-  background: #6366f1;
+  padding: 10px 0;
+  background: #4F46E5;
   color: #fff;
   border: none;
+  margin-left: 88%;
   border-radius: 8px;
   font-size: 16px;
   font-family: 'Pretendard-SemiBold', sans-serif;
@@ -10,14 +11,10 @@
   transition: background 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px 0 rgba(99,102,241,0.08);
 }
-.export-button:hover:not(:disabled) {
-  background: #4f46e5;
-}
-.export-button:active:not(:disabled) {
-  background: #4338ca;
-}
+
 .export-button:disabled {
-  background: #e5e7eb;
-  color: #bdbdbd;
+  background: #E5E7EB;
+  color: #9CA3AF;
   cursor: not-allowed;
-} 
+  box-shadow: none;
+}

@@ -57,20 +57,6 @@ const ExportInput: React.FC<ExportInputProps> = ({
           type="button"
           tabIndex={-1}
           className="export-input-eye-btn"
-          style={{
-            position: 'absolute',
-            right: 10,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: 0.7
-          }}
           onClick={() => setShowPassword(v => !v)}
         >
           <img src={showPassword ? EyeIcon : EyeOffIcon} alt={showPassword ? '비밀번호 표시' : '비밀번호 숨김'} style={{ width: 22, height: 22 }} />

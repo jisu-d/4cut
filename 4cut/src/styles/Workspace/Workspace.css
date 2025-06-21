@@ -1,23 +1,23 @@
-.main-layout{
-    height: 100vh;
-    display: flex;
-    padding: 15px 30px;
-    background-color: hsl(0, 0%, 80%);
+.main-layout {
+  height: 100vh;
+  display: flex;
+  padding: 15px 30px;
+  background-color: hsl(0, 0%, 80%);
 }
 
-.main-layout .tools-panel{
-    display: flex;
-    flex-direction: column;
-    flex-basis: 40%;
-    margin-right: 15px;
+.main-layout .tools-panel {
+  display: flex;
+  flex-direction: column;
+  flex-basis: 40%;
+  margin-right: 15px;
 }
 
-.main-layout .canvas-area{
-    flex-basis: 0;
-    flex-grow: 1; 
-    background-color: #F9FAFB;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.main-layout .canvas-area {
+  flex-basis: 0;
+  flex-grow: 1;
+  background-color: #F9FAFB;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .popup-overlay {
@@ -26,21 +26,21 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
+
 .popup-content {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
   background: #fff;
   border-radius: 20px;
   padding: 40px;
   box-shadow: 0 4px 24px #0001;
   min-width: 600px;
-  min-height: 860px;
   max-width: 50vw;
 }
