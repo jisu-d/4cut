@@ -1,8 +1,8 @@
 import '../../../styles/Workspace/layers/DndList.css';
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import type { DndListProps } from '../../../types/types';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import type {DndListProps} from '../../../types/types';
 import trash from '../../../assets/Icon/trash.svg';
-import { CustomCheckbox } from '../CustomCheckbox';
+import {CustomCheckbox} from '../CustomCheckbox';
 
 // arrayMove 유틸리티 함수 (기존과 동일)
 const arrayMove = <T,>(arr: T[], oldIndex: number, newIndex: number): T[] => {

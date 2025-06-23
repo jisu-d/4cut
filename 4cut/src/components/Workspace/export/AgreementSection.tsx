@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { CustomCheckbox } from '../CustomCheckbox';
+import React, {useEffect, useState} from 'react';
+import {CustomCheckbox} from '../CustomCheckbox';
 import '../../../styles/Workspace/export/AgreementSection.css';
 
 const initialAgreements = [
