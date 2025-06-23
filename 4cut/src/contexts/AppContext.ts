@@ -1,13 +1,14 @@
 import React from 'react';
 
-import type { AppContextType } from '../types/types'
+import type {AppContextType} from '../types/types'
 
 const AppContext = React.createContext<AppContextType>({
   addImg : null,
   export: null,
   brush: null,
   layer: null,
-  colors: null
+  colors: null,
+  canvas: null
 });
 
 export default AppContext;

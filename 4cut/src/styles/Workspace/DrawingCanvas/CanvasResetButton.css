@@ -1,0 +1,38 @@
+.canvas-reset-button {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 1000;
+  color: #666;
+}
+
+.canvas-reset-button:hover {
+  background-color: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: #333;
+}
+
+.canvas-reset-button:active {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* 모바일에서 터치 최적화 */
+@media (max-width: 768px) {
+  .canvas-reset-button {
+    width: 44px;
+    height: 44px;
+    bottom: 16px;
+    left: 16px;
+  }
+} 

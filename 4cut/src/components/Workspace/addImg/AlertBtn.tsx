@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {useState} from 'react';
 import '../../../styles/Workspace/addImg/AlertBtn.css'
 
 import AlertCrcleIcon from '../../../assets/Icon/AlertCrcle.svg'
