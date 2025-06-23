@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import '../../../styles/Workspace/export/ExportPasswordInput.css';
 import InfoIcon from '../../../assets/Icon/Info.svg';
 import EyeIcon from '../../../assets/Icon/eye.svg';

@@ -1,10 +1,10 @@
 import '../../../styles/Workspace/layers/LayerList.css'
 
 import addIcon from '../../../assets/Icon/add.svg'
-import type { ListItem } from '../../../types/types'
+import type {ListItem} from '../../../types/types'
 
 import DndList from './DndList'
-import React, { useContext, useState } from 'react';
+import React, {useContext} from 'react';
 
 import AppContext from '../../../contexts/AppContext';
 

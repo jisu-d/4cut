@@ -1,6 +1,6 @@
-import React, { useContext } from 'react';
+import React, {useContext} from 'react';
 import '../../../styles/Workspace/layers/ImageRatioSelector.css';
-import type { AspectRatio } from '../../../types/types'
+import type {AspectRatio} from '../../../types/types'
 import AspectRatioButton from './AspectRatioButton'
 
 import AppContext from '../../../contexts/AppContext';

@@ -1,4 +1,3 @@
-
 import ImageRatioSelector from './ImageRatioSelector';
 import LayerList from './LayerList';
 
