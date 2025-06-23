@@ -1,15 +1,15 @@
 import '../../../styles/Workspace/colors/ColorsContent.css'
 
-import { hslToHex } from './HslToHex'
+import {hslToHex} from './HslToHex'
 
 import GradientColorPicker from './GradientColorPicker';
-import { useContext, useRef, useEffect, useState } from 'react';
+import {useContext, useEffect, useRef, useState} from 'react';
 import HslPicker from './HslPicker'
 import AlphaPicker from './AlphaPicker'
 
 import AppContext from '../../../contexts/AppContext';
 import ColorHistoryBar from './ColorHistoryBar';
-import type { HistoryColor } from '../../../types/types';
+import type {HistoryColor} from '../../../types/types';
 
 function ColorsContent() {
     const context = useContext(AppContext);

@@ -33,6 +33,21 @@ export interface HistoryColor {
   }
 }
 
+
+export interface DrawingStroke {
+  brushType: string; // "pen", "eraser", "marker" 등 브러시 종류를 나타내는 문자열
+  mouseData: [number, number][]; // 해당 스트로크를 구성하는 모든 좌표 데이터
+}
+
+export interface LayersData {
+  [layerName: string]: DrawingStroke[];
+}
+
+export interface CanvasSize {
+  width: number;
+  height: number;
+}
+
 export interface AppContextType {
   addImg: null,
   export: null,
@@ -64,4 +79,12 @@ export interface AppContextType {
       addHistoryColor: () => void;
     }
   } | null,
+  canvas: {
+    canvasSize: CanvasSize
+    setCanvasSize: React.Dispatch<React.SetStateAction<CanvasSize>>;
+    backgroundColor: string;
+    setBackgroundColor: React.Dispatch<React.SetStateAction<string>>;
+  } | null,
 }
+
+

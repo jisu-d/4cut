@@ -1,6 +1,5 @@
-import { useRef, useContext, type ChangeEvent } from 'react';
+import {type ChangeEvent, useContext, useRef} from 'react';
 import '../../../styles/Workspace/colors/HslPicker.css'; // 새로 생성한 CSS 파일 임포트
-
 import AppContext from '../../../contexts/AppContext';
 
 const HslPicker = () => {
