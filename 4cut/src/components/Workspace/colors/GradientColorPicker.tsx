@@ -1,4 +1,4 @@
-import React, { useRef, useContext, useState, useEffect } from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import AppContext from '../../../contexts/AppContext';
 import '../../../styles/Workspace/colors/GradientColorPicker.css';
 

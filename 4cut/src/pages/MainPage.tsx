@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import '../styles/MainPage/MainPage.css';
 
 const MainPage: React.FC = () => {
