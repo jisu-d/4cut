@@ -4,10 +4,11 @@ import '../styles/Workspace/Workspace.css';
 
 import Dashboard from '../components/Workspace/Dashboard';
 import AppContext from '../contexts/AppContext';
-import { useEffect, useState, useMemo } from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import ExportContent from '../components/Workspace/export/ExportContent';
+import DrawingCanvas from '../components/Workspace/DrawingCanvas/DrawingCanvas';
 
-import type { ListCutImage, ListItem, HSL, AppContextType } from '../types/types'
+import type {AppContextType, CanvasSize, HSL, ListCutImage, ListItem} from '../types/types'
 
 function Workspace() {
   const [cutImages, setCutImages] = useState<ListCutImage[]>([]);
@@ -20,6 +21,12 @@ function Workspace() {
     hslData: { hsl: HSL },
     alphaData: { alpha: number }
   }[]>([]);
+
+  // 캔버스 크기 상태 추가
+  const [canvasSize, setCanvasSize] = useState<CanvasSize>({ width: 1652, height: 4920 });
+  
+  // 캔버스 배경색 상태 추가
+  const [backgroundColor, setBackgroundColor] = useState<string>('#ffffff');
 
   // 마우스 업 등에서 호출: 현재 색상/알파를 historyColor에 추가
   const addHistoryColor = () => {
@@ -46,6 +53,13 @@ function Workspace() {
       { id: '3', text: '항목 3', checked: true },
       { id: '4', text: '항목 4', checked: true },
     ]);
+
+    setCanvasSize({
+      width: 1652,
+      height: 4920
+    });
+
+    setBackgroundColor('#4F46E5');
   }, []);
 
   const appProvidedValue: AppContextType = useMemo(() => ({
@@ -79,7 +93,13 @@ function Workspace() {
         addHistoryColor: addHistoryColor
       }
     },
-  }), [cutImages, layers, hsl, alpha, historyColor]);
+    canvas: {
+      canvasSize: canvasSize,
+      setCanvasSize: setCanvasSize,
+      backgroundColor: backgroundColor,
+      setBackgroundColor: setBackgroundColor
+    }
+  }), [cutImages, layers, hsl, alpha, historyColor, canvasSize, backgroundColor]);
 
   const openExportPopup = () => setIsExportPopupOpen(true);
   const closeExportPopup = () => setIsExportPopupOpen(false);
@@ -92,6 +112,7 @@ function Workspace() {
         </div>
         <div className='canvas-area'>
           {/* 캔버스 관련 내용이 여기에 들어갈 수 있습니다 */}
+          <DrawingCanvas />
         </div>
       </AppContext.Provider>
       {isExportPopupOpen && (

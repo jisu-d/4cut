@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import '../../../styles/Workspace/brushes/BrushesContent.css';
 import BrushCategoryButton from './BrushCategoryButton';
 import BrushItem from './BrushItem';
