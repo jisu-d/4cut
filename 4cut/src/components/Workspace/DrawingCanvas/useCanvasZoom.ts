@@ -39,7 +39,7 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 2) {
       // 두 손 터치: 캔버스 이동 모드
-      e.preventDefault();
+      
       setIsDragging(true);
       setDragStart({
         x: e.touches[0].clientX - position.x,
@@ -52,7 +52,6 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 2 && isDragging) {
       // 두 손 터치: 캔버스 이동 + 핀치 줌
-      e.preventDefault();
       
       // 캔버스 이동
       setPosition({
@@ -80,7 +79,7 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
   // 마우스 이벤트 핸들러 (PC)
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button === 1) { // 중간 클릭 (스크롤 클릭)
-      e.preventDefault();
+      
       setIsDragging(true);
       setDragStart({
         x: e.clientX - position.x,
@@ -107,7 +106,7 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
 
   // 마우스 휠 줌
   const handleWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault();
+    
     const delta = e.deltaY > 0 ? (1 - zoomSpeed) : (1 + zoomSpeed);
     setScale(prev => Math.max(minScale, Math.min(maxScale, prev * delta)));
   }, [zoomSpeed, minScale, maxScale]);
@@ -122,7 +121,7 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === '0' && e.ctrlKey) {
-        e.preventDefault();
+        
         resetView();
       }
     };

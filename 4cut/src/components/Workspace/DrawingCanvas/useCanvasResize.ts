@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 
 export interface CanvasSize {
   width: number;
@@ -28,7 +28,7 @@ export const useCanvasResize = (
     height: 600 
   });
 
-  const updateCanvasSize = () => {
+  const updateCanvasSize = useCallback(() => {
     if (containerRef.current) {
       const container = containerRef.current;
       const containerWidth = container.clientWidth;
@@ -53,7 +53,7 @@ export const useCanvasResize = (
 
       setCanvasSize({ width: newWidth, height: newHeight });
     }
-  };
+  }, [aspectRatio, maxSizeRatio, minWidth, minHeight]);
 
   useEffect(() => {
     updateCanvasSize();
