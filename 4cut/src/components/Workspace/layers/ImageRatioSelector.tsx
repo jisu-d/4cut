@@ -1,6 +1,6 @@
-import React, {useContext} from 'react';
+import {useContext} from 'react';
 import '../../../styles/Workspace/layers/ImageRatioSelector.css';
-import type {AspectRatio} from '../../../types/types'
+import type {AspectRatio, UserLayerDataType} from '../../../types/types'
 import AspectRatioButton from './AspectRatioButton'
 
 import AppContext from '../../../contexts/AppContext';
@@ -15,19 +15,44 @@ const nextRatio = (ratio: AspectRatio): AspectRatio => {
     }
 };
 
+// 비율에 따라 height 계산 함수
+function getSizeByRatio(ratio: string, width: number): { width: number, height: number } {
+    switch (ratio) {
+        case '4:3': return { width, height: width * 3 / 4 };
+        case '3:4': return { width, height: width * 4 / 3 };
+        case '1:1': return { width, height: width };
+        case '16:9': return { width, height: width * 9 / 16 };
+        default: return { width, height: width };
+    }
+}
+
 const ImageRatioSelector = () => {
     const context = useContext(AppContext);
     if (!context.layer) {
         return <div>레이어 데이터를 불러오는 중...</div>;
     }
     const { cutImageData, setCutImageData } = context.layer.cutImageData;
+    const userLayerDataType = context.layer.userLayerDataType.userLayerDataType;
 
     const handleClick = (idx: number) => {
-        setCutImageData(prev => prev.map((item, i) =>
-            i === idx
-                ? { ...item, AspectRatio: nextRatio(item.AspectRatio) }
-                : item
-        ));
+        const CutSelected = userLayerDataType.filter((item) => item.LayerType == "Cut")[0]
+        if (!CutSelected.selected) return
+
+
+        setCutImageData(prev => prev.map((item, i) => {
+            if (i === idx) {
+                const newRatio = nextRatio(item.AspectRatio);
+                const width = item.size?.width ?? 200;
+                const { height } = getSizeByRatio(newRatio, width);
+                return {
+                    ...item,
+                    AspectRatio: newRatio,
+                    size: { width, height },
+                    checked: true
+                };
+            }
+            return { ...item, checked: false };
+        }));
     };
 
     return (
