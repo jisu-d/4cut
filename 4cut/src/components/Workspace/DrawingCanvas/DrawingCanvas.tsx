@@ -1,10 +1,11 @@
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import '../../../styles/Workspace/DrawingCanvas/DrawingCanvas.css';
 import { useCanvasResize } from './useCanvasResize';
 import { useCanvasZoom } from './useCanvasZoom';
-import { useCanvasDrawing } from './useCanvasDrawing';
 import CanvasResetButton from './CanvasResetButton';
 import AppContext from '../../../contexts/AppContext';
+import { createFabricCanvas, syncFabricBackgroundColor } from './fabric/fabric';
+import { syncAspectRatioRects } from './fabric/cutLayer';
 
 function DrawingCanvas() {
     const appContext = useContext(AppContext);
@@ -12,10 +13,12 @@ function DrawingCanvas() {
     const contextCanvasSize = appContext.canvas.canvasSize;
     const contextBackgroundColor = appContext.canvas.backgroundColor;
 
-    // 리사이징 훅 사용 - AppContext의 캔버스 크기를 기준으로 설정
+    const contextUserLayerDataType = appContext.layer?.userLayerDataType.userLayerDataType;
+
+    // 리사이징 훅 사용
     const { containerRef, canvasSize } = useCanvasResize({
-        aspectRatio: contextCanvasSize.width / contextCanvasSize.height, // 실제 캔버스 비율
-        maxSizeRatio: 0.9, // 컨테이너의 90%
+        aspectRatio: contextCanvasSize.width / contextCanvasSize.height,
+        maxSizeRatio: 0.9,
         minWidth: 200,
         minHeight: 150,
     });
@@ -39,72 +42,153 @@ function DrawingCanvas() {
         zoomSpeed: 0.1
     });
 
-    // 드로잉 훅 사용
-    const {
-        canvasRef,
-        isDrawing,
-        handleDrawingStart,
-        handleDrawingMove,
-        handleDrawingEnd
-    } = useCanvasDrawing({
-        strokeColor: '#000',
-        strokeWidth: 2,
-        lineCap: 'round',
-        lineJoin: 'round'
-    });
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const fabricCanvasRef = useRef<any>(null);
 
-    // 통합된 이벤트 핸들러들
-    const handleTouchStart = useCallback((e: React.TouchEvent) => {
-        if (e.touches.length === 2) {
-            handleZoomTouchStart(e);
-        } else if (e.touches.length === 1) {
-            handleDrawingStart(e, scale, canvasSize);
+    // Fabric.js 캔버스 생성 (캔버스 요소만)
+    useEffect(() => {
+        if (canvasRef.current) {
+            const fabricCanvas = createFabricCanvas(
+                canvasRef.current,
+                canvasSize.width,
+                canvasSize.height,
+                contextBackgroundColor
+            );
+            fabricCanvasRef.current = fabricCanvas;
+            return () => {
+                fabricCanvas.dispose();
+                fabricCanvasRef.current = null;
+            };
         }
-    }, [handleZoomTouchStart, handleDrawingStart, scale, canvasSize]);
+    }, [canvasRef, canvasSize]);
+
+    // 배경색 동기화
+    useEffect(() => {
+        if (fabricCanvasRef.current) {
+            syncFabricBackgroundColor(fabricCanvasRef.current, contextBackgroundColor);
+        }
+    }, [contextBackgroundColor]);
+
+    // 모든 cut의 사각형을 그리고, 클릭/이동/크기조절/회전 시 데이터 갱신
+    useEffect(() => {
+    
+        if (fabricCanvasRef.current && contextUserLayerDataType) {
+            const cutImageData = appContext.layer?.cutImageData.cutImageData || [];
+            const setCutImageData = appContext.layer?.cutImageData.setCutImageData;
+            
+            contextUserLayerDataType.forEach(item => {
+                if (item.LayerType === 'Cut') {
+                    // 레이어의 checked가 true일 때만 전체 cutImageData를 그림
+                    const visibleCuts = item.checked ? cutImageData : [];
+                    
+                    // 클릭/변형 핸들러: selected=true일 때만 활성화
+                    const handleRectClick = item.selected ? (id: string) => {
+                        if (setCutImageData) {
+                            setCutImageData(prev =>
+                                prev.map(item =>
+                                    item.id === id
+                                        ? { ...item, checked: true }
+                                        : { ...item, checked: false }
+                                )
+                            );
+                        }
+                    } : undefined;
+        
+                    const handleRectTransform = item.selected ? (id: string, position: {x: number, y: number}, size: {width: number, height: number}, angle: number) => {
+                        if (setCutImageData) {
+                            setCutImageData(prev =>
+                                prev.map(item =>
+                                    item.id === id
+                                        ? { ...item, position, size, angle }
+                                        : item
+                                )
+                            );
+                        }
+                    } : undefined;
+        
+                    syncAspectRatioRects(
+                        fabricCanvasRef.current,
+                        visibleCuts,
+                        handleRectClick,
+                        handleRectTransform,
+                        item.selected
+                    );
+                }
+            });
+
+
+        }
+    }, [appContext.layer?.cutImageData.cutImageData, canvasSize, contextUserLayerDataType]);
+
+    // 이벤트 핸들러
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+        handleZoomTouchStart(e);
+    }, [handleZoomTouchStart]);
 
     const handleTouchMove = useCallback((e: React.TouchEvent) => {
-        if (e.touches.length === 2) {
-            handleZoomTouchMove(e);
-        } else if (e.touches.length === 1 && isDrawing) {
-            handleDrawingMove(e, scale, canvasSize);
-        }
-    }, [handleZoomTouchMove, handleDrawingMove, isDrawing, scale, canvasSize]);
+        handleZoomTouchMove(e);
+    }, [handleZoomTouchMove]);
 
     const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-        if (e.touches.length === 0) {
-            // 모든 터치가 끝났을 때
-            handleZoomTouchEnd();
-            handleDrawingEnd();
-        }
-    }, [handleZoomTouchEnd, handleDrawingEnd]);
+        handleZoomTouchEnd();
+    }, [handleZoomTouchEnd]);
 
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
-        if (e.button === 1) {
-            handleZoomMouseDown(e);
-        } else if (e.button === 0) {
-            handleDrawingStart(e, scale, canvasSize);
-        }
-    }, [handleZoomMouseDown, handleDrawingStart, scale, canvasSize]);
+        handleZoomMouseDown(e);
+    }, [handleZoomMouseDown]);
 
     const handleMouseMove = useCallback((e: React.MouseEvent) => {
         handleZoomMouseMove(e);
-        if (isDrawing) {
-            handleDrawingMove(e, scale, canvasSize);
-        }
-    }, [handleZoomMouseMove, handleDrawingMove, isDrawing, scale, canvasSize]);
+    }, [handleZoomMouseMove]);
 
     const handleMouseUp = useCallback((e: React.MouseEvent) => {
-        if (e.button === 1) { // 중간 클릭 해제
-            handleZoomMouseUp(e);
-        } else if (e.button === 0) { // 좌클릭 해제
-            handleDrawingEnd();
-        }       
-    }, [handleZoomMouseUp, handleDrawingEnd]);
+        handleZoomMouseUp(e);
+    }, [handleZoomMouseUp]);
+
+    // drawing-canvas 영역 클릭 시 모두 해제 (캔버스 내부, rect 선택 시 제외)
+    const handleCanvasAreaClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        // 캔버스 내부 클릭이면 해제하지 않음
+        if (canvasRef.current && canvasRef.current.contains(e.target as Node)) return;
+        
+        if (fabricCanvasRef.current && fabricCanvasRef.current.getActiveObject()) return;
+        
+        // 그 외(진짜 빈 영역)만 해제
+        const setCutImageData = appContext.layer?.cutImageData.setCutImageData;
+        if (setCutImageData) {
+            setCutImageData(prev => prev.map(item => ({ ...item, checked: false })));
+        }
+        if (fabricCanvasRef.current) {
+            fabricCanvasRef.current.discardActiveObject();
+            fabricCanvasRef.current.requestRenderAll();
+        }
+    };
+
+    useEffect(() => {
+        if (!fabricCanvasRef.current) return;
+        const setCutImageData = appContext.layer?.cutImageData.setCutImageData;
+
+        const handleBodyClick = (e: MouseEvent) => {
+            // drawing-canvas 영역 클릭 시에만 해제
+            if ((e.target as HTMLElement).classList[0] === 'drawing-canvas') {
+                if (setCutImageData) {
+                    setCutImageData(prev => prev.map(item => ({ ...item, checked: false })));
+                }
+                fabricCanvasRef.current.discardActiveObject();
+                fabricCanvasRef.current.requestRenderAll();
+            }
+        };
+
+        document.body.addEventListener('mousedown', handleBodyClick);
+        return () => {
+            document.body.removeEventListener('mousedown', handleBodyClick);
+        };
+    }, [appContext.layer?.cutImageData, canvasSize]);
 
     return (
-        <div 
+        <div
             className="drawing-canvas"
             ref={containerRef}
+            onClick={handleCanvasAreaClick}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -114,32 +198,27 @@ function DrawingCanvas() {
             onMouseLeave={handleMouseUp}
             onWheel={handleWheel}
             style={{
-                cursor: isDragging ? 'grabbing' : isDrawing ? 'crosshair' : 'grab',
+                cursor: isDragging ? 'grabbing' : 'grab',
                 userSelect: 'none',
                 touchAction: 'none'
             }}
         >
-            <div 
+            <div
                 className="canvas-content"
                 style={{
                     transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
                     transformOrigin: 'center center'
                 }}
             >
-                <canvas 
+                <canvas
                     ref={canvasRef}
-                    width={contextCanvasSize.width} 
-                    height={contextCanvasSize.height}
+                    width={canvasSize.width}
+                    height={canvasSize.height}
                     style={{
-                        width: `${canvasSize.width}px`,
-                        height: `${canvasSize.height}px`,
-                        border: '1px solid #ccc',
-                        backgroundColor: contextBackgroundColor
+                        border: 'none'
                     }}
                 />
             </div>
-            
-            {/* 캔버스 리셋 버튼 */}
             <CanvasResetButton onReset={resetView} />
         </div>
     );

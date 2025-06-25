@@ -1,20 +1,21 @@
 export type AspectRatio = '4:3' | '3:4' | '1:1' | '16:9';
 
 
-
-export interface DndListProps {
-  items: ListItem[];
-  setItems: React.Dispatch<React.SetStateAction<ListItem[]>>;
+export interface ListDrawingItem {
+  [layerName: string]: {
+    brushType: "pen" | "marker" | "eraser";
+    bryshSize: number;
+    mouseData: [number, number][];
+  }[];
 }
 
-export interface ListItem {
-  id: string;
-  text: string;
-  checked: boolean;
-}
 
 export interface ListCutImage {
-  AspectRatio: '4:3' | '3:4' | '1:1' | '16:9';
+  id: string; // 각 컷의 고유 id
+  AspectRatio: AspectRatio;
+  position: { x: number; y: number }; // 중심 좌표
+  size: { width: number; height: number }; // 크기
+  angle: number; // 회전 각도
   checked: boolean;
 }
 
@@ -30,6 +31,27 @@ export interface HistoryColor {
   }
   alphaData: {
     alpha: number;
+  }
+}
+
+//export interface UserLayerDataType {
+//  [layerName: string]:{
+//    LayerType: "Drawing" | 'Cut' | 'Img';
+//    checked: boolean;
+//  }
+//}
+
+export interface UserLayerDataType {
+  id: string;
+  text: string;
+  LayerType: "Drawing" | 'Cut' | 'Img';
+  checked: boolean;
+  selected: boolean; // 현재 선택/수정 가능한 레이어 여부
+}
+
+export interface ImgData {
+  [imgkey: string]: {
+    positionData: [number, number][]
   }
 }
 
@@ -53,13 +75,21 @@ export interface AppContextType {
   export: null,
   brush: null,
   layer: {
-    cutImageData: {
+    userLayerDataType: { // 화면 직접 적으로 표시할 데이터 
+      userLayerDataType: UserLayerDataType[];
+      setUserLayerDataType: React.Dispatch<React.SetStateAction<UserLayerDataType[]>>;
+    }
+    DrawingData: { // 그림 그리는 레이어 - Drawing
+      drawingData: ListDrawingItem;
+      setDrawingData: React.Dispatch<React.SetStateAction<ListDrawingItem>>;
+    }
+    cutImageData: { // 컷 이미지가 들어갈 공간의 정보를 담은 데이터 타입 - Cut
       cutImageData: ListCutImage[];
       setCutImageData: React.Dispatch<React.SetStateAction<ListCutImage[]>>;
-    }
-    layerData: {
-      layerData: ListItem[];
-      setLayerData: React.Dispatch<React.SetStateAction<ListItem[]>>;
+    },
+    imgData: { // 이미지 데이터 타입 - Img
+      imgData: ImgData
+      setImgData: React.Dispatch<React.SetStateAction<ImgData>>;
     }
   } | null,
   colors: {

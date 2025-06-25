@@ -1,6 +1,6 @@
 import '../../../styles/Workspace/layers/DndList.css';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import type {DndListProps} from '../../../types/types';
+import type {UserLayerDataType} from '../../../types/types';
 import trash from '../../../assets/Icon/trash.svg';
 import {CustomCheckbox} from '../CustomCheckbox';
 
@@ -17,6 +17,11 @@ const arrayMove = <T,>(arr: T[], oldIndex: number, newIndex: number): T[] => {
 
 const TRANSITION_DURATION = 300; // 0.3초 (ms 단위)
 
+interface DndListProps {
+  items: UserLayerDataType[];
+  setItems: React.Dispatch<React.SetStateAction<UserLayerDataType[]>>;
+}
+
 const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [overlayPos, setOverlayPos] = useState<{ x: number; y: number } | null>(null);
@@ -30,6 +35,32 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
 
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const itemRects = useRef<Map<string, DOMRect>>(new Map());
+
+  // 롱프레스 타이머 및 상태
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const [longPressTriggered, setLongPressTriggered] = useState(false);
+  const LONG_PRESS_DURATION = 300; // 1초로 변경
+
+  // 드래그/터치 종료 (공통 로직)
+  const commonDragEndLogic = useCallback(() => {
+    if (draggingId) {
+      setDraggingId(null);
+      setOverlayPos(null);
+      setOffset(null);
+      setOriginalIndex(null);
+
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+      document.body.style.overflow = '';
+
+      items.forEach(item => {
+        const el = itemRefs.current.get(item.id);
+        if (el) {
+          el.style.transform = '';
+        }
+      });
+    }
+  }, [draggingId, items]);
 
   // ⭐ 수정된 onDelete 함수: 즉시 삭제 대신 애니메이션을 트리거합니다.
   const onDelete = useCallback((id: string) => {
@@ -113,21 +144,66 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
     document.body.style.userSelect = 'none';
     document.body.style.cursor = 'grabbing';
     document.body.style.overflow = 'hidden';
-  }, [items, deletingIds, editingId]); // editingId를 의존성 배열에 추가
+  }, [items, deletingIds, editingId]);
 
-  // 마우스 드래그 시작
+  // 레이어 선택(selected) 함수 (radio처럼 동작)
+  const selectLayer = useCallback((id: string) => {
+    setItems(prevItems => prevItems.map(item => ({ ...item, selected: item.id === id })));
+  }, [setItems]);
+
+  // 체크박스 토글 함수 (checked만 변경)
+  const toggleChecked = useCallback((id: string) => {
+    setItems(prevItems =>
+      prevItems.map(item =>
+        item.id === id ? { ...item, checked: !item.checked } : item
+      )
+    );
+  }, [setItems]);
+
+  // 마우스/터치 다운 핸들러 (롱프레스/클릭 분기)
+  const handlePointerDown = useCallback((clientX: number, clientY: number, id: string, target: EventTarget) => {
+    setLongPressTriggered(false);
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    longPressTimer.current = setTimeout(() => {
+      setLongPressTriggered(true);
+      commonDragStartLogic(clientX, clientY, id, target);
+    }, LONG_PRESS_DURATION);
+  }, [commonDragStartLogic]);
+
+  // 마우스/터치 업 핸들러 (롱프레스 여부에 따라 분기)
+  const handlePointerUp = useCallback((id: string) => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    if (!longPressTriggered) {
+      // 롱프레스가 아니면 클릭(선택)
+      selectLayer(id);
+    }
+    setLongPressTriggered(false);
+  }, [longPressTriggered, selectLayer]);
+
+  // 마우스 이벤트 래퍼
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>, id: string) => {
     if (e.button !== 0) return;
-    e.preventDefault();
-    commonDragStartLogic(e.clientX, e.clientY, id, e.target);
-  }, [commonDragStartLogic]);
+    handlePointerDown(e.clientX, e.clientY, id, e.target);
+  }, [handlePointerDown]);
+  const handleMouseUp = useCallback((e: MouseEvent, id?: string) => {
+    if (!id) return;
+    handlePointerUp(id);
+    if (draggingId) commonDragEndLogic();
+  }, [handlePointerUp, draggingId, commonDragEndLogic]);
 
-  // 터치 드래그 시작
+  // 터치 이벤트 래퍼
   const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>, id: string) => {
     if (e.touches.length !== 1) return;
-    e.preventDefault();
-    commonDragStartLogic(e.touches[0].clientX, e.touches[0].clientY, id, e.target);
-  }, [commonDragStartLogic]);
+    handlePointerDown(e.touches[0].clientX, e.touches[0].clientY, id, e.target);
+  }, [handlePointerDown]);
+  const handleTouchEnd = useCallback((e: TouchEvent, id?: string) => {
+    if (!id) return;
+    handlePointerUp(id);
+    if (draggingId) commonDragEndLogic();
+  }, [handlePointerUp, draggingId, commonDragEndLogic]);
 
   // 드래그 중 (마우스/터치 공통 로직)
   const commonDragMoveLogic = useCallback((clientX: number, clientY: number) => {
@@ -200,43 +276,6 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
     }
   }, [commonDragMoveLogic]);
 
-  // 드래그/터치 종료 (공통 로직)
-  const commonDragEndLogic = useCallback(() => {
-    if (draggingId) {
-      setDraggingId(null);
-      setOverlayPos(null);
-      setOffset(null);
-      setOriginalIndex(null);
-
-      document.body.style.userSelect = '';
-      document.body.style.cursor = '';
-      document.body.style.overflow = '';
-
-      items.forEach(item => {
-        const el = itemRefs.current.get(item.id);
-        if (el) {
-          el.style.transform = '';
-        }
-      });
-    }
-  }, [draggingId, items]);
-
-  const handleMouseUp = useCallback(() => {
-    commonDragEndLogic();
-  }, [commonDragEndLogic]);
-
-  const handleTouchEnd = useCallback(() => {
-    commonDragEndLogic();
-  }, [commonDragEndLogic]);
-
-  const onToggle = (id: string) => {
-    setItems(prevItems =>
-      prevItems.map(item =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
-    );
-  };
-
   // 텍스트 편집 관련 핸들러
   const handleTextClick = useCallback((id: string) => {
     // 드래그 중이거나 삭제 애니메이션 중이 아닐 때만 편집 모드로 전환
@@ -268,14 +307,14 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
   useEffect(() => {
     if (draggingId) {
       window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('mouseup', (e) => handleMouseUp(e, draggingId ?? undefined));
     } else {
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mouseup', (e) => handleMouseUp(e, draggingId ?? undefined));
     }
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mouseup', (e) => handleMouseUp(e, draggingId ?? undefined));
     };
   }, [draggingId, handleMouseMove, handleMouseUp]);
 
@@ -283,14 +322,14 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
   useEffect(() => {
     if (draggingId) {
       window.addEventListener('touchmove', handleTouchMove, { passive: false });
-      window.addEventListener('touchend', handleTouchEnd, { passive: false });
+      window.addEventListener('touchend', (e) => handleTouchEnd(e, draggingId ?? undefined), { passive: false });
     } else {
       window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchend', (e) => handleTouchEnd(e, draggingId ?? undefined));
     }
     return () => {
       window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchend', (e) => handleTouchEnd(e, draggingId ?? undefined));
     };
   }, [draggingId, handleTouchMove, handleTouchEnd]);
 
@@ -299,8 +338,8 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
       {items.map(item => {
         const isDeleting = deletingIds.has(item.id);
         const isCurrentlyDragging = item.id === draggingId;
-        const isEditing = item.id === editingId; // ⭐ 편집 모드 상태
-
+        const isEditing = item.id === editingId;
+        const isSelected = item.selected;
         return (
           <div
             key={item.id}
@@ -308,9 +347,11 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
               if (el) itemRefs.current.set(item.id, el);
               else itemRefs.current.delete(item.id);
             }}
-            className={`list-item ${isCurrentlyDragging ? 'is-dragging' : ''} ${isDeleting ? 'is-deleting' : ''}`}
+            className={`list-item${isCurrentlyDragging ? ' is-dragging' : ''}${isDeleting ? ' is-deleting' : ''}${isSelected ? ' selected' : ''}`}
             onMouseDown={(e) => handleMouseDown(e, item.id)}
+            onMouseUp={(e) => handleMouseUp(e.nativeEvent, item.id)}
             onTouchStart={(e) => handleTouchStart(e, item.id)}
+            onTouchEnd={(e) => handleTouchEnd(e.nativeEvent, item.id)}
             onTransitionEnd={(e) => {
               if (e.propertyName === 'opacity' && isDeleting) {
                 console.log(`Item ${item.id} animation ended, ready for removal`);
@@ -345,25 +386,27 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
               </span>
             )}
             <div className="list-item-controls">
-              <CustomCheckbox id={item.id} checked={item.checked} onToggle={onToggle} />
-              <img
-                src={trash}
-                alt="Delete"
-                className="delete-icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(item.id);
-                }}
-              />
+              <CustomCheckbox id={item.id} checked={item.checked} onToggle={toggleChecked} />
+              {item.LayerType !== 'Cut' && ( // Cut 타입은 삭제 불가
+                <img
+                  src={trash}
+                  alt="Delete"
+                  className="delete-icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(item.id);
+                  }}
+                />
+              )}
             </div>
           </div>
         );
       })}
 
-      {/* 드래그 중인 항목을 위한 오버레이 (기존과 동일) */}
+      {/* 드래그 중인 항목을 위한 오버레이*/}
       {draggingId && overlayPos && offset && (
         <div
-          className="list-item dragged-overlay"
+          className={`list-item dragged-overlay${items.find(item => item.id === draggingId)?.selected ? ' selected' : ''}`}
           style={{
             left: overlayPos.x,
             top: overlayPos.y,
@@ -380,17 +423,19 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
             <CustomCheckbox
               id={draggingId}
               checked={items.find(item => item.id === draggingId)?.checked ?? true}
-              onToggle={onToggle}
+              onToggle={toggleChecked}
             />
-            <img
-              src={trash}
-              alt="Delete"
-              className="delete-icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(draggingId); // onDelete 함수에 드래그 중인 아이템의 ID를 전달합니다.
-              }}
-            />
+            {items.find(item => item.id === draggingId)?.LayerType !== 'Cut' && ( // Cut 타입은 삭제 불가
+              <img
+                src={trash}
+                alt="Delete"
+                className="delete-icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(draggingId); // onDelete 함수에 드래그 중인 아이템의 ID를 전달합니다.
+                }}
+              />
+            )}
           </div>
         </div>
       )}
