@@ -1,7 +1,7 @@
 import '../../../styles/Workspace/layers/LayerList.css'
 
 import addIcon from '../../../assets/Icon/add.svg'
-import type {ListItem} from '../../../types/types'
+import type {UserLayerDataType} from '../../../types/types'
 
 import DndList from './DndList'
 import React, {useContext} from 'react';
@@ -11,21 +11,23 @@ import AppContext from '../../../contexts/AppContext';
 const LayerList = () => {
   const context = useContext(AppContext);
 
-  if (!context.layer) {
+  if (!context.layer?.userLayerDataType) {
     return <div>레이어 데이터를 불러오는 중...</div>;
   }
-  const { layerData, setLayerData } = context.layer.layerData;
+  const { userLayerDataType, setUserLayerDataType } = context.layer.userLayerDataType;
 
   const handleAddLayer = () => {
-    console.log(layerData.length + 1);
+    console.log(userLayerDataType.length + 1);
     
-    const newLayer: ListItem = {
-      id: String(layerData.length + 1),
-      text: `새 레이어 ${layerData.length + 1}`, // 예시 텍스트
+    const newLayer: UserLayerDataType = {
+      id: String(userLayerDataType.length + 1),
+      text: `새 레이어 ${userLayerDataType.length + 1}`,
+      LayerType: 'Drawing',
       checked: true,
+      selected: false
     };
 
-    setLayerData((prevLayerData: ListItem[]) => [newLayer, ...prevLayerData]);
+    setUserLayerDataType((prevLayerData: UserLayerDataType[]) => [newLayer, ...prevLayerData]);
   };
 
   return (
@@ -37,8 +39,8 @@ const LayerList = () => {
         }} alt="" />
       </div>
       <DndList
-        items={layerData}
-        setItems={setLayerData}
+        items={userLayerDataType}
+        setItems={setUserLayerDataType}
       />
     </div>
   );
