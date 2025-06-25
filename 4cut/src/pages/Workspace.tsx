@@ -8,12 +8,31 @@ import {useEffect, useMemo, useState} from 'react';
 import ExportContent from '../components/Workspace/export/ExportContent';
 import DrawingCanvas from '../components/Workspace/DrawingCanvas/DrawingCanvas';
 
-import type {AppContextType, CanvasSize, HSL, ListCutImage, ListItem} from '../types/types'
+import type {AppContextType, CanvasSize, HSL, ListCutImage, ListDrawingItem, UserLayerDataType, ImgData} from '../types/types'
 
 function Workspace() {
   const [cutImages, setCutImages] = useState<ListCutImage[]>([]);
-  const [layers, setLayers] = useState<ListItem[]>([]);
+
+  const [drawingData, setDrawingData] = useState<ListDrawingItem>({});
   const [isExportPopupOpen, setIsExportPopupOpen] = useState(false);
+
+  const [userLayerDataType, setUserLayerDataType] = useState<UserLayerDataType[]>([
+    {
+      id: '1',
+      text: 'cutData',
+      LayerType: 'Cut',
+      checked: true,
+      selected: true,
+    },
+    {
+      id: '2',
+      text: 'layer1',
+      LayerType: 'Drawing',
+      checked: true,
+      selected: false,
+    }
+  ])
+  const [imgData, setImgData] = useState<ImgData>({})
 
   const [hsl, setHsl] = useState<HSL>({h:0, s:0, l:0})
   const [alpha, setAlpha] = useState<number>(0)
@@ -41,18 +60,54 @@ function Workspace() {
 
   useEffect(() => { // 임시 데이터
     setCutImages([
-      { AspectRatio: '3:4', checked: false },
-      { AspectRatio: '3:4', checked: false },
-      { AspectRatio: '3:4', checked: false },
-      { AspectRatio: '3:4', checked: false },
+      {
+        id: 'cut1',
+        AspectRatio: '3:4',
+        position: { x: 100, y: 100 },
+        size: { width: 120, height: 160 },
+        angle: 0,
+        checked: false,
+      },
+      {
+        id: 'cut2',
+        AspectRatio: '1:1',
+        position: { x: 100, y: 150 },
+        size: { width: 120, height: 120 },
+        angle: 0,
+        checked: false,
+      },
+      {
+        id: 'cut3',
+        AspectRatio: '4:3',
+        position: { x: 100, y: 200 },
+        size: { width: 160, height: 120 },
+        angle: 0,
+        checked: false,
+      },
+      {
+        id: 'cut4',
+        AspectRatio: '16:9',
+        position: { x: 100, y: 250 },
+        size: { width: 180, height: 101.25 }, // 16:9 비율
+        angle: 0,
+        checked: false,
+      },
     ]);
 
-    setLayers([
-      { id: '1', text: '뽀짝한그림', checked: true },
-      { id: '2', text: '심쿵한 그림', checked: true },
-      { id: '3', text: '항목 3', checked: true },
-      { id: '4', text: '항목 4', checked: true },
-    ]);
+    setDrawingData({
+      layer1: [
+        { 
+          brushType: "pen",
+          bryshSize: 10,
+          mouseData: [[1, 2], [2, 3], [3, 2]]
+        },
+        {
+          brushType: "marker",
+          bryshSize: 10,
+          mouseData: [[10, 20], [20, 30], [30, 20]]
+        }
+      ]
+    });
 
     setCanvasSize({
       width: 1652,
@@ -67,13 +122,21 @@ function Workspace() {
     export: null,
     brush: null,
     layer: {
+      userLayerDataType: {
+        userLayerDataType: userLayerDataType,
+        setUserLayerDataType: setUserLayerDataType
+      },
       cutImageData: {
         cutImageData: cutImages,
         setCutImageData: setCutImages,
       },
-      layerData: {
-        layerData: layers,
-        setLayerData: setLayers,
+      DrawingData: {
+        drawingData: drawingData,
+        setDrawingData: setDrawingData,
+      },
+      imgData: {
+        imgData: imgData,
+        setImgData: setImgData
       },
     },
     colors: {
@@ -99,7 +162,19 @@ function Workspace() {
       backgroundColor: backgroundColor,
       setBackgroundColor: setBackgroundColor
     }
-  }), [cutImages, layers, hsl, alpha, historyColor, canvasSize, backgroundColor]);
+  }), [
+    // 레이어 관련
+    cutImages, 
+    userLayerDataType, 
+    drawingData, 
+    // 색상 관련
+    hsl, 
+    alpha, 
+    historyColor, 
+    // 캔버스 관련
+    canvasSize, 
+    backgroundColor,
+  ]);
 
   const openExportPopup = () => setIsExportPopupOpen(true);
   const closeExportPopup = () => setIsExportPopupOpen(false);

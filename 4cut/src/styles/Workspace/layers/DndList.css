@@ -3,7 +3,6 @@
   flex-direction: column;
   gap: 4px;
   background-color: #f9f9f9;
-  border-radius: 8px;
   flex-basis: 0;
   flex-grow: 1;
   overflow-y: auto;
@@ -28,7 +27,11 @@
   transition: transform 0.2s ease-in-out,
               opacity 0.3s ease-out,
               box-shadow 0.2s ease-in-out;
+}
 
+.list-item.selected {
+  border: 1.5px solid #4F46E5;
+  /* 필요시 배경색 등 추가 스타일 */
 }
 
 .is-deleting {
