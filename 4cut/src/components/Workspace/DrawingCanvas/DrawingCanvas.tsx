@@ -120,6 +120,31 @@ function DrawingCanvas() {
         }
     }, [appContext.layer?.cutImageData.cutImageData, canvasSize, contextUserLayerDataType]);
 
+    // checked가 true인 객체를 fabric.js에서 선택
+    useEffect(() => {
+        if (!fabricCanvasRef.current) return;
+        
+        const cutImageData = appContext.layer?.cutImageData.cutImageData || [];
+        const checkedItem = cutImageData.find(item => item.checked);
+        
+        if (checkedItem) {
+            // fabric.js에서 해당 객체 찾기
+            const fabricObjects = fabricCanvasRef.current.getObjects();
+            const targetObject = fabricObjects.find((obj: any) => 
+                obj.data && obj.data.id === checkedItem.id
+            );
+            
+            if (targetObject) {
+                fabricCanvasRef.current.setActiveObject(targetObject);
+                fabricCanvasRef.current.requestRenderAll();
+            }
+        } else {
+            // checked가 true인 객체가 없으면 선택 해제
+            fabricCanvasRef.current.discardActiveObject();
+            fabricCanvasRef.current.requestRenderAll();
+        }
+    }, [appContext.layer?.cutImageData.cutImageData]);
+
     // 이벤트 핸들러
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
         handleZoomTouchStart(e);
@@ -147,9 +172,12 @@ function DrawingCanvas() {
 
     // drawing-canvas 영역 클릭 시 모두 해제 (캔버스 내부, rect 선택 시 제외)
     const handleCanvasAreaClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        // 캔버스 내부 클릭이면 해제하지 않음
-        if (canvasRef.current && canvasRef.current.contains(e.target as Node)) return;
+        const target = e.target as HTMLElement;
         
+        // 캔버스 내부 클릭이면 해제하지 않음
+        if (canvasRef.current && canvasRef.current.contains(target)) return;
+        
+        // fabric.js 활성 객체가 있으면 해제하지 않음
         if (fabricCanvasRef.current && fabricCanvasRef.current.getActiveObject()) return;
         
         // 그 외(진짜 빈 영역)만 해제
@@ -157,6 +185,7 @@ function DrawingCanvas() {
         if (setCutImageData) {
             setCutImageData(prev => prev.map(item => ({ ...item, checked: false })));
         }
+        
         if (fabricCanvasRef.current) {
             fabricCanvasRef.current.discardActiveObject();
             fabricCanvasRef.current.requestRenderAll();
@@ -168,11 +197,23 @@ function DrawingCanvas() {
         const setCutImageData = appContext.layer?.cutImageData.setCutImageData;
 
         const handleBodyClick = (e: MouseEvent) => {
-            // drawing-canvas 영역 클릭 시에만 해제
-            if ((e.target as HTMLElement).classList[0] === 'drawing-canvas') {
+            const target = e.target as HTMLElement;
+            
+            // 클릭된 요소가 캔버스나 캔버스 관련 요소인지 확인
+            const isCanvas = target.tagName === 'CANVAS';
+            const isFabricObject = fabricCanvasRef.current.getActiveObject();
+            
+            // ImageRatioSelector 관련 요소인지 확인
+            const isImageRatioSelector = target.closest('.image-ratio-selector-section');
+            
+            // 캔버스 영역이 아니고, ImageRatioSelector도 아니고, 선택된 객체가 있을 때만 해제
+            if (!isCanvas && !isImageRatioSelector && isFabricObject) {
+                // cutImageData의 checked 해제
                 if (setCutImageData) {
                     setCutImageData(prev => prev.map(item => ({ ...item, checked: false })));
                 }
+                
+                // fabric.js 활성 객체 해제
                 fabricCanvasRef.current.discardActiveObject();
                 fabricCanvasRef.current.requestRenderAll();
             }
