@@ -51,6 +51,32 @@ export function syncAspectRatioRects(
       });
       (rect as any).set('data', { type: 'aspect-ratio', id: cut.id });
 
+      // 컨트롤(핸들) 설정: 엣지(상,하,좌,우) 비활성화, 모서리만 활성화
+      if (selectable) {
+        rect.setControlsVisibility({
+          mt: false, // top middle
+          mb: false, // bottom middle
+          ml: false, // left middle
+          mr: false, // right middle
+          mtr: true, // rotate handle
+          tl: true,  // top left
+          tr: true,  // top right
+          bl: true,  // bottom left
+          br: true   // bottom right
+        });
+        
+        // 균등 비율 유지를 위한 설정
+        rect.lockScalingX = false;
+        rect.lockScalingY = false;
+        rect.lockScalingFlip = true;
+      } else {
+        // 선택 불가능할 때는 모든 컨트롤 비활성화
+        rect.setControlsVisibility({
+          mt: false, mb: false, ml: false, mr: false,
+          mtr: false, tl: false, tr: false, bl: false, br: false
+        });
+      }
+
       // 클릭 이벤트 등록
       if (onRectClick) {
         rect.on('mousedown', () => onRectClick(cut.id));
