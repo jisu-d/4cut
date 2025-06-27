@@ -9,6 +9,7 @@ import ExportContent from '../components/Workspace/export/ExportContent';
 import DrawingCanvas from '../components/Workspace/DrawingCanvas/DrawingCanvas';
 
 import type {AppContextType, CanvasSize, HSL, ListCutImage, ListDrawingItem, UserLayerDataType, ImgData} from '../types/types'
+import * as fabric from 'fabric';
 
 function Workspace() {
   const [cutImages, setCutImages] = useState<ListCutImage[]>([]);
@@ -63,33 +64,53 @@ function Workspace() {
       {
         id: 'cut1',
         AspectRatio: '3:4',
-        position: { x: 100, y: 100 },
-        size: { width: 120, height: 160 },
-        angle: 0,
+        jsonData: {
+          left: 100,
+          top: 100,
+          width: 120,
+          height: 160,
+          angle: 0,
+          selectable: true
+        },
         checked: false,
       },
       {
         id: 'cut2',
         AspectRatio: '1:1',
-        position: { x: 100, y: 150 },
-        size: { width: 120, height: 120 },
-        angle: 0,
+        jsonData: {
+          left: 100,
+          top: 150,
+          width: 120,
+          height: 120,
+          angle: 0,
+          selectable: true
+        },
         checked: false,
       },
       {
         id: 'cut3',
         AspectRatio: '4:3',
-        position: { x: 100, y: 200 },
-        size: { width: 160, height: 120 },
-        angle: 0,
+        jsonData: {
+          left: 100,
+          top: 200,
+          width: 160,
+          height: 120,
+          angle: 0,
+          selectable: true
+        },
         checked: false,
       },
       {
         id: 'cut4',
         AspectRatio: '16:9',
-        position: { x: 100, y: 250 },
-        size: { width: 180, height: 101.25 }, // 16:9 비율
-        angle: 0,
+        jsonData: {
+          left: 100,
+          top: 250,
+          width: 180,
+          height: 101.25,
+          angle: 0,
+          selectable: true
+        },
         checked: false,
       },
     ]);

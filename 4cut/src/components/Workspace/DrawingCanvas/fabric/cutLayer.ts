@@ -1,192 +1,219 @@
 import * as fabric from 'fabric';
 
+import type {ListCutImage, AspectRatio} from '../../../../types/types.ts'
+
+// Canvas에 _aspectRects 속성 추가를 위한 타입 확장
+declare module 'fabric' {
+  interface Canvas {
+    _aspectRects?: Map<string, fabric.Rect>;
+  }
+}
+
+// 비율에 따른 크기 계산 함수
+function calculateSizeByAspectRatio(width: number, height: number, aspectRatio: AspectRatio): { width: number; height: number } {
+  switch (aspectRatio) {
+    case '4:3': 
+      if (width < height) {
+        return { width, height: width * (3/4) };
+      } else {
+        return { width: height * (4/3), height };
+      }
+    case '3:4': 
+      if (width < height) {
+        return { width, height: width * (4/3) };
+      } else {
+        return { width: height * (3/4), height };
+      }
+    case '1:1': 
+      const size = Math.min(width, height);
+      return { width: size, height: size };
+    case '16:9': 
+      if (width < height) {
+        return { width, height: width * (9/16) };
+      } else {
+        return { width: height * (16/9), height };
+      }
+    default:
+      return { width, height };
+  }
+}
+
+class CutLayerManager {
+  private canvas: fabric.Canvas;
+  private rectMap: Map<string, fabric.Rect>;
+
+  constructor(canvas: fabric.Canvas) {
+    this.canvas = canvas;
+    if (!canvas._aspectRects) {
+      canvas._aspectRects = new Map();
+    }
+    this.rectMap = canvas._aspectRects;
+  }
+
+  // 컨트롤 설정을 업데이트하는 메서드
+  private updateControls(rect: fabric.Rect, selectable: boolean): void {
+    if (selectable) {
+      rect.setControlsVisibility({
+        mt: false, mb: false, ml: false, mr: false,
+        mtr: true, tl: true, tr: true, bl: true, br: true
+      });
+    } else {
+      rect.setControlsVisibility({
+        mt: false, mb: false, ml: false, mr: false,
+        mtr: false, tl: false, tr: false, bl: false, br: false
+      });
+    }
+  }
+
+  // 새로운 rect를 생성하는 메서드
+  private createRect(cut: ListCutImage, rectData: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    angle: number;
+  }, selectable: boolean, onRectClick?: (id: string) => void, onRectTransform?: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void): fabric.Rect {
+    const rect = new fabric.Rect({
+      ...rectData,
+      fill: 'rgb(255, 255, 255)',
+      stroke: cut.checked ? 'red' : 'black',
+      strokeWidth: 3,
+      selectable,
+      evented: selectable,
+      scaleX: 1,
+      scaleY: 1,
+    });
+
+    // 컨트롤 설정
+    this.updateControls(rect, selectable);
+    
+    // 균등 비율 유지를 위한 설정
+    rect.lockScalingX = false;
+    rect.lockScalingY = false;
+    rect.lockScalingFlip = true;
+
+    // 이벤트 등록
+    if (onRectClick) {
+      rect.on('mousedown', () => onRectClick(cut.id));
+    }
+
+    if (onRectTransform) {
+      rect.on('modified', () => {
+        if (rect) {
+          onRectTransform(
+            cut.id,
+            { x: rect.left ?? 0, y: rect.top ?? 0 },
+            {
+              width: rect.width! * (rect.scaleX ?? 1),
+              height: rect.height! * (rect.scaleY ?? 1)
+            },
+            rect.angle ?? 0
+          );
+        }
+      });
+    }
+
+    return rect;
+  }
+
+  // 기존 rect를 업데이트하는 메서드
+  private updateRect(rect: fabric.Rect, cut: ListCutImage, rectData: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    angle: number;
+  }, selectable: boolean): void {
+    rect.set({
+      ...rectData,
+      stroke: cut.checked ? 'red' : 'black',
+      selectable,
+      evented: selectable,
+    });
+    console.log(cut);
+    
+    
+    rect.set('scaleX', 1);
+    rect.set('scaleY', 1);
+    rect.setCoords();
+    
+    this.updateControls(rect, selectable);
+  }
+
+  // rect 데이터를 계산하는 메서드
+  private calculateRectData(cut: ListCutImage, idx: number): {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    angle: number;
+  } {
+    const jsonData = cut.jsonData || {};
+    let width = jsonData.width ?? 200;
+    let height = jsonData.height ?? 200;
+    
+    // 비율에 따른 크기 계산
+    const { width: calculatedWidth, height: calculatedHeight } = calculateSizeByAspectRatio(width, height, cut.AspectRatio);
+    width = calculatedWidth;
+    height = calculatedHeight;
+    
+    return {
+      left: jsonData.left ?? (50 + idx * 250),
+      top: jsonData.top ?? ((this.canvas.height! - height) / 2),
+      width,
+      height,
+      angle: jsonData.angle ?? 0
+    };
+  }
+
+  // 사용하지 않는 rect들을 제거하는 메서드
+  private removeUnusedRects(cuts: ListCutImage[]): void {
+    for (const [id, rect] of this.rectMap.entries()) {
+      if (!cuts.find(cut => cut.id === id)) {
+        this.canvas.remove(rect);
+        this.rectMap.delete(id);
+      }
+    }
+  }
+
+  // 메인 동기화 메서드
+  syncRects(
+    cuts: ListCutImage[],
+    onRectClick?: (id: string) => void,
+    onRectTransform?: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void,
+    selectable: boolean = true
+  ): void {
+    // 사용하지 않는 rect 제거
+    this.removeUnusedRects(cuts);
+
+    // cuts 처리
+    cuts.forEach((cut, idx) => {
+      let rect = this.rectMap.get(cut.id);
+      const rectData = this.calculateRectData(cut, idx);
+
+      if (!rect) {
+        // 새로운 rect 생성
+        rect = this.createRect(cut, rectData, selectable, onRectClick, onRectTransform);
+        this.canvas.add(rect);
+        this.rectMap.set(cut.id, rect);
+      } else {
+        // 기존 rect 업데이트
+        this.updateRect(rect, cut, rectData, selectable);
+      }
+    });
+
+    this.canvas.renderAll();
+  }
+}
+
+// 기존 함수를 클래스 래퍼로 유지 (하위 호환성)
 export function syncAspectRatioRects(
   canvas: fabric.Canvas,
-  cuts: { id: string; AspectRatio: string; checked: boolean; position?: {x:number, y:number}, size?: {width:number, height:number}, angle?: number }[],
+  cuts: ListCutImage[],
   onRectClick?: (id: string) => void,
   onRectTransform?: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void,
   selectable: boolean = true
 ) {
-  // rect를 id별로 관리
-  if (!(canvas as any)._aspectRects) {
-    (canvas as any)._aspectRects = new Map();
-  }
-  const rectMap: Map<string, fabric.Rect> = (canvas as any)._aspectRects;
-
-  // cuts에 없는 rect는 삭제
-  for (const [id, rect] of rectMap.entries()) {
-    if (!cuts.find(cut => cut.id === id)) {
-      canvas.remove(rect);
-      rectMap.delete(id);
-    }
-  }
-
-  cuts.forEach((cut, idx) => {
-    let rect: fabric.Rect | undefined = rectMap.get(cut.id);
-    let width = cut.size?.width ?? 200, height = cut.size?.height ?? 200;
-    switch (cut.AspectRatio) {
-      case '4:3': width = width || 200; height = height || 150; break;
-      case '3:4': width = width || 150; height = height || 200; break;
-      case '1:1': width = width || 200; height = height || 200; break;
-      case '16:9': width = width || 240; height = height || 135; break;
-    }
-    const left = cut.position?.x ?? (50 + idx * 250);
-    const top = cut.position?.y ?? ((canvas.height! - height) / 2);
-    const angle = cut.angle ?? 0;
-
-    if (!rect) {
-      rect = new fabric.Rect({
-        left,
-        top,
-        width,
-        height,
-        angle,
-        fill: 'rgb(255, 255, 255)',
-        stroke: cut.checked ? 'red' : 'black',
-        strokeWidth: 3,
-        selectable: selectable, // 선택 되었을때만 수정가능하게 함.
-        evented: selectable,
-        scaleX: 1,
-        scaleY: 1,
-      });
-      (rect as any).set('data', { type: 'aspect-ratio', id: cut.id });
-
-      // 컨트롤(핸들) 설정: 엣지(상,하,좌,우) 비활성화, 모서리만 활성화
-      if (selectable) {
-        rect.setControlsVisibility({
-          mt: false, // top middle
-          mb: false, // bottom middle
-          ml: false, // left middle
-          mr: false, // right middle
-          mtr: true, // rotate handle
-          tl: true,  // top left
-          tr: true,  // top right
-          bl: true,  // bottom left
-          br: true   // bottom right
-        });
-        
-        // 균등 비율 유지를 위한 설정
-        rect.lockScalingX = false;
-        rect.lockScalingY = false;
-        rect.lockScalingFlip = true;
-      } else {
-        // 선택 불가능할 때는 모든 컨트롤 비활성화
-        rect.setControlsVisibility({
-          mt: false, mb: false, ml: false, mr: false,
-          mtr: false, tl: false, tr: false, bl: false, br: false
-        });
-      }
-
-      // 클릭 이벤트 등록
-      if (onRectClick) {
-        rect.on('mousedown', () => onRectClick(cut.id));
-      }
-      // 이동/크기조절/회전 이벤트 등록
-      if (onRectTransform) {
-        rect.on('modified', () => {
-          if (rect) {
-            onRectTransform(
-              cut.id,
-              {
-                x: rect.left ?? 0,
-                y: rect.top ?? 0
-              },
-              {
-                width: rect.width! * (rect.scaleX ?? 1),
-                height: rect.height! * (rect.scaleY ?? 1)
-              },
-              rect.angle ?? 0
-            );
-          }
-        });
-      }
-      canvas.add(rect);
-      rectMap.set(cut.id, rect);
-    } else {
-      // 이미 있는 rect의 속성만 업데이트
-      rect.set({
-        left,
-        top,
-        width,
-        height,
-        angle,
-        stroke: cut.checked ? 'red' : 'black',
-        selectable: selectable,
-        evented: selectable,
-      });
-      rect.set('scaleX', 1);
-      rect.set('scaleY', 1);
-      rect.setCoords();
-      // 컨트롤(핸들) 설정: 엣지(상,하,좌,우) 비활성화, 모서리만 활성화
-      rect.setControlsVisibility({
-        mt: false, // top middle
-        mb: false, // bottom middle
-        ml: false, // left middle
-        mr: false, // right middle
-      });
-    }
-  });
-  canvas.renderAll();
+  const manager = new CutLayerManager(canvas);
+  manager.syncRects(cuts, onRectClick, onRectTransform, selectable);
 }
-
-export function drawAllAspectRatioRects(
-  canvas: fabric.Canvas,
-  cuts: { id: string; AspectRatio: string; checked: boolean; position?: {x:number, y:number}, size?: {width:number, height:number}, angle?: number }[],
-  onRectClick?: (id: string) => void,
-  onRectTransform?: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void
-) {
-  cuts.forEach((cut, idx) => {
-    let width = cut.size?.width ?? 200, height = cut.size?.height ?? 200;
-    switch (cut.AspectRatio) {
-      case '4:3': width = width || 200; height = height || 150; break;
-      case '3:4': width = width || 150; height = height || 200; break;
-      case '1:1': width = width || 200; height = height || 200; break;
-      case '16:9': width = width || 240; height = height || 135; break;
-    }
-    const left = cut.position?.x ?? (50 + idx * 250);
-    const top = cut.position?.y ?? ((canvas.height! - height) / 2);
-    const angle = cut.angle ?? 0;
-
-    const rect = new fabric.Rect({
-      left,
-      top,
-      width,
-      height,
-      angle,
-      fill: 'rgba(0,0,0,0.2)',
-      stroke: cut.checked ? 'red' : 'black',
-      strokeWidth: 3,
-      selectable: true,
-      evented: true,
-      scaleX: 1,
-      scaleY: 1,
-    });
-    (rect as any).set('data', { type: 'aspect-ratio', id: cut.id });
-
-    // 클릭 이벤트 등록
-    if (onRectClick && rect) {
-      rect.on('mousedown', () => onRectClick(cut.id));
-    }
-
-    // 이동/크기조절/회전 이벤트 등록
-    if (onRectTransform) {
-      rect.on('modified', () => {
-        onRectTransform(
-          cut.id,
-          {
-            x: rect.left ?? 0,
-            y: rect.top ?? 0
-          },
-          {
-            width: rect.width! * (rect.scaleX ?? 1),
-            height: rect.height! * (rect.scaleY ?? 1)
-          },
-          rect.angle ?? 0
-        );
-      });
-    }
-
-    canvas.add(rect);
-  });
-  canvas.renderAll();
-} 

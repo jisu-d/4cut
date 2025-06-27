@@ -24,15 +24,24 @@ export const useCanvasResize = (
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasSize, setCanvasSize] = useState<CanvasSize>({ 
-    width: 800, 
-    height: 600 
+    width: 0, 
+    height: 0 
   });
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const updateCanvasSize = useCallback(() => {
     if (containerRef.current) {
       const container = containerRef.current;
       const containerWidth = container.clientWidth;
       const containerHeight = container.clientHeight;
+
+      // 컨테이너가 아직 크기를 가지지 않았으면 기본값 사용
+      if (containerWidth === 0 || containerHeight === 0) {
+        const defaultWidth = Math.max(800, minWidth);
+        const defaultHeight = Math.max(defaultWidth / aspectRatio, minHeight);
+        setCanvasSize({ width: defaultWidth, height: defaultHeight });
+        return;
+      }
 
       // 컨테이너 크기의 지정된 비율로 제한
       const maxWidth = containerWidth * maxSizeRatio;
@@ -52,11 +61,21 @@ export const useCanvasResize = (
       newHeight = Math.max(newHeight, minHeight);
 
       setCanvasSize({ width: newWidth, height: newHeight });
+      setIsInitialized(true);
     }
   }, [aspectRatio, maxSizeRatio, minWidth, minHeight]);
 
   useEffect(() => {
-    updateCanvasSize();
+    // 초기 크기 설정을 지연시켜 DOM이 완전히 렌더링된 후 실행
+    const timer = setTimeout(() => {
+      updateCanvasSize();
+    }, 0);
+    
+    return () => clearTimeout(timer);
+  }, [updateCanvasSize]);
+
+  useEffect(() => {
+    if (!isInitialized) return;
     
     // 리사이즈 이벤트 리스너 추가
     const handleResize = () => {
@@ -65,7 +84,7 @@ export const useCanvasResize = (
 
     window.addEventListener('resize', handleResize);
     
-    // ResizeObserver를 사용하여 컨테이너 크기 변화 감지 (선택사항)
+    // ResizeObserver를 사용하여 컨테이너 크기 변화 감지
     let resizeObserver: ResizeObserver | null = null;
     if (containerRef.current && window.ResizeObserver) {
       resizeObserver = new ResizeObserver(handleResize);
@@ -78,7 +97,7 @@ export const useCanvasResize = (
         resizeObserver.disconnect();
       }
     };
-  }, [aspectRatio, maxSizeRatio, minWidth, minHeight, updateCanvasSize]);
+  }, [isInitialized, updateCanvasSize]);
 
   return {
     containerRef,
