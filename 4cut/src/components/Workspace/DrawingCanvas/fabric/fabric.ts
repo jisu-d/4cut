@@ -11,7 +11,6 @@ export function createFabricCanvas(
     height,
     backgroundColor,
   });
-  canvas.selection = true; // 선택 박스 활성화
   return canvas;
 }
 
