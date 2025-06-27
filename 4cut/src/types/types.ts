@@ -13,9 +13,14 @@ export interface ListDrawingItem {
 export interface ListCutImage {
   id: string; // 각 컷의 고유 id
   AspectRatio: AspectRatio;
-  position: { x: number; y: number }; // 중심 좌표
-  size: { width: number; height: number }; // 크기
-  angle: number; // 회전 각도
+  jsonData: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    angle: number;
+    selectable: boolean;
+  }
   checked: boolean;
 }
 
@@ -33,13 +38,6 @@ export interface HistoryColor {
     alpha: number;
   }
 }
-
-//export interface UserLayerDataType {
-//  [layerName: string]:{
-//    LayerType: "Drawing" | 'Cut' | 'Img';
-//    checked: boolean;
-//  }
-//}
 
 export interface UserLayerDataType {
   id: string;
