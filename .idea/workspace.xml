@@ -5,30 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ac9d453d-3f4e-4d5a-8a8c-72b931208c8b" name="변경" comment="캔버스 부분 기능">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/4cut/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/Dashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/Dashboard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/addImg/AlertBtn.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/addImg/AlertBtn.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/brushes/BrushCategoryButton.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/brushes/BrushCategoryButton.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/brushes/BrushesContent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/brushes/BrushesContent.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/DrawingCanvas/DrawingCanvas.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/DrawingCanvas/DrawingCanvas.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/DrawingCanvas/fabric/cutLayer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/DrawingCanvas/fabric/cutLayer.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/DrawingCanvas/fabric/drawingLayer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/DrawingCanvas/fabric/drawingLayer.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/colors/AlphaPicker.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/colors/AlphaPicker.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/colors/ColorHistoryBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/colors/ColorHistoryBar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/colors/ColorsContent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/colors/ColorsContent.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/colors/GradientColorPicker.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/colors/GradientColorPicker.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/colors/HslPicker.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/colors/HslPicker.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/export/AgreementSection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/export/AgreementSection.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/export/ExportContent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/export/ExportContent.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/export/ExportInput.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/export/ExportInput.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/export/ExportPasswordInput.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/export/ExportPasswordInput.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/layers/DndList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/layers/DndList.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/layers/ImageRatioSelector.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/layers/ImageRatioSelector.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/layers/LayerList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/layers/LayerList.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/layers/LayersContent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/layers/LayersContent.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/contexts/AppContext.ts" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/contexts/AppContext.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/main.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/main.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/pages/MainPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/pages/MainPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/4cut/src/pages/Workspace.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/pages/Workspace.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/4cut/src/types/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/types/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/vite.config.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,20 +22,20 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "jisu-d"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;jisu-d&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/jisu-d/4cut.git",
-    "accountId": "9a667afe-efd5-4c4f-9d69-d569bc07cf1e"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/jisu-d/4cut.git&quot;,
+    &quot;accountId&quot;: &quot;9a667afe-efd5-4c4f-9d69-d569bc07cf1e&quot;
   }
-}]]></component>
+}</component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="QODANA_PROBLEMS_VIEW_TAB" />
+    <option name="selectedTabId" value="ProjectErrors" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -62,23 +46,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;JavaScript 디버그.localhost:5173.executor&quot;: &quot;Debug&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature/Workspace&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;pnpm&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\lim16\\Desktop\\4cut\\4cut\\node_modules\\typescript\\lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JavaScript 디버그.localhost:5173.executor": "Debug",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "feature/Workspace",
+    "ignore.virus.scanning.warn.message": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "pnpm",
+    "settings.editor.selected.configurable": "reference.idesettings.quicklists",
+    "ts.external.directory.path": "C:\\Users\\lim16\\Desktop\\4cut\\4cut\\node_modules\\typescript\\lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="localhost:5173" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:5173/">
       <method v="2" />
@@ -105,6 +91,8 @@
       <updated>1750687017990</updated>
       <workItem from="1750687019779" duration="3547000" />
       <workItem from="1750695958984" duration="218000" />
+      <workItem from="1750919510074" duration="11412000" />
+      <workItem from="1751022216088" duration="10642000" />
     </task>
     <servers />
   </component>

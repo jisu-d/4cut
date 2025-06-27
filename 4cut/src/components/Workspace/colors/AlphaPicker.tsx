@@ -1,4 +1,4 @@
-import React, {type ChangeEvent, useContext, useEffect, useRef} from 'react';
+import {type ChangeEvent, useContext, useEffect, useRef} from 'react';
 import '../../../styles/Workspace/colors/AlphaPicker.css'; // 알파 슬라이더를 위한 CSS 파일 (다음 단계에서 생성)
 import AppContext from '../../../contexts/AppContext';
 import type {HSL} from '../../../types/types';
