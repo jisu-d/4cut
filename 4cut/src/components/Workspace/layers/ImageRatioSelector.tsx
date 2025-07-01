@@ -36,18 +36,18 @@ const ImageRatioSelector = () => {
 
     const handleClick = (idx: number) => {
         const CutSelected = userLayerDataType.filter((item) => item.LayerType == "Cut")[0]
-        if (!CutSelected.selected) return
+        if (!CutSelected.active) return
 
 
         setCutImageData(prev => prev.map((item, i) => {
             if (i === idx) {
                 const newRatio = nextRatio(item.AspectRatio);
-                const width = item.size?.width ?? 200;
+                const width = item.jsonData?.width ?? 200;
                 const { height } = getSizeByRatio(newRatio, width);
                 return {
                     ...item,
                     AspectRatio: newRatio,
-                    size: { width, height },
+                    jsonData: { ...item.jsonData, width, height },
                     checked: true
                 };
             }

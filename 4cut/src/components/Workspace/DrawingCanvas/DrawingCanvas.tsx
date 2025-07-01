@@ -1,12 +1,15 @@
-import React, {useCallback, useContext, useEffect, useRef} from 'react';
+import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
 import '../../../styles/Workspace/DrawingCanvas/DrawingCanvas.css';
 import {useCanvasResize} from './useCanvasResize';
 import {useCanvasZoom} from './useCanvasZoom';
 import CanvasResetButton from './CanvasResetButton';
+import CanvasToolBar from './CanvasToolBar';
 import AppContext from '../../../contexts/AppContext';
 import {createFabricCanvas, syncFabricBackgroundColor} from './fabric/fabric';
 import {syncAspectRatioRects} from './fabric/cutLayer';
-import type fabric from "fabric";
+import {syncDrawingLayer} from './fabric/drawingLayer';
+import * as fabric from 'fabric';
+import { useDrawingManager } from './fabric/useDrawingManager';
 
 function DrawingCanvas() {
     const appContext = useContext(AppContext);
@@ -15,9 +18,13 @@ function DrawingCanvas() {
     const currentBackgroundColor = appContext.canvas?.backgroundColor || '#f0f0f0';
 
     const contextUserLayerDataType = appContext.layer?.userLayerDataType.userLayerDataType;
+    const drawingData = appContext.layer?.DrawingData.drawingData || {};
+    const setDrawingData = appContext.layer?.DrawingData.setDrawingData;
+
+    // 도구 상태 관리
+    const [activeTool, setActiveTool] = useState<"pen" | "select">("select");
 
     // 캔버스 화면 조정
-    // 리사이징 훅 사용
     const {containerRef, canvasSize} = useCanvasResize({
         aspectRatio: currentCanvasSize.width / currentCanvasSize.height,
         maxSizeRatio: 0.9,
@@ -48,6 +55,21 @@ function DrawingCanvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
 
+    // useDrawingManager 훅 사용
+    const {
+        handleCanvasPointerDown,
+        handleCanvasPointerMove,
+        handleCanvasPointerUp
+    } = useDrawingManager({
+        contextUserLayerDataType,
+        activeTool,
+        setDrawingData,
+        canvasRef,
+        fabricCanvasRef
+    });
+
+
+
     // Fabric.js 캔버스 생성 (캔버스 요소만)
     useEffect(() => {
         if (canvasRef.current && canvasSize.width > 0 && canvasSize.height > 0) {
@@ -67,12 +89,17 @@ function DrawingCanvas() {
         }
     }, [canvasRef, canvasSize, currentBackgroundColor]);
 
-    // 배경색 동기화
     useEffect(() => {
-        if (fabricCanvasRef.current) {
-            syncFabricBackgroundColor(fabricCanvasRef.current, currentBackgroundColor);
+        if (!fabricCanvasRef.current) return;
+        if (activeTool === 'pen') {
+            fabricCanvasRef.current.isDrawingMode = true;
+            fabricCanvasRef.current.selection = false;
+        } else {
+            fabricCanvasRef.current.isDrawingMode = false;
+            fabricCanvasRef.current.selection = true;
         }
-    }, [currentBackgroundColor]); // currentBackgroundColor로 변경
+    }, [activeTool]);
+
 
     // 모든 cut의 사각형을 그리고, 클릭/이동/크기조절/회전 시 데이터 갱신
     useEffect(() => {
@@ -82,11 +109,9 @@ function DrawingCanvas() {
 
             contextUserLayerDataType.forEach(item => {
                 if (item.LayerType === 'Cut') {
-                    // 레이어의 checked가 true일 때만 전체 cutImageData를 그림
-                    const visibleCuts = item.checked ? cutImageData : [];
 
                     // 클릭/변형 핸들러: selected=true일 때만 활성화
-                    const handleRectClick = item.selected ? (id: string) => {
+                    const handleRectClick = (id: string) => {
                         if (setCutImageData) {
                             setCutImageData(prev =>
                                 prev.map(item =>
@@ -96,12 +121,17 @@ function DrawingCanvas() {
                                 )
                             );
                         }
-                    } : undefined;
+                    };
 
-                    const handleRectTransform = item.selected ? (id: string, position: { x: number, y: number }, size: {
-                        width: number,
-                        height: number
-                    }, angle: number) => {
+                    const handleRectTransform = (
+                        id: string, 
+                        position: { x: number, y: number }, 
+                        size: {
+                            width: number,
+                            height: number
+                        }, 
+                        angle: number
+                    ) => {
                         if (setCutImageData) {
                             setCutImageData(prev =>
                                 prev.map(item =>
@@ -121,17 +151,44 @@ function DrawingCanvas() {
                                 )
                             );
                         }
-                    } : undefined;
-
+                    };
+                    
                     syncAspectRatioRects(
                         fabricCanvasRef.current!,
-                        visibleCuts,
+                        cutImageData ?? [],
                         handleRectClick,
                         handleRectTransform,
-                        item.selected
+                        item.active,
+                        item.visible
                     );
                 } else if (item.LayerType === 'Drawing') {
-                    const d = 2
+                    // Drawing 레이어 처리
+                    const layerDrawingData = drawingData[item.text];
+                   
+
+                    const handleDrawingTransform = (id: string, newProps: any) => {
+                        if (setDrawingData) {
+                            setDrawingData(prev => ({
+                                ...prev,
+                                [item.text]: prev[item.text].map(drawing =>
+                                    drawing.id === id
+                                        ? { ...drawing, ...newProps }
+                                        : drawing
+                                )
+                            }));
+                        }
+                    };
+
+                    // visible이 true일 때만 그림 화면에 보임
+                    // active가 true일 때만 선택 수정 가능함
+
+                    syncDrawingLayer(
+                        fabricCanvasRef.current!,
+                        layerDrawingData, 
+                        handleDrawingTransform,
+                        item.active,
+                        item.visible
+                    );
                 }
             });
         }
@@ -139,7 +196,9 @@ function DrawingCanvas() {
         appContext.layer?.cutImageData.cutImageData,
         appContext.layer?.cutImageData.setCutImageData,
         contextUserLayerDataType,
-        fabricCanvasRef.current // fabricCanvas가 생성된 후에도 다시 실행되도록 추가
+        drawingData,
+        setDrawingData,
+        fabricCanvasRef.current
     ]);
 
     // checked가 true인 객체를 fabric.js에서 선택
@@ -166,31 +225,6 @@ function DrawingCanvas() {
             fabricCanvasRef.current.requestRenderAll();
         }
     }, [appContext.layer?.cutImageData.cutImageData]);
-
-    // 이벤트 핸들러 (useCallback 의존성은 그대로 유지)
-    const handleTouchStart = useCallback((e: React.TouchEvent) => {
-        handleZoomTouchStart(e);
-    }, [handleZoomTouchStart]);
-
-    const handleTouchMove = useCallback((e: React.TouchEvent) => {
-        handleZoomTouchMove(e);
-    }, [handleZoomTouchMove]);
-
-    const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-        handleZoomTouchEnd();
-    }, [handleZoomTouchEnd]);
-
-    const handleMouseDown = useCallback((e: React.MouseEvent) => {
-        handleZoomMouseDown(e);
-    }, [handleZoomMouseDown]);
-
-    const handleMouseMove = useCallback((e: React.MouseEvent) => {
-        handleZoomMouseMove(e);
-    }, [handleZoomMouseMove]);
-
-    const handleMouseUp = useCallback((e: React.MouseEvent) => {
-        handleZoomMouseUp(e);
-    }, [handleZoomMouseUp]);
 
     // drawing-canvas 영역 클릭 시 모두 해제 (캔버스 내부, rect 선택 시 제외)
     const handleCanvasAreaClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -246,6 +280,37 @@ function DrawingCanvas() {
         };
     }, [appContext.layer?.cutImageData, canvasSize]); // canvasSize 의존성 그대로 유지
 
+    // 기존 핸들러에 드로잉용 핸들러 추가
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+        handleCanvasPointerDown(e);
+        handleZoomTouchStart(e);
+    }, [handleCanvasPointerDown, handleZoomTouchStart]);
+
+    const handleTouchMove = useCallback((e: React.TouchEvent) => {
+        handleCanvasPointerMove(e);
+        handleZoomTouchMove(e);
+    }, [handleCanvasPointerMove, handleZoomTouchMove]);
+
+    const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+        handleCanvasPointerUp();
+        handleZoomTouchEnd();
+    }, [handleCanvasPointerUp, handleZoomTouchEnd]);
+
+    const handleMouseDown = useCallback((e: React.MouseEvent) => {
+        handleCanvasPointerDown(e);
+        handleZoomMouseDown(e);
+    }, [handleCanvasPointerDown, handleZoomMouseDown]);
+
+    const handleMouseMove = useCallback((e: React.MouseEvent) => {
+        handleCanvasPointerMove(e);
+        handleZoomMouseMove(e);
+    }, [handleCanvasPointerMove, handleZoomMouseMove]);
+
+    const handleMouseUp = useCallback((e: React.MouseEvent) => {
+        handleCanvasPointerUp();
+        handleZoomMouseUp(e);
+    }, [handleCanvasPointerUp, handleZoomMouseUp]);
+
     return (
         <div
             className="drawing-canvas"
@@ -281,6 +346,13 @@ function DrawingCanvas() {
                     }}
                 />
             </div>
+            
+            {/* 도구 바 */}
+            <CanvasToolBar 
+                activeTool={activeTool}
+                onToolChange={setActiveTool}
+            />
+            
             <CanvasResetButton onReset={resetView}/>
         </div>
     );

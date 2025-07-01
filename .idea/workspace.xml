@@ -4,13 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ac9d453d-3f4e-4d5a-8a8c-72b931208c8b" name="변경" comment="캔버스 부분 기능">
+    <list default="true" id="ac9d453d-3f4e-4d5a-8a8c-72b931208c8b" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/CustomCheckbox.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/CustomCheckbox.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/DrawingCanvas/DrawingCanvas.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/DrawingCanvas/DrawingCanvas.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/DrawingCanvas/fabric/cutLayer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/DrawingCanvas/fabric/cutLayer.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/DrawingCanvas/fabric/drawingLayer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/DrawingCanvas/fabric/drawingLayer.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/colors/AlphaPicker.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/colors/AlphaPicker.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/export/AgreementSection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/export/AgreementSection.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/layers/DndList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/layers/DndList.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/layers/ImageRatioSelector.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/layers/ImageRatioSelector.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/4cut/src/components/Workspace/layers/LayerList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/components/Workspace/layers/LayerList.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/4cut/src/pages/Test.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/pages/Test.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/4cut/src/pages/Workspace.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/pages/Workspace.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/4cut/src/types/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/4cut/src/types/types.ts" afterDir="false" />
     </list>
@@ -35,7 +39,7 @@
   }
 }</component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="ProjectErrors" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -46,25 +50,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "JavaScript 디버그.localhost:5173.executor": "Debug",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feature/Workspace",
-    "ignore.virus.scanning.warn.message": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "pnpm",
-    "settings.editor.selected.configurable": "reference.idesettings.quicklists",
-    "ts.external.directory.path": "C:\\Users\\lim16\\Desktop\\4cut\\4cut\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;JavaScript 디버그.localhost:5173.executor&quot;: &quot;Debug&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/Workspace&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;pnpm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.idesettings.quicklists&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\lim16\\Desktop\\4cut\\4cut\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="localhost:5173" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:5173/">
       <method v="2" />
@@ -92,8 +96,29 @@
       <workItem from="1750687019779" duration="3547000" />
       <workItem from="1750695958984" duration="218000" />
       <workItem from="1750919510074" duration="11412000" />
-      <workItem from="1751022216088" duration="10642000" />
+      <workItem from="1751022216088" duration="11658000" />
+      <workItem from="1751094100218" duration="1767000" />
+      <workItem from="1751198924936" duration="7857000" />
+      <workItem from="1751265734746" duration="4633000" />
+      <workItem from="1751362465267" duration="1236000" />
     </task>
+    <task id="LOCAL-00001" summary="아니 뭐 수정했는데 잘 모르겠다 코드 구성을 좀 바꿈;;;">
+      <option name="closed" value="true" />
+      <created>1751042860844</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1751042860844</updated>
+    </task>
+    <task id="LOCAL-00002" summary="아니 뭐 수정했는데 잘 모르겠다 코드 구성을 좀 바꿈;;;">
+      <option name="closed" value="true" />
+      <created>1751042967750</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1751042967750</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -121,5 +146,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="아니 뭐 수정했는데 잘 모르겠다 코드 구성을 좀 바꿈;;;" />
+    <option name="LAST_COMMIT_MESSAGE" value="아니 뭐 수정했는데 잘 모르겠다 코드 구성을 좀 바꿈;;;" />
   </component>
 </project>
