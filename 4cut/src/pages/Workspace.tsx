@@ -22,15 +22,15 @@ function Workspace() {
       id: '1',
       text: 'cutData',
       LayerType: 'Cut',
-      checked: true,
-      selected: true,
+      visible: true,
+      active: true,
     },
     {
       id: '2',
       text: 'layer1',
       LayerType: 'Drawing',
-      checked: true,
-      selected: false,
+      visible: true,
+      active: false,
     }
   ])
   const [imgData, setImgData] = useState<ImgData>({})
@@ -76,12 +76,12 @@ function Workspace() {
       },
       {
         id: 'cut2',
-        AspectRatio: '1:1',
+        AspectRatio: '3:4',
         jsonData: {
           left: 100,
           top: 150,
           width: 120,
-          height: 120,
+          height: 160,
           angle: 0,
           selectable: true
         },
@@ -89,12 +89,12 @@ function Workspace() {
       },
       {
         id: 'cut3',
-        AspectRatio: '4:3',
+        AspectRatio: '3:4',
         jsonData: {
           left: 100,
           top: 200,
-          width: 160,
-          height: 120,
+          width: 120,
+          height: 160,
           angle: 0,
           selectable: true
         },
@@ -102,12 +102,12 @@ function Workspace() {
       },
       {
         id: 'cut4',
-        AspectRatio: '16:9',
+        AspectRatio: '3:4',
         jsonData: {
           left: 100,
           top: 250,
-          width: 180,
-          height: 101.25,
+          width: 120,
+          height: 160,
           angle: 0,
           selectable: true
         },
@@ -118,14 +118,53 @@ function Workspace() {
     setDrawingData({
       layer1: [
         { 
+          id: 'drawing-1',
           brushType: "pen",
-          bryshSize: 10,
-          mouseData: [[1, 2], [2, 3], [3, 2]]
+          jsonData: {
+            points: [
+              { x: 10, y: 10 },
+              { x: 100, y: 10 },
+              { x: 100, y: 100 },
+              { x: 200, y: 100 },
+              { x: 200, y: 200 },
+              { x: 100, y: 200 },
+              { x: 100, y: 300 },
+            ],
+            options: {
+              stroke: 'black',
+              strokeWidth: 2,
+              fill: '',
+              left: 10,
+              top: 10,
+              width: 190,
+              height: 290,
+              angle: 0,
+              scaleX: 1,
+              scaleY: 1,
+            }
+          }
         },
         {
+          id: 'drawing-2',
           brushType: "marker",
-          bryshSize: 10,
-          mouseData: [[10, 20], [20, 30], [30, 20]]
+          jsonData: {
+            points: [
+              { x: 20, y: 30 },
+              { x: 120, y: 30 }
+            ],
+            options: {
+              stroke: 'red',
+              strokeWidth: 2,
+              fill: '',
+              left: 20,
+              top: 30,
+              width: 100,
+              height: 0,
+              angle: 0,
+              scaleX: 1,
+              scaleY: 1,
+            }
+          }
         }
       ]
     });
