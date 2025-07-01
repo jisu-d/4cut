@@ -1,8 +1,9 @@
 import '../../../styles/Workspace/layers/DndList.css';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState, useContext} from 'react';
 import type {UserLayerDataType} from '../../../types/types';
 import trash from '../../../assets/Icon/trash.svg';
 import {CustomCheckbox} from '../CustomCheckbox';
+import AppContext from '../../../contexts/AppContext';
 
 // arrayMove 유틸리티 함수 (기존과 동일)
 const arrayMove = <T,>(arr: T[], oldIndex: number, newIndex: number): T[] => {
@@ -23,6 +24,8 @@ interface DndListProps {
 }
 
 const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
+  const appContext = useContext(AppContext);
+  const setDrawingData = appContext?.layer?.DrawingData.setDrawingData;
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [overlayPos, setOverlayPos] = useState<{ x: number; y: number } | null>(null);
   const [offset, setOffset] = useState<{ x: number; y: number } | null>(null);
@@ -146,16 +149,16 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
     document.body.style.overflow = 'hidden';
   }, [items, deletingIds, editingId]);
 
-  // 레이어 선택(selected) 함수 (radio처럼 동작)
+  // 레이어 선택(active) 함수 (radio처럼 동작)
   const selectLayer = useCallback((id: string) => {
-    setItems(prevItems => prevItems.map(item => ({ ...item, selected: item.id === id })));
+    setItems(prevItems => prevItems.map(item => ({ ...item, active: item.id === id })));
   }, [setItems]);
 
-  // 체크박스 토글 함수 (checked만 변경)
-  const toggleChecked = useCallback((id: string) => {
+  // 체크박스 토글 함수 (visible만 변경)
+  const toggleVisible = useCallback((id: string) => {
     setItems(prevItems =>
       prevItems.map(item =>
-        item.id === id ? { ...item, checked: !item.checked } : item
+        item.id === id ? { ...item, visible: !item.visible } : item
       )
     );
   }, [setItems]);
@@ -285,12 +288,27 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
   }, [draggingId, deletingIds]);
 
   const handleTextInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>, id: string) => {
-    setItems(prevItems =>
-      prevItems.map(item =>
-        item.id === id ? { ...item, text: e.target.value } : item
-      )
-    );
-  }, [setItems]);
+    setItems(prevItems => {
+      const oldName = prevItems.find(item => item.id === id)?.text;
+      const newName = e.target.value;
+      // Drawing 레이어의 이름이 바뀌면 DrawingData의 key도 바꾼다
+      if (setDrawingData && oldName && oldName !== newName) {
+        setDrawingData(prev => {
+          if (prev[oldName]) {
+            const newData = { ...prev };
+            newData[newName] = newData[oldName];
+            delete newData[oldName];
+            console.log(`[레이어 이름 변경] ${oldName} → ${newName}`);
+            return newData;
+          }
+          return prev;
+        });
+      }
+      return prevItems.map(item =>
+        item.id === id ? { ...item, text: newName } : item
+      );
+    });
+  }, [setItems, setDrawingData]);
 
   const handleTextBlur = useCallback(() => {
     setEditingId(null); // 편집 모드 종료
@@ -339,7 +357,7 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
         const isDeleting = deletingIds.has(item.id);
         const isCurrentlyDragging = item.id === draggingId;
         const isEditing = item.id === editingId;
-        const isSelected = item.selected;
+        const isSelected = item.active;
         return (
           <div
             key={item.id}
@@ -374,7 +392,9 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
               />
             ) : (
               <span
-                onClick={() => handleTextClick(item.id)}
+                onClick={() => {
+                  if (item.LayerType !== 'Cut') handleTextClick(item.id);
+                }}
                 // 드래그 시작 방지를 위해 mousedown/touchstart 이벤트 전파 중지 (선택 사항, 필요 시)
                 onMouseDown={(e) => e.stopPropagation()}
                 onTouchStart={(e) => e.stopPropagation()}
@@ -386,7 +406,7 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
               </span>
             )}
             <div className="list-item-controls">
-              <CustomCheckbox id={item.id} checked={item.checked} onToggle={toggleChecked} />
+              <CustomCheckbox id={item.id} visible={item.visible} onToggleVisible={toggleVisible} />
               {item.LayerType !== 'Cut' && ( // Cut 타입은 삭제 불가
                 <img
                   src={trash}
@@ -406,7 +426,7 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
       {/* 드래그 중인 항목을 위한 오버레이*/}
       {draggingId && overlayPos && offset && (
         <div
-          className={`list-item dragged-overlay${items.find(item => item.id === draggingId)?.selected ? ' selected' : ''}`}
+          className={`list-item dragged-overlay${items.find(item => item.id === draggingId)?.active ? ' selected' : ''}`}
           style={{
             left: overlayPos.x,
             top: overlayPos.y,
@@ -422,8 +442,8 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
             {/* CustomCheckbox에 드래그 중인 아이템의 ID와 체크 상태를 전달합니다. */}
             <CustomCheckbox
               id={draggingId}
-              checked={items.find(item => item.id === draggingId)?.checked ?? true}
-              onToggle={toggleChecked}
+              visible={items.find(item => item.id === draggingId)?.visible ?? true}
+              onToggleVisible={toggleVisible}
             />
             {items.find(item => item.id === draggingId)?.LayerType !== 'Cut' && ( // Cut 타입은 삭제 불가
               <img

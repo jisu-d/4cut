@@ -1,12 +1,17 @@
 export type AspectRatio = '4:3' | '3:4' | '1:1' | '16:9';
+import type { PathProps, TOptions } from 'fabric';
 
+export interface DrawingItem {
+  id: string;
+  brushType: "pen" | "marker" | "eraser";
+  jsonData: {
+    points: { x: number; y: number }[];
+    options: Partial<TOptions<PathProps>>;
+  }
+}
 
 export interface ListDrawingItem {
-  [layerName: string]: {
-    brushType: "pen" | "marker" | "eraser";
-    bryshSize: number;
-    mouseData: [number, number][];
-  }[];
+  [layerName: string]: DrawingItem[]
 }
 
 
@@ -43,8 +48,8 @@ export interface UserLayerDataType {
   id: string;
   text: string;
   LayerType: "Drawing" | 'Cut' | 'Img';
-  checked: boolean;
-  selected: boolean; // 현재 선택/수정 가능한 레이어 여부
+  visible: boolean; // 화면에 보이는 여부
+  active: boolean; // 현재 선택/수정 가능한 레이어 여부
 }
 
 export interface ImgData {

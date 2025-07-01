@@ -72,20 +72,21 @@ class CutLayerManager {
     width: number;
     height: number;
     angle: number;
-  }, selectable: boolean, onRectClick?: (id: string) => void, onRectTransform?: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void): fabric.Rect {
+  }, active: boolean, visible: boolean, onRectClick?: (id: string) => void, onRectTransform?: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void): fabric.Rect {
     const rect = new fabric.Rect({
       ...rectData,
       fill: 'rgb(255, 255, 255)',
       stroke: cut.checked ? 'red' : 'black',
       strokeWidth: 3,
-      selectable,
-      evented: selectable,
+      selectable: active,
+      evented: active,
+      visible: visible,
       scaleX: 1,
       scaleY: 1,
     });
 
     // 컨트롤 설정
-    this.updateControls(rect, selectable);
+    this.updateControls(rect, active);
     
     // 균등 비율 유지를 위한 설정
     rect.lockScalingX = false;
@@ -123,21 +124,20 @@ class CutLayerManager {
     width: number;
     height: number;
     angle: number;
-  }, selectable: boolean): void {
+  }, active: boolean, visible: boolean): void {
     rect.set({
       ...rectData,
       stroke: cut.checked ? 'red' : 'black',
-      selectable,
-      evented: selectable,
+      selectable: active,
+      evented: active,
+      visible: visible
     });
-    console.log(cut);
-    
     
     rect.set('scaleX', 1);
     rect.set('scaleY', 1);
     rect.setCoords();
     
-    this.updateControls(rect, selectable);
+    this.updateControls(rect, active);
   }
 
   // rect 데이터를 계산하는 메서드
@@ -181,7 +181,8 @@ class CutLayerManager {
     cuts: ListCutImage[],
     onRectClick?: (id: string) => void,
     onRectTransform?: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void,
-    selectable: boolean = true
+    active: boolean = true,
+    visible: boolean = true
   ): void {
     // 사용하지 않는 rect 제거
     this.removeUnusedRects(cuts);
@@ -193,15 +194,14 @@ class CutLayerManager {
 
       if (!rect) {
         // 새로운 rect 생성
-        rect = this.createRect(cut, rectData, selectable, onRectClick, onRectTransform);
+        rect = this.createRect(cut, rectData, active, visible, onRectClick, onRectTransform);
         this.canvas.add(rect);
         this.rectMap.set(cut.id, rect);
       } else {
         // 기존 rect 업데이트
-        this.updateRect(rect, cut, rectData, selectable);
+        this.updateRect(rect, cut, rectData, active, visible);
       }
     });
-
     this.canvas.renderAll();
   }
 }
@@ -212,8 +212,9 @@ export function syncAspectRatioRects(
   cuts: ListCutImage[],
   onRectClick?: (id: string) => void,
   onRectTransform?: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void,
-  selectable: boolean = true
+  active: boolean = true,
+  visible: boolean = true
 ) {
   const manager = new CutLayerManager(canvas);
-  manager.syncRects(cuts, onRectClick, onRectTransform, selectable);
+  manager.syncRects(cuts, onRectClick, onRectTransform, active, visible);
 }

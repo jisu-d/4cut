@@ -1,7 +1,7 @@
 import '../../../styles/Workspace/layers/LayerList.css'
 
 import addIcon from '../../../assets/Icon/add.svg'
-import type {UserLayerDataType} from '../../../types/types'
+import type {UserLayerDataType, ListDrawingItem, DrawingItem} from '../../../types/types'
 
 import DndList from './DndList'
 import React, {useContext} from 'react';
@@ -15,6 +15,7 @@ const LayerList = () => {
     return <div>레이어 데이터를 불러오는 중...</div>;
   }
   const { userLayerDataType, setUserLayerDataType } = context.layer.userLayerDataType;
+  const { drawingData, setDrawingData } = context.layer.DrawingData;
 
   const handleAddLayer = () => {
     console.log(userLayerDataType.length + 1);
@@ -23,11 +24,18 @@ const LayerList = () => {
       id: String(userLayerDataType.length + 1),
       text: `새 레이어 ${userLayerDataType.length + 1}`,
       LayerType: 'Drawing',
-      checked: true,
-      selected: false
+      visible: true,
+      active: false
     };
 
+    const newDrawingData: ListDrawingItem = {
+      [newLayer.text]: []
+    }
+    
+
     setUserLayerDataType((prevLayerData: UserLayerDataType[]) => [newLayer, ...prevLayerData]);
+
+    setDrawingData((drawingData: ListDrawingItem) => ({...drawingData, ...newDrawingData}));
   };
 
   return (
