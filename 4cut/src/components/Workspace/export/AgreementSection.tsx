@@ -37,7 +37,7 @@ const AgreementSection: React.FC<AgreementSectionProps> = ({ onValidityChange })
     <div className="agreement-section">
       <div className="agreement-item all-agreement">
         <div className="agreement-left">
-          <CustomCheckbox id="all" checked={isAllChecked} onToggle={handleToggleAll} />
+          <CustomCheckbox id="all" visible={isAllChecked} onToggleVisible={handleToggleAll} />
           <span className="agreement-label all-label">약관에 모두 동의</span>
         </div>
       </div>
@@ -45,7 +45,7 @@ const AgreementSection: React.FC<AgreementSectionProps> = ({ onValidityChange })
       {agreements.map(item => (
         <div key={item.id} className="agreement-item">
           <div className="agreement-left">
-            <CustomCheckbox id={item.id} checked={item.checked} onToggle={() => handleToggleItem(item.id)} />
+            <CustomCheckbox id={item.id} visible={item.checked} onToggleVisible={() => handleToggleItem(item.id)} />
             <span className="agreement-label">{item.label}</span>
           </div>
           <span className="agreement-arrow">&gt;</span>
