@@ -146,6 +146,7 @@ const GradientColorPicker: React.FC = () => {
           border: `3px solid ${markerColorStr}`,
           boxSizing: 'border-box',
           pointerEvents: 'none',
+          backgroundColor: markerColorStr,
           boxShadow: '0 0 0 2px #0006',
         }}
       />
