@@ -16,8 +16,8 @@ const ColorHistoryBar: React.FC<ColorHistoryBarProps> = ({ historyColor, onSelec
   useEffect(() => {
     if (!historyListRef.current) return;
     const update = () => {
-      const width = historyListRef.current!.offsetWidth;
-      const count = Math.max(1, Math.floor(width / 40)); // 32px + 8px gap
+      const width = historyListRef.current!.offsetWidth - 12;
+      const count = Math.max(1, Math.floor(width / 48)); // 32px + 8px gap
       setMaxVisible(Math.min(15, count));
     };
     update();
