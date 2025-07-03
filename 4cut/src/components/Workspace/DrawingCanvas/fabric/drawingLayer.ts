@@ -1,11 +1,11 @@
 import * as fabric from 'fabric';
 import type { DrawingItem } from '../../../../types/types';
 
-// Canvas에 _drawingObjects 속성 추가를 위한 타입 확장
-// (캔버스 단위로 드로잉 객체를 관리)
+// Canvas에 _drawingLayerObjects 속성 추가를 위한 타입 확장
+// (캔버스 단위로 레이어별 드로잉 객체를 관리)
 declare module 'fabric' {
   interface Canvas {
-    _drawingObjects?: Map<string, fabric.Path>;
+    _drawingLayerObjects?: Map<string, Map<string, fabric.Path>>;
   }
 }
 
@@ -18,19 +18,15 @@ function createFabricDrawing(drawingData: DrawingItem): fabric.Path {
     drawingData.jsonData.points.length > 0
   ) {
     const pathData = pointsToPathData(drawingData.jsonData.points);
-    console.log(222);
-    
 
     // 주요 옵션만 추출
     const {
       stroke, strokeWidth, fill, left, top, width, height, angle, scaleX, scaleY,
     } = drawingData.jsonData.options || {};
 
-    const pathOptions = {
+    return new fabric.Path(pathData, {
       stroke, strokeWidth, fill, left, top, width, height, angle, scaleX, scaleY,
-    };
-
-    return new fabric.Path(pathData, pathOptions);
+    });
   }
   return new fabric.Path('');
 }
@@ -49,16 +45,19 @@ class DrawingLayerManager {
   private canvas: fabric.Canvas;
   private drawingMap: Map<string, fabric.Path>;
 
-  constructor(canvas: fabric.Canvas) {
+  constructor(canvas: fabric.Canvas, layerId: string) {
     this.canvas = canvas;
-    if (!canvas._drawingObjects) {
-      canvas._drawingObjects = new Map();
+    if (!canvas._drawingLayerObjects) {
+      canvas._drawingLayerObjects = new Map();
     }
-    this.drawingMap = canvas._drawingObjects;
+    if (!canvas._drawingLayerObjects.has(layerId)) {
+      canvas._drawingLayerObjects.set(layerId, new Map());
+    }
+    this.drawingMap = canvas._drawingLayerObjects.get(layerId)!;
   }
 
   // 기존 드로잉 객체를 업데이트
-  private updateDrawing(obj: fabric.Path, active: boolean, visible: boolean, drawingData: DrawingItem) {
+  private updateDrawing(obj: fabric.Path, active: boolean, visible: boolean) {
     obj.set({
       visible: visible,
       evented: active,
@@ -81,8 +80,6 @@ class DrawingLayerManager {
     if (onDrawingTransform) {
       obj.on('modified', () => {
         // fabric.Path의 path 데이터를 points 배열로 변환
-        console.log(obj.toObject());
-        
         let points: {x: number, y: number}[] = [];
         if (obj instanceof fabric.Path) {
           const pathArr = obj.get('path');
@@ -119,7 +116,8 @@ class DrawingLayerManager {
   }
 
   // 사용하지 않는 드로잉 객체 제거
-  private removeUnusedDrawings(drawings: any[]) {
+  private removeUnusedDrawings(drawings: DrawingItem[]) {
+    
     for (const [id, obj] of this.drawingMap.entries()) {
       if (!drawings.find(d => d.id === id)) {
         this.canvas.remove(obj);
@@ -137,20 +135,18 @@ class DrawingLayerManager {
   ) {
     // 1. 사용하지 않는 드로잉 제거
     this.removeUnusedDrawings(drawings);
-
+    
     // 2. drawings 처리
     drawings.forEach(drawing => {
       let obj = this.drawingMap.get(drawing.id);
-      
       if (!obj) {
         // 새 드로잉 객체 생성
         obj = this.createDrawing(drawing, active, visible, onDrawingTransform);
         this.canvas.add(obj);
         this.drawingMap.set(drawing.id, obj);
-
       } else {
         // 기존 드로잉 객체 업데이트
-        this.updateDrawing(obj, active, visible, drawing);
+        this.updateDrawing(obj, active, visible);
       }
     });
     this.canvas.renderAll();
@@ -160,11 +156,12 @@ class DrawingLayerManager {
 // 기존 cutLayer.ts처럼 외부에서 호출할 수 있는 함수 제공
 export function syncDrawingLayer(
   canvas: fabric.Canvas,
+  layerId: string,
   drawingItems: DrawingItem[],
   onDrawingTransform?: (id: string, newProps: any) => void,
   active: boolean = true,
   visible: boolean = true
 ) {
-  const manager = new DrawingLayerManager(canvas);
+  const manager = new DrawingLayerManager(canvas, layerId);
   manager.syncDrawings(drawingItems, onDrawingTransform, active, visible);
 }

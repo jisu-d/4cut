@@ -65,7 +65,6 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
     }
   }, [draggingId, items]);
 
-  // ⭐ 수정된 onDelete 함수: 즉시 삭제 대신 애니메이션을 트리거합니다.
   const onDelete = useCallback((id: string) => {
     // 1. 해당 항목에 'is-deleting' 클래스를 추가하기 위해 deletingIds에 ID를 추가합니다.
     setDeletingIds(prevIds => new Set(prevIds.add(id)));
