@@ -55,6 +55,7 @@ function DrawingCanvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
 
+
     // useDrawingManager 훅 사용
     const {
         handleCanvasPointerDown,
@@ -65,10 +66,9 @@ function DrawingCanvas() {
         activeTool,
         setDrawingData,
         canvasRef,
-        fabricCanvasRef
+        fabricCanvasRef,
+        scale
     });
-
-
 
     // Fabric.js 캔버스 생성 (캔버스 요소만)
     useEffect(() => {
@@ -98,16 +98,18 @@ function DrawingCanvas() {
             fabricCanvasRef.current.isDrawingMode = false;
             fabricCanvasRef.current.selection = true;
         }
-    }, [activeTool]);
+    }, [activeTool, fabricCanvasRef.current]);
 
 
-    // 모든 cut의 사각형을 그리고, 클릭/이동/크기조절/회전 시 데이터 갱신
+    // 모든 cut의 사각형을 그리고, 클릭/이동/크기조절/회전 시 데이터 갱신 - 최적화가 필요
     useEffect(() => {
         if (fabricCanvasRef.current && contextUserLayerDataType) {
             const cutImageData = appContext.layer?.cutImageData.cutImageData || [];
             const setCutImageData = appContext.layer?.cutImageData.setCutImageData;
+            
 
             contextUserLayerDataType.forEach(item => {
+                
                 if (item.LayerType === 'Cut') {
 
                     // 클릭/변형 핸들러: selected=true일 때만 활성화
@@ -184,6 +186,7 @@ function DrawingCanvas() {
 
                     syncDrawingLayer(
                         fabricCanvasRef.current!,
+                        item.text,
                         layerDrawingData, 
                         handleDrawingTransform,
                         item.active,
@@ -194,13 +197,11 @@ function DrawingCanvas() {
         }
     }, [
         appContext.layer?.cutImageData.cutImageData,
-        appContext.layer?.cutImageData.setCutImageData,
         contextUserLayerDataType,
         drawingData,
-        setDrawingData,
         fabricCanvasRef.current
     ]);
-
+    
     // checked가 true인 객체를 fabric.js에서 선택
     useEffect(() => {
         if (!fabricCanvasRef.current) return;
