@@ -101,7 +101,7 @@ function DrawingCanvas() {
     }, [activeTool, fabricCanvasRef.current]);
 
 
-    // 모든 cut의 사각형을 그리고, 클릭/이동/크기조절/회전 시 데이터 갱신 - 최적화가 필요
+    // 모든 cut의 사각형을 그리고, 클릭/이동/크기조절/회전 시 데이터 갱신 - TODO -> 레이어 그리는 부분 최적화가 필요
     useEffect(() => {
         if (fabricCanvasRef.current && contextUserLayerDataType) {
             const cutImageData = appContext.layer?.cutImageData.cutImageData || [];

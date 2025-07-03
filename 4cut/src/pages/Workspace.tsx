@@ -4,7 +4,7 @@ import '../styles/Workspace/Workspace.css';
 
 import Dashboard from '../components/Workspace/Dashboard';
 import AppContext from '../contexts/AppContext';
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useState, useRef} from 'react';
 import ExportContent from '../components/Workspace/export/ExportContent';
 import DrawingCanvas from '../components/Workspace/DrawingCanvas/DrawingCanvas';
 
@@ -47,11 +47,15 @@ function Workspace() {
   
   // 캔버스 배경색 상태 추가
   const [backgroundColor, setBackgroundColor] = useState<string>('#ffffff');
+  //TODO 이부분 최적화 -> 왜 이딴식으로 짜야할지;; 코드는 동작함
+  const hslRef = useRef(hsl);
+  const alphaRef = useRef(alpha);
+  useEffect(() => { hslRef.current = hsl; }, [hsl]);
+  useEffect(() => { alphaRef.current = alpha; }, [alpha]);
 
-  // 마우스 업 등에서 호출: 현재 색상/알파를 historyColor에 추가
   const addHistoryColor = () => {
     setHistoryColor((prev) => {
-      const next = [...prev, { hslData: { hsl }, alphaData: { alpha } }];
+      const next = [...prev, { hslData: { hsl: hslRef.current }, alphaData: { alpha: alphaRef.current } }];
       if (next.length > 15) {
         return next.slice(next.length - 15);
       }
