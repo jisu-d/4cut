@@ -18,11 +18,10 @@ const LayerList = () => {
   const { drawingData, setDrawingData } = context.layer.DrawingData;
 
   const handleAddLayer = () => {
-    console.log(userLayerDataType.length + 1);
     
     const newLayer: UserLayerDataType = {
       id: String(userLayerDataType.length + 1),
-      text: `새 레이어 ${userLayerDataType.length + 1}`,
+      text: `layer${userLayerDataType.length + 1}`,
       LayerType: 'Drawing',
       visible: true,
       active: false
