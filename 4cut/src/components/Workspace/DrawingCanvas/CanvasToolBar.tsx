@@ -6,8 +6,8 @@ import { useEffect } from 'react';
 import type {UserLayerDataType} from '../../../types/types'
 
 interface CanvasToolBarProps {
-  activeTool: "pen" | "select";
-  onToolChange: React.Dispatch<React.SetStateAction<"pen" | "select">>;
+  activeTool: "pen" | "select" | "eraser";
+  onToolChange: React.Dispatch<React.SetStateAction<"pen" | "select" | "eraser">>;
 }
 
 const CanvasToolBar: React.FC<CanvasToolBarProps> = ({ 
@@ -36,6 +36,10 @@ const CanvasToolBar: React.FC<CanvasToolBarProps> = ({
     onToolChange('pen');
   };
 
+  const handleEraserTool = () => {
+    onToolChange('eraser');
+  };
+
   return (
     <div className="canvas-tool-bar">
       <button
@@ -57,6 +61,18 @@ const CanvasToolBar: React.FC<CanvasToolBarProps> = ({
         {/* 펜 아이콘 */}
         <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
           <path d="M2.5 14.3751V17.5001H5.625L14.8417 8.28342L11.7167 5.15842L2.5 14.3751ZM17.2583 5.86675C17.3356 5.78966 17.3969 5.69808 17.4387 5.59727C17.4805 5.49646 17.502 5.38839 17.502 5.27925C17.502 5.17011 17.4805 5.06204 17.4387 4.96123C17.3969 4.86042 17.3356 4.76885 17.2583 4.69175L15.3083 2.74175C15.2312 2.6645 15.1397 2.60321 15.0389 2.56139C14.938 2.51957 14.83 2.49805 14.7208 2.49805C14.6117 2.49805 14.5036 2.51957 14.4028 2.56139C14.302 2.60321 14.2104 2.6645 14.1333 2.74175L12.6083 4.26675L15.7333 7.39175L17.2583 5.86675Z" fill="inherit" />
+        </svg>
+      </button>
+      <button
+        onClick={handleEraserTool}
+        className={activeTool === "eraser" ? "active" : ""}
+        disabled={isCutLayerSelected}
+        title={isCutLayerSelected ? "Cut 레이어에서는 지우개 도구를 사용할 수 없습니다" : "지우개 도구"}
+      >
+        {/* 지우개 아이콘 */}
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="1" y="7" width="20" height="10" rx="2" transform="rotate(-45 10 12)" fill="none" stroke="inherit"/>
+          <line x1="12" y1="16" x2="5" y2="9" stroke="inherit"/>
         </svg>
       </button>
     </div>
