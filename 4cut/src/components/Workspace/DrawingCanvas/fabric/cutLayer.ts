@@ -72,7 +72,7 @@ class CutLayerManager {
     width: number;
     height: number;
     angle: number;
-  }, active: boolean, visible: boolean, onRectClick?: (id: string) => void, onRectTransform?: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void): fabric.Rect {
+  }, active: boolean, visible: boolean, zIndex:number, onRectClick?: (id: string) => void, onRectTransform?: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void) {
     const rect = new fabric.Rect({
       ...rectData,
       fill: 'rgb(255, 255, 255)',
@@ -87,6 +87,7 @@ class CutLayerManager {
 
     // 컨트롤 설정
     this.updateControls(rect, active);
+
     
     // 균등 비율 유지를 위한 설정
     rect.lockScalingX = false;
@@ -114,7 +115,13 @@ class CutLayerManager {
       });
     }
 
-    return rect;
+    // checked면 선택 상태로
+    if (cut.checked) {
+      this.canvas.setActiveObject(rect);
+    }
+
+    this.canvas.add(rect);
+    this.rectMap.set(cut.id, rect);
   }
 
   // 기존 rect를 업데이트하는 메서드
@@ -124,7 +131,7 @@ class CutLayerManager {
     width: number;
     height: number;
     angle: number;
-  }, active: boolean, visible: boolean): void {
+  }, active: boolean, visible: boolean, zIndex:number): void {
     rect.set({
       ...rectData,
       stroke: cut.checked ? 'red' : 'black',
@@ -136,8 +143,15 @@ class CutLayerManager {
     rect.set('scaleX', 1);
     rect.set('scaleY', 1);
     rect.setCoords();
+
+    this.canvas.moveObjectTo(rect, zIndex)
     
     this.updateControls(rect, active);
+
+    // checked면 선택 상태로
+    if (cut.checked) {
+      this.canvas.setActiveObject(rect);
+    }
   }
 
   // rect 데이터를 계산하는 메서드
@@ -179,10 +193,11 @@ class CutLayerManager {
   // 메인 동기화 메서드
   syncRects(
     cuts: ListCutImage[],
-    onRectClick?: (id: string) => void,
-    onRectTransform?: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void,
-    active: boolean = true,
-    visible: boolean = true
+    onRectClick: (id: string) => void,
+    onRectTransform: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void,
+    active: boolean,
+    visible: boolean,
+    zIndex: number
   ): void {
     // 사용하지 않는 rect 제거
     this.removeUnusedRects(cuts);
@@ -192,16 +207,19 @@ class CutLayerManager {
       let rect = this.rectMap.get(cut.id);
       const rectData = this.calculateRectData(cut, idx);
 
+      // TODO 겹칠때 각 요소의 zindex를 겹치지 않도록 하기 위해서 만들어 놨지만 안된다ㄷㄷ
+      const tempZIndex = zIndex + (idx / 100)
+
       if (!rect) {
         // 새로운 rect 생성
-        rect = this.createRect(cut, rectData, active, visible, onRectClick, onRectTransform);
-        this.canvas.add(rect);
-        this.rectMap.set(cut.id, rect);
+        this.createRect(cut, rectData, active, visible, tempZIndex, onRectClick, onRectTransform);
+
       } else {
         // 기존 rect 업데이트
-        this.updateRect(rect, cut, rectData, active, visible);
+        this.updateRect(rect, cut, rectData, active, visible, tempZIndex);
       }
     });
+
     this.canvas.renderAll();
   }
 }
@@ -210,11 +228,12 @@ class CutLayerManager {
 export function syncAspectRatioRects(
   canvas: fabric.Canvas,
   cuts: ListCutImage[],
-  onRectClick?: (id: string) => void,
-  onRectTransform?: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void,
-  active: boolean = true,
-  visible: boolean = true
+  onRectClick: (id: string) => void,
+  onRectTransform: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void,
+  active: boolean,
+  visible: boolean,
+  zindx: number
 ) {
   const manager = new CutLayerManager(canvas);
-  manager.syncRects(cuts, onRectClick, onRectTransform, active, visible);
+  manager.syncRects(cuts, onRectClick, onRectTransform, active, visible, zindx);
 }
