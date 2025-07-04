@@ -31,9 +31,27 @@ function Workspace() {
       LayerType: 'Drawing',
       visible: true,
       active: false,
+    },
+    {
+      id: '3',
+      text: 'img',
+      LayerType: 'Img',
+      visible: true,
+      active: false,
     }
   ])
-  const [imgData, setImgData] = useState<ImgData>({})
+
+  const [imgData, setImgData] = useState<ImgData>({
+    img: {
+      id: 'img-123',
+      url: '/src/assets/Icon/test.jpg',
+      left: 100,
+      top: 100,
+      scaleX: 1,
+      scaleY: 1,
+      angle: 0
+    },
+  })
 
   const [hsl, setHsl] = useState<HSL>({h:0, s:0, l:0})
   const [alpha, setAlpha] = useState<number>(0)

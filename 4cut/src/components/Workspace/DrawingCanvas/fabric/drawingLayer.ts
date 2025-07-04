@@ -57,17 +57,18 @@ class DrawingLayerManager {
   }
 
   // 기존 드로잉 객체를 업데이트
-  private updateDrawing(obj: fabric.Path, active: boolean, visible: boolean) {
+  private updateDrawing(obj: fabric.Path, active: boolean, visible: boolean, zIndex:number) {
     obj.set({
       visible: visible,
       evented: active,
       selectable: active,
     });
+    this.canvas.moveObjectTo(obj, zIndex)
     obj.setCoords();
   }
 
   // 드로잉 객체 생성
-  private createDrawing(drawingData: DrawingItem, active: boolean, visible: boolean, onDrawingTransform?: (id: string, newProps: any) => void): fabric.Path {
+  private createDrawing(drawingData: DrawingItem, active: boolean, visible: boolean, zIndex:number, onDrawingTransform?: (id: string, newProps: any) => void): fabric.Path {
     const obj = createFabricDrawing(drawingData);
     // visible, active 속성에 따라 제어
     obj.set({
@@ -129,9 +130,10 @@ class DrawingLayerManager {
   // 메인 동기화 메서드
   syncDrawings(
     drawings: DrawingItem[],
-    onDrawingTransform?: (id: string, newProps: any) => void,
-    active: boolean = true,
-    visible: boolean = true
+    onDrawingTransform: (id: string, newProps: any) => void,
+    active: boolean,
+    visible: boolean,
+    zIndex: number
   ) {
     // 1. 사용하지 않는 드로잉 제거
     this.removeUnusedDrawings(drawings);
@@ -141,12 +143,12 @@ class DrawingLayerManager {
       let obj = this.drawingMap.get(drawing.id);
       if (!obj) {
         // 새 드로잉 객체 생성
-        obj = this.createDrawing(drawing, active, visible, onDrawingTransform);
+        obj = this.createDrawing(drawing, active, visible, zIndex, onDrawingTransform);
         this.canvas.add(obj);
         this.drawingMap.set(drawing.id, obj);
       } else {
         // 기존 드로잉 객체 업데이트
-        this.updateDrawing(obj, active, visible);
+        this.updateDrawing(obj, active, visible, zIndex);
       }
     });
     this.canvas.renderAll();
@@ -158,10 +160,11 @@ export function syncDrawingLayer(
   canvas: fabric.Canvas,
   layerId: string,
   drawingItems: DrawingItem[],
-  onDrawingTransform?: (id: string, newProps: any) => void,
-  active: boolean = true,
-  visible: boolean = true
+  onDrawingTransform: (id: string, newProps: any) => void,
+  active: boolean,
+  visible: boolean,
+  zIndex: number,
 ) {
   const manager = new DrawingLayerManager(canvas, layerId);
-  manager.syncDrawings(drawingItems, onDrawingTransform, active, visible);
+  manager.syncDrawings(drawingItems, onDrawingTransform, active, visible, zIndex);
 }

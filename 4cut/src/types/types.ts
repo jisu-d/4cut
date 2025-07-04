@@ -52,10 +52,18 @@ export interface UserLayerDataType {
   active: boolean; // 현재 선택/수정 가능한 레이어 여부
 }
 
+export interface ImgDataItem {
+  id: string,
+  url: string,
+  left: number,
+  top: number,
+  scaleX: number,
+  scaleY: number,
+  angle: number
+}
+
 export interface ImgData {
-  [imgkey: string]: {
-    positionData: [number, number][]
-  }
+  [imgkey: string]: ImgDataItem
 }
 
 
