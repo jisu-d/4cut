@@ -10,6 +10,7 @@ import {syncAspectRatioRects} from './fabric/cutLayer';
 import {syncDrawingLayer} from './fabric/drawingLayer';
 import * as fabric from 'fabric';
 import { useDrawingManager } from './fabric/useDrawingManager';
+import { syncImgLayers } from './fabric/imgLayer';
 
 function DrawingCanvas() {
     const appContext = useContext(AppContext);
@@ -18,11 +19,19 @@ function DrawingCanvas() {
     const currentBackgroundColor = appContext.canvas?.backgroundColor || '#f0f0f0';
 
     const contextUserLayerDataType = appContext.layer?.userLayerDataType.userLayerDataType;
+    
     const drawingData = appContext.layer?.DrawingData.drawingData || {};
     const setDrawingData = appContext.layer?.DrawingData.setDrawingData;
 
+
+    const cutImageData = appContext.layer?.cutImageData.cutImageData || [];
+    const setCutImageData = appContext.layer?.cutImageData.setCutImageData;
+
+    const imgData = appContext.layer?.imgData.imgData || {}
+    const setImgData = appContext.layer?.imgData.setImgData
+
     // 도구 상태 관리
-    const [activeTool, setActiveTool] = useState<"pen" | "select">("select");
+    const [activeTool, setActiveTool] = useState<"pen" | "select" | "eraser">("select");
 
     // 캔버스 화면 조정
     const {containerRef, canvasSize} = useCanvasResize({
@@ -94,7 +103,7 @@ function DrawingCanvas() {
         if (activeTool === 'pen') {
             fabricCanvasRef.current.isDrawingMode = true;
             fabricCanvasRef.current.selection = false;
-        } else {
+        } else if (activeTool === 'select'){
             fabricCanvasRef.current.isDrawingMode = false;
             fabricCanvasRef.current.selection = true;
         }
@@ -104,11 +113,9 @@ function DrawingCanvas() {
     // 모든 cut의 사각형을 그리고, 클릭/이동/크기조절/회전 시 데이터 갱신 - TODO -> 레이어 그리는 부분 최적화가 필요
     useEffect(() => {
         if (fabricCanvasRef.current && contextUserLayerDataType) {
-            const cutImageData = appContext.layer?.cutImageData.cutImageData || [];
-            const setCutImageData = appContext.layer?.cutImageData.setCutImageData;
-            
 
-            contextUserLayerDataType.forEach(item => {
+            contextUserLayerDataType.forEach((item, index) => {
+                const idx = contextUserLayerDataType.length - index
                 
                 if (item.LayerType === 'Cut') {
 
@@ -128,10 +135,7 @@ function DrawingCanvas() {
                     const handleRectTransform = (
                         id: string, 
                         position: { x: number, y: number }, 
-                        size: {
-                            width: number,
-                            height: number
-                        }, 
+                        size: { width: number, height: number }, 
                         angle: number
                     ) => {
                         if (setCutImageData) {
@@ -161,7 +165,8 @@ function DrawingCanvas() {
                         handleRectClick,
                         handleRectTransform,
                         item.active,
-                        item.visible
+                        item.visible,
+                        idx
                     );
                 } else if (item.LayerType === 'Drawing') {
                     // Drawing 레이어 처리
@@ -181,17 +186,42 @@ function DrawingCanvas() {
                         }
                     };
 
-                    // visible이 true일 때만 그림 화면에 보임
-                    // active가 true일 때만 선택 수정 가능함
-
                     syncDrawingLayer(
                         fabricCanvasRef.current!,
                         item.text,
                         layerDrawingData, 
                         handleDrawingTransform,
                         item.active,
-                        item.visible
+                        item.visible,
+                        idx
                     );
+                } else if (item.LayerType === 'Img') {
+                    const layerImgData = imgData[item.text]
+                    if (layerImgData) {
+                        const handleImgTransform = (
+                            top: number,
+                            left: number,
+                            scaleX: number,
+                            scaleY: number,
+                            angle: number
+                        ) => {
+                            if (setImgData){
+                                setImgData(prev => ({
+                                  ...prev,
+                                   [item.text]: { ...prev[item.text], top, left, scaleX, scaleY, angle }
+                                 }));
+                            }
+                        };
+
+                        syncImgLayers(
+                            fabricCanvasRef.current!,
+                            layerImgData,
+                            handleImgTransform,
+                            item.active,
+                            item.visible,
+                            idx
+                        );
+                    }
                 }
             });
         }
@@ -199,33 +229,10 @@ function DrawingCanvas() {
         appContext.layer?.cutImageData.cutImageData,
         contextUserLayerDataType,
         drawingData,
-        fabricCanvasRef.current
+        fabricCanvasRef.current,
+        appContext.layer?.imgData
     ]);
     
-    // checked가 true인 객체를 fabric.js에서 선택
-    useEffect(() => {
-        if (!fabricCanvasRef.current) return;
-
-        const cutImageData = appContext.layer?.cutImageData.cutImageData || [];
-        const checkedItem = cutImageData.find(item => item.checked);
-
-        if (checkedItem) {
-            // fabric.js에서 해당 객체 찾기
-            const fabricObjects = fabricCanvasRef.current.getObjects();
-            const targetObject = fabricObjects.find((obj: any) =>
-                obj.data && obj.data.id === checkedItem.id
-            );
-
-            if (targetObject) {
-                fabricCanvasRef.current.setActiveObject(targetObject);
-                fabricCanvasRef.current.requestRenderAll();
-            }
-        } else {
-            // checked가 true인 객체가 없으면 선택 해제
-            fabricCanvasRef.current.discardActiveObject();
-            fabricCanvasRef.current.requestRenderAll();
-        }
-    }, [appContext.layer?.cutImageData.cutImageData]);
 
     // drawing-canvas 영역 클릭 시 모두 해제 (캔버스 내부, rect 선택 시 제외)
     const handleCanvasAreaClick = (e: React.MouseEvent<HTMLDivElement>) => {
