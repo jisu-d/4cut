@@ -375,7 +375,6 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
               }
             }}
           >
-            {/* ⭐ 조건부 렌더링: 편집 모드에 따라 input 또는 span 표시 */}
             {isEditing ? (
               <input
                 type="text"
@@ -398,7 +397,11 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
                 onMouseDown={(e) => e.stopPropagation()}
                 onTouchStart={(e) => e.stopPropagation()}
                 style={{
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  maxWidth: '50%'
                 }}
               >
                 {item.text}

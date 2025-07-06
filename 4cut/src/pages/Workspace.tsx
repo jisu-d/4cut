@@ -8,10 +8,16 @@ import {useEffect, useMemo, useState, useRef} from 'react';
 import ExportContent from '../components/Workspace/export/ExportContent';
 import DrawingCanvas from '../components/Workspace/DrawingCanvas/DrawingCanvas';
 
-import type {AppContextType, CanvasSize, HSL, ListCutImage, ListDrawingItem, UserLayerDataType, ImgData} from '../types/types'
+import type {AppContextType, CanvasSize, HSL, ListCutImage, ListDrawingItem, UserLayerDataType, ImgData, BrushData} from '../types/types'
 import * as fabric from 'fabric';
 
 function Workspace() {
+  const [brushData, setBrushData] = useState<BrushData>({
+    brushType: 'pen',
+    penSize: 1,
+    eraserSize: 1,
+  })
+
   const [cutImages, setCutImages] = useState<ListCutImage[]>([]);
 
   const [drawingData, setDrawingData] = useState<ListDrawingItem>({});
@@ -27,14 +33,14 @@ function Workspace() {
     },
     {
       id: '2',
-      text: 'layer1',
+      text: 'drawing-1',
       LayerType: 'Drawing',
       visible: true,
       active: false,
     },
     {
       id: '3',
-      text: 'img',
+      text: 'img-1',
       LayerType: 'Img',
       visible: true,
       active: false,
@@ -42,7 +48,7 @@ function Workspace() {
   ])
 
   const [imgData, setImgData] = useState<ImgData>({
-    img: {
+    'img-1': {
       id: 'img-123',
       url: '/src/assets/Icon/test.jpg',
       left: 100,
@@ -138,7 +144,7 @@ function Workspace() {
     ]);
 
     setDrawingData({
-      layer1: [
+      'drawing-1': [
         { 
           id: 'drawing-1',
           brushType: "pen",
@@ -155,6 +161,8 @@ function Workspace() {
             options: {
               stroke: 'black',
               strokeWidth: 2,
+              strokeLineCap: 'round',
+              strokeLineJoin: 'round',
               fill: '',
               left: 10,
               top: 10,
@@ -177,6 +185,8 @@ function Workspace() {
             options: {
               stroke: 'red',
               strokeWidth: 2,
+              strokeLineCap: 'round',
+              strokeLineJoin: 'round',
               fill: '',
               left: 20,
               top: 30,
@@ -202,7 +212,10 @@ function Workspace() {
   const appProvidedValue: AppContextType = useMemo(() => ({
     addImg: null,
     export: null,
-    brush: null,
+    brush: {
+      brushData: brushData,
+      setBrushData: setBrushData,
+    },
     layer: {
       userLayerDataType: {
         userLayerDataType: userLayerDataType,

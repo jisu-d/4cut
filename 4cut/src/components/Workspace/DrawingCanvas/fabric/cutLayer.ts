@@ -139,6 +139,12 @@ class CutLayerManager {
       evented: active,
       visible: visible
     });
+
+    //if (this.lastZIndex !== zIndex) {
+    //  this.lastZIndex = zIndex;
+    //  this.fullSync(cuts, onRectClick, onRectTransform, active, visible, zIndex);
+    //  return;
+    //}
     
     rect.set('scaleX', 1);
     rect.set('scaleY', 1);
