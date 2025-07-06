@@ -50,13 +50,15 @@
 
 .list-item-input {
   height: 30px; 
+  width: 50%; /* 부모 요소의 절반 크기로 제한 */
+  max-width: 150px; /* 최대 너비 제한 */
   font-size: 20px;
-  max-width: 30%;
   border: none;
   background-color: transparent;
   padding: 0;
   margin-right: auto;
   z-index: 2px;
+  overflow: hidden; /* 넘치는 텍스트 숨김 */
 }
 
 .list-item-input:focus {
