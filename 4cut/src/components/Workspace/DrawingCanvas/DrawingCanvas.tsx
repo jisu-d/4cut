@@ -30,6 +30,12 @@ function DrawingCanvas() {
     const imgData = appContext.layer?.imgData.imgData || {}
     const setImgData = appContext.layer?.imgData.setImgData
 
+    const brushData = appContext.brush.brushData
+
+    // 색상 데이터 가져오기
+    const hsl = appContext.colors?.chosenColor.hslData.hsl || { h: 0, s: 0, l: 0 };
+    const alpha = appContext.colors?.chosenColor.alphaData.alpha || 1;
+    
     // 도구 상태 관리
     const [activeTool, setActiveTool] = useState<"pen" | "select" | "eraser">("select");
 
@@ -73,6 +79,9 @@ function DrawingCanvas() {
     } = useDrawingManager({
         contextUserLayerDataType,
         activeTool,
+        brushData,
+        hsl,
+        alpha,
         setDrawingData,
         canvasRef,
         fabricCanvasRef,
@@ -196,6 +205,7 @@ function DrawingCanvas() {
                         idx
                     );
                 } else if (item.LayerType === 'Img') {
+                    
                     const layerImgData = imgData[item.text]
                     if (layerImgData) {
                         const handleImgTransform = (
@@ -226,11 +236,11 @@ function DrawingCanvas() {
             });
         }
     }, [
-        appContext.layer?.cutImageData.cutImageData,
+        cutImageData,
         contextUserLayerDataType,
         drawingData,
         fabricCanvasRef.current,
-        appContext.layer?.imgData
+        imgData
     ]);
     
 
