@@ -29,8 +29,10 @@ class ImgLayerManager {
     zIndex:number,
     onImgTransform?: (top: number, left: number, width: number, height: number, angle: number) => void
   ): Promise<void> {
-    try {
-      const img = await fabric.FabricImage.fromURL('http://localhost:5173' + imgData.url);
+    try { 
+      // URL이 이미 전체 경로인지 확인하고 처리
+      const fullUrl = imgData.url.startsWith('http') ? imgData.url : `http://localhost:5173${imgData.url}`;
+      const img = await fabric.FabricImage.fromURL(fullUrl);
 
       // 캔버스 크기
       const canvasWidth = this.canvas.getWidth();
@@ -49,6 +51,12 @@ class ImgLayerManager {
       //센터
       // (canvasWidth - imgWidth * scale) / 2
       // (canvasHeight - imgHeight * scale) / 2
+
+      
+      if (imgData.left == 0 && imgData.top == 0){
+        imgData.left = (canvasWidth - imgWidth * scale) / 2
+        imgData.top = (canvasHeight - imgHeight * scale) / 2
+      }
 
       img.set({
         left: imgData.left,
@@ -76,7 +84,7 @@ class ImgLayerManager {
       this.imgMap.set(id, img);
       this.canvas.renderAll();
     } catch (e) {
-      console.log('실패');
+      console.log('실패', imgData.url);
     }
   }
 
@@ -87,17 +95,24 @@ class ImgLayerManager {
       visible: visible,
     });
     this.canvas.moveObjectTo(img, zIndex)
-    //img.setCoords();
     this.canvas.renderAll();
   }
 
-  private removeUnusedImgs(currentImgId: string): void {
-    for (const [id, img] of this.imgMap.entries()) {
-      if (id !== currentImgId) {
-        this.canvas.remove(img);
-        this.imgMap.delete(id);
-      }
+  // 특정 이미지만 제거하는 메서드
+  private removeImg(imgId: string): void {
+    const img = this.imgMap.get(imgId);
+    if (img) {
+      this.canvas.remove(img);
+      this.imgMap.delete(imgId);
     }
+  }
+
+  // 모든 이미지를 제거하는 메서드
+  private removeAllImgs(): void {
+    for (const [id, img] of this.imgMap.entries()) {
+      this.canvas.remove(img);
+    }
+    this.imgMap.clear();
   }
 
   async syncImgs(
@@ -107,17 +122,26 @@ class ImgLayerManager {
     visible: boolean,
     zIndex: number
   ): Promise<void> {
-    this.removeUnusedImgs(imgData.id);
     let img = this.imgMap.get(imgData.id);
 
     if (!img) {
       await this.createImg(imgData.id, imgData, active, visible, zIndex, onImgTransform);
-      
     } else {
       this.updateImg(img, active, visible, zIndex);
     }
   }
+
+  // 특정 이미지 제거
+  removeImgById(imgId: string): void {
+    this.removeImg(imgId);
+  }
+
+  // 모든 이미지 제거
+  clearAllImgs(): void {
+    this.removeAllImgs();
+  }
 }
+
 
 export async function syncImgLayers(
   canvas: fabric.Canvas,
@@ -129,5 +153,6 @@ export async function syncImgLayers(
 ) {
   const manager = new ImgLayerManager(canvas);
   await manager.syncImgs(imgData, onImgTransform, active, visible, zIndex);
+  
 }
 
