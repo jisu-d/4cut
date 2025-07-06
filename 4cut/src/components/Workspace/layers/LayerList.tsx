@@ -21,7 +21,7 @@ const LayerList = () => {
     
     const newLayer: UserLayerDataType = {
       id: String(userLayerDataType.length + 1),
-      text: `layer${userLayerDataType.length + 1}`,
+      text: `drawing-${userLayerDataType.length + 1}`,
       LayerType: 'Drawing',
       visible: true,
       active: false

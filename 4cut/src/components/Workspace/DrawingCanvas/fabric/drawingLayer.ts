@@ -19,13 +19,13 @@ function createFabricDrawing(drawingData: DrawingItem): fabric.Path {
   ) {
     const pathData = pointsToPathData(drawingData.jsonData.points);
 
-    // 주요 옵션만 추출
+    // TODO 주요 옵션만 추출 -> 이거를 이렇게 처리해야 하는 이유를 잘 모르겠음
     const {
-      stroke, strokeWidth, fill, left, top, width, height, angle, scaleX, scaleY,
+      stroke, strokeWidth, fill, left, top, width, height, angle, scaleX, scaleY, strokeLineCap, strokeLineJoin
     } = drawingData.jsonData.options || {};
 
     return new fabric.Path(pathData, {
-      stroke, strokeWidth, fill, left, top, width, height, angle, scaleX, scaleY,
+      stroke, strokeWidth, fill, left, top, width, height, angle, scaleX, scaleY, strokeLineCap, strokeLineJoin
     });
   }
   return new fabric.Path('');
