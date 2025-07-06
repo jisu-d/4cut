@@ -1,15 +1,30 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { RefObject } from 'react';
-import type { DrawingItem, ListDrawingItem, UserLayerDataType } from '../../../../types/types';
+import type { DrawingItem, ListDrawingItem, UserLayerDataType, BrushData, HSL } from '../../../../types/types';
 import * as fabric from 'fabric';
 
 interface UseDrawingManagerProps {
   contextUserLayerDataType: UserLayerDataType[] | undefined;
   activeTool: string;
+  brushData: BrushData;
+  hsl: HSL;
+  alpha: number;
   setDrawingData?: React.Dispatch<React.SetStateAction<ListDrawingItem>>;
   canvasRef: RefObject<HTMLCanvasElement | null>;
   fabricCanvasRef?: RefObject<fabric.Canvas | null>;
   scale?: number;
+}
+
+// HSL을 hex로 변환하는 함수
+function hslToHex(h: number, s: number, l: number): string {
+  l /= 100;
+  const a = s * Math.min(l, 1 - l) / 100;
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
 }
 
 // 좌표 변환 
@@ -31,19 +46,38 @@ function getPointerFromEvent(e: React.MouseEvent | React.TouchEvent, canvasRef: 
   return { x, y };
 }
 
-// points 배열을 SVG PathData로 변환하는 유틸 함수
+// points 배열을 SVG PathData로 변환하는 유틸 함수 - 부드러운 곡선으로 변경
 function pointsToPathData(points: {x: number, y: number}[]): string {
   if (!points || points.length === 0) return '';
+  if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
+  
   let d = `M ${points[0].x} ${points[0].y}`;
-  for (let i = 1; i < points.length; i++) {
-    d += ` L ${points[i].x} ${points[i].y}`;
+  
+  // 부드러운 곡선을 위해 3개 이상의 점이 있을 때만 곡선 사용
+  if (points.length >= 3) {
+    for (let i = 1; i < points.length - 1; i++) {
+      const current = points[i];
+      const next = points[i + 1];
+      // 중간점을 제어점으로 사용하여 부드러운 곡선 생성
+      d += ` Q ${current.x} ${current.y}, ${(current.x + next.x) / 2} ${(current.y + next.y) / 2}`;
+    }
+    // 마지막 점까지 직선으로 연결
+    const lastPoint = points[points.length - 1];
+    d += ` L ${lastPoint.x} ${lastPoint.y}`;
+  } else {
+    // 점이 2개일 때는 직선
+    d += ` L ${points[1].x} ${points[1].y}`;
   }
+  
   return d;
 }
 
 export function useDrawingManager({
   contextUserLayerDataType,
   activeTool,
+  brushData,
+  hsl,
+  alpha,
   setDrawingData,
   canvasRef,
   fabricCanvasRef,
@@ -92,13 +126,15 @@ export function useDrawingManager({
           jsonData: {
             points: drawingPoints,
             options: {
-              stroke: 'black',
-              strokeWidth: 2,
+              stroke: hslToHex(hsl.h, hsl.s, hsl.l),
+              strokeWidth: brushData.penSize,
+              strokeLineCap: 'round',
+              strokeLineJoin: 'round',
               fill: '',
-              left: Math.min(...drawingPoints.map(p => p.x)),
-              top: Math.min(...drawingPoints.map(p => p.y)),
-              width: Math.max(...drawingPoints.map(p => p.x)) - Math.min(...drawingPoints.map(p => p.x)),
-              height: Math.max(...drawingPoints.map(p => p.y)) - Math.min(...drawingPoints.map(p => p.y)),
+              left: Math.min(...drawingPoints.map(p => p.x)) - brushData.penSize / 2,
+              top: Math.min(...drawingPoints.map(p => p.y)) - brushData.penSize / 2,
+              width: Math.max(...drawingPoints.map(p => p.x)) - Math.min(...drawingPoints.map(p => p.x)) + brushData.penSize,
+              height: Math.max(...drawingPoints.map(p => p.y)) - Math.min(...drawingPoints.map(p => p.y)) + brushData.penSize,
               angle: 0,
               scaleX: 1,
               scaleY: 1,
@@ -135,8 +171,10 @@ export function useDrawingManager({
       
       // 새로운 Path 객체 생성
       const newPathObj = new fabric.Path(pathData, {
-        stroke: 'black',
-        strokeWidth: 20,
+        stroke: hslToHex(hsl.h, hsl.s, hsl.l),
+        strokeWidth: brushData.penSize,
+        strokeLineCap: 'round',
+        strokeLineJoin: 'round',
         fill: '',
         selectable: false,
         evented: false,
