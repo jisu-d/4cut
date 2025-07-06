@@ -44,4 +44,144 @@
 .canvas-tool-bar button svg {
   width: 20px;
   height: 20px;
-} 
+}
+
+/* 크기 슬라이더 컨테이너 */
+.size-slider-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+/* 세로 슬라이더 스타일 */
+.vertical-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 8px;
+  height: 130px;
+  accent-color: #4F46E5;
+  transition: all 0.3s ease;
+  -webkit-appearance: slider-vertical;
+  background: transparent;
+}
+
+.tool-buttons{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 슬라이드 인 애니메이션 */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 사라질 때 애니메이션 */
+.size-slider-container.removing {
+  animation: slideOut 0.3s ease-in forwards;
+}
+
+@keyframes slideOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 200px;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0px;
+  }
+}
+
+/* WebKit 브라우저용 슬라이더 스타일 */
+.vertical-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #4F46E5;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+  transition: all 0.3s ease;
+}
+
+.vertical-slider::-webkit-slider-thumb:hover {
+  background: #3b35d4;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(79, 70, 229, 0.4);
+}
+
+.vertical-slider::-webkit-slider-track {
+  background: linear-gradient(to top, #4F46E5, #e0e0e0);
+  border-radius: 3px;
+  width: 6px;
+  transition: all 0.3s ease;
+}
+
+/* Firefox 브라우저용 슬라이더 스타일 */
+.vertical-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: #4F46E5;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+  transition: all 0.3s ease;
+}
+
+.vertical-slider::-moz-range-thumb:hover {
+  background: #3b35d4;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(79, 70, 229, 0.4);
+}
+
+.vertical-slider::-moz-range-track {
+  background: linear-gradient(to top, #4F46E5, #e0e0e0);
+  border-radius: 3px;
+  width: 6px;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+/* 포커스 상태 */
+.vertical-slider:focus {
+  outline: none;
+}
+
+.vertical-slider:focus::-webkit-slider-track {
+  background: linear-gradient(to top, #3b35d4, #e0e0e0);
+}
+
+.vertical-slider:focus::-moz-range-track {
+  background: linear-gradient(to top, #3b35d4, #e0e0e0);
+}
+
+/* 크기 값 표시 */
+.size-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4F46E5;
+  text-align: center;
+  background: rgba(79, 70, 229, 0.1);
+  padding: 4px 8px;
+  border-radius: 12px;
+  min-width: 20px;
+  transition: all 0.3s ease;
+}

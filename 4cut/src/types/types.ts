@@ -81,10 +81,19 @@ export interface CanvasSize {
   height: number;
 }
 
+export interface BrushData {
+  brushType: string;
+  penSize: number;
+  eraserSize: number
+}
+
 export interface AppContextType {
   addImg: null,
   export: null,
-  brush: null,
+  brush: {
+    brushData: BrushData;
+    setBrushData: React.Dispatch<React.SetStateAction<BrushData>>;
+  },
   layer: {
     userLayerDataType: { // 화면 직접 적으로 표시할 데이터 
       userLayerDataType: UserLayerDataType[];
