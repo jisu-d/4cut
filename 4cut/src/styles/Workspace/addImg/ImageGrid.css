@@ -5,12 +5,17 @@
   display: -webkit-box; /* Safari workaround */
   display: -ms-flexbox; /* IE10 workaround */
   display: flex;
-  padding: 0 12px;
+  padding-left: 12px;
   margin-left: -16px; /* gap과 동일한 값으로 음수 마진 (Masonry 라이브러리 공식 예시에서 보통 이렇게 사용) */
   width: auto; /* 너비 자동 */
   overflow-y: auto;
 }
 
+.image-grid-scroll-area{
+/* 스크롤바 숨기기 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE, Edge */
+}
 
 .my-masonry-grid_column {
   padding-left: 10px; /* gap과 동일한 값으로 패딩 */
