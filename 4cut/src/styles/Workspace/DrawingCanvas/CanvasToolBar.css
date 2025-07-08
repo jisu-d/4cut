@@ -26,10 +26,12 @@
   transition: all 0.2s ease;
 }
 
+/*
 .canvas-tool-bar button:hover {
   background: rgba(0, 0, 0, 0.05);
   color: #333;
 }
+*/
 
 .canvas-tool-bar button.active {
   background: #4F46E5;

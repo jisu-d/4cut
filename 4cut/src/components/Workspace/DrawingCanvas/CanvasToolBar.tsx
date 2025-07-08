@@ -25,7 +25,7 @@ const CanvasToolBar: React.FC<CanvasToolBarProps> = ({
   const [lastActiveTool, setLastActiveTool] = useState<"pen" | "eraser">("pen");
   
   // 슬라이더 부드럽게 만들기 위한 로컬 상태
-  const [localPenSize, setLocalPenSize] = useState(brushData.penSize);
+  const [localPenSize, setLocalPenSize] = useState(brushData.brushSize);
   const [localEraserSize, setLocalEraserSize] = useState(brushData.eraserSize);
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -41,9 +41,9 @@ const CanvasToolBar: React.FC<CanvasToolBarProps> = ({
 
   // brushData 변경 시 로컬 상태 동기화
   useEffect(() => {
-    setLocalPenSize(brushData.penSize);
+    setLocalPenSize(brushData.brushSize);
     setLocalEraserSize(brushData.eraserSize);
-  }, [brushData.penSize, brushData.eraserSize]);
+  }, [brushData.brushSize, brushData.eraserSize]);
 
   // 슬라이더 표시/숨김 애니메이션 처리
   useEffect(() => {
@@ -89,7 +89,7 @@ const CanvasToolBar: React.FC<CanvasToolBarProps> = ({
         clearTimeout(updateTimeoutRef.current);
       }
       updateTimeoutRef.current = setTimeout(() => {
-        setBrushData(prev => ({ ...prev, penSize: value }));
+        setBrushData(prev => ({ ...prev, brushSize: value }));
       }, 100);
     } else if (lastActiveTool === "eraser") {
       setLocalEraserSize(value);
