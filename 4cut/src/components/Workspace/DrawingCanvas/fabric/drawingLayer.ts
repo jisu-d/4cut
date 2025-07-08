@@ -1,11 +1,18 @@
 import * as fabric from 'fabric';
-import type { DrawingItem } from '../../../../types/types';
+import type { DrawingItem, BrushType } from '../../../../types/types';
+
+import AppContext from '../../../../contexts/AppContext';
+
+import {imageStampBrush} from './imageStampBrush'
+import { useContext } from 'react';
+
+import {brushType} from '../../../../assets/brush/brushType'
 
 // Canvas에 _drawingLayerObjects 속성 추가를 위한 타입 확장
 // (캔버스 단위로 레이어별 드로잉 객체를 관리)
 declare module 'fabric' {
   interface Canvas {
-    _drawingLayerObjects?: Map<string, Map<string, fabric.Path>>;
+    _drawingLayerObjects?: Map<string, Map<string, fabric.Path | fabric.Group>>;
   }
 }
 
@@ -21,15 +28,16 @@ function createFabricDrawing(drawingData: DrawingItem): fabric.Path {
 
     // TODO 주요 옵션만 추출 -> 이거를 이렇게 처리해야 하는 이유를 잘 모르겠음
     const {
-      stroke, strokeWidth, fill, left, top, width, height, angle, scaleX, scaleY, strokeLineCap, strokeLineJoin
+      stroke, strokeWidth, fill, left, top, width, height, angle, scaleX, scaleY, strokeLineCap, strokeLineJoin, opacity
     } = drawingData.jsonData.options || {};
 
     return new fabric.Path(pathData, {
-      stroke, strokeWidth, fill, left, top, width, height, angle, scaleX, scaleY, strokeLineCap, strokeLineJoin
+      stroke, strokeWidth, fill, left, top, width, height, angle, scaleX, scaleY, strokeLineCap, strokeLineJoin, opacity
     });
   }
   return new fabric.Path('');
 }
+
 
 // points 배열을 SVG PathData로 변환하는 유틸 함수
 function pointsToPathData(points: {x: number, y: number}[]): string {
@@ -41,9 +49,42 @@ function pointsToPathData(points: {x: number, y: number}[]): string {
   return d;
 }
 
+// 변형 이벤트 핸들러 함수 분리
+function handleModifiedEvent(obj: fabric.Path | fabric.Group, drawingData: DrawingItem, onDrawingTransform: (id: string, newProps: any) => void) {
+  let points: {x: number, y: number}[] = [];
+  if (obj instanceof fabric.Path) {
+    const pathArr = obj.get('path');
+    if (Array.isArray(pathArr)) {
+      pathArr.forEach((seg: any) => {
+        if (seg[0] === 'M' || seg[0] === 'L') {
+          points.push({ x: seg[1], y: seg[2] });
+        }
+      });
+    }
+  }
+  onDrawingTransform(
+    drawingData.id,
+    {
+      jsonData: {
+        points,
+        options: {
+          ...((obj as any).toObject()),
+          left: obj.left,
+          top: obj.top,
+          width: obj.width,
+          height: obj.height,
+          angle: obj.angle,
+          scaleX: obj.scaleX,
+          scaleY: obj.scaleY,
+        }
+      }
+    }
+  );
+}
+
 class DrawingLayerManager {
   private canvas: fabric.Canvas;
-  private drawingMap: Map<string, fabric.Path>;
+  private drawingMap: Map<string, fabric.Path | fabric.Group>;
 
   constructor(canvas: fabric.Canvas, layerId: string) {
     this.canvas = canvas;
@@ -57,7 +98,7 @@ class DrawingLayerManager {
   }
 
   // 기존 드로잉 객체를 업데이트
-  private updateDrawing(obj: fabric.Path, active: boolean, visible: boolean, zIndex:number) {
+  private updateDrawing(obj: fabric.Path | fabric.Group, active: boolean, visible: boolean, zIndex:number) {
     obj.set({
       visible: visible,
       evented: active,
@@ -68,50 +109,35 @@ class DrawingLayerManager {
   }
 
   // 드로잉 객체 생성
-  private createDrawing(drawingData: DrawingItem, active: boolean, visible: boolean, zIndex:number, onDrawingTransform?: (id: string, newProps: any) => void): fabric.Path {
-    const obj = createFabricDrawing(drawingData);
+  private async createDrawing(drawingData: DrawingItem, active: boolean, visible: boolean, zIndex:number, onDrawingTransform?: (id: string, newProps: any) => void): Promise<fabric.Path | fabric.Group> {
+    //const obj = createFabricDrawing(drawingData);
+    //const obj = await createGroupedImages(drawingData.jsonData.points, 'http://localhost:5173/src/assets/brush/brush1.png');
     // visible, active 속성에 따라 제어
+
+    let obj: fabric.Path | fabric.Group
+
+    
+    if(drawingData.brushType === 'pen'){
+      obj = createFabricDrawing(drawingData);
+    } else{
+      const matchedBrush = brushType.find(b => b.brushType === drawingData.brushType) as BrushType
+      obj = await imageStampBrush(drawingData, matchedBrush);
+    }
+
     obj.set({
       visible: visible,
       evented: active,
       selectable: active,
     });
     
-    // 변형 이벤트
+    // 변형 이벤트 
+    // TODO -> 이거 오류때문에 임시로 이렇게 처리했는데 이유를 잘 모르겠음
     if (onDrawingTransform) {
-      obj.on('modified', () => {
-        // fabric.Path의 path 데이터를 points 배열로 변환
-        let points: {x: number, y: number}[] = [];
-        if (obj instanceof fabric.Path) {
-          const pathArr = obj.get('path');
-          if (Array.isArray(pathArr)) {
-            pathArr.forEach((seg: any, idx: number) => {
-              if (seg[0] === 'M' || seg[0] === 'L') {
-                points.push({ x: seg[1], y: seg[2] });
-              }
-            });
-          }
-        }
-
-        onDrawingTransform(
-          drawingData.id,
-          {
-            jsonData: {
-              points,
-              options: {
-                ...obj.toObject(),
-                left: obj.left,
-                top: obj.top,
-                width: obj.width,
-                height: obj.height,
-                angle: obj.angle,
-                scaleX: obj.scaleX,
-                scaleY: obj.scaleY,
-              }
-            }
-          }
-        );
-      });
+      if(obj instanceof fabric.Path){
+        obj.on('modified', () => handleModifiedEvent(obj, drawingData, onDrawingTransform));
+      }else if(obj instanceof fabric.Group){
+        obj.on('modified', () => handleModifiedEvent(obj, drawingData, onDrawingTransform));
+      }
     }
     return obj;
   }
@@ -139,11 +165,11 @@ class DrawingLayerManager {
     this.removeUnusedDrawings(drawings);
     
     // 2. drawings 처리
-    drawings.forEach(drawing => {
+    drawings.forEach(async drawing => {
       let obj = this.drawingMap.get(drawing.id);
       if (!obj) {
         // 새 드로잉 객체 생성
-        obj = this.createDrawing(drawing, active, visible, zIndex, onDrawingTransform);
+        obj = await this.createDrawing(drawing, active, visible, zIndex, onDrawingTransform);
         this.canvas.add(obj);
         this.drawingMap.set(drawing.id, obj);
       } else {
