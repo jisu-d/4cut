@@ -30,11 +30,11 @@ function DrawingCanvas() {
     const imgData = appContext.layer?.imgData.imgData || {}
     const setImgData = appContext.layer?.imgData.setImgData
 
-    const brushData = appContext.brush.brushData
+    const brushData = appContext.brush?.brushData
 
     // 색상 데이터 가져오기
     const hsl = appContext.colors?.chosenColor.hslData.hsl || { h: 0, s: 0, l: 0 };
-    const alpha = appContext.colors?.chosenColor.alphaData.alpha || 1;
+    const alpha = appContext.colors?.chosenColor.alphaData.alpha;
     
     // 도구 상태 관리
     const [activeTool, setActiveTool] = useState<"pen" | "select" | "eraser">("select");
@@ -69,7 +69,6 @@ function DrawingCanvas() {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
-
 
     // useDrawingManager 훅 사용
     const {
@@ -122,12 +121,10 @@ function DrawingCanvas() {
     // 모든 cut의 사각형을 그리고, 클릭/이동/크기조절/회전 시 데이터 갱신 - TODO -> 레이어 그리는 부분 최적화가 필요
     useEffect(() => {
         if (fabricCanvasRef.current && contextUserLayerDataType) {
-
             contextUserLayerDataType.forEach((item, index) => {
                 const idx = contextUserLayerDataType.length - index
                 
                 if (item.LayerType === 'Cut') {
-
                     // 클릭/변형 핸들러: selected=true일 때만 활성화
                     const handleRectClick = (id: string) => {
                         if (setCutImageData) {
@@ -179,14 +176,13 @@ function DrawingCanvas() {
                     );
                 } else if (item.LayerType === 'Drawing') {
                     // Drawing 레이어 처리
-                    const layerDrawingData = drawingData[item.text];
-                   
+                    const layerDrawingData = drawingData[item.id];
 
                     const handleDrawingTransform = (id: string, newProps: any) => {
                         if (setDrawingData) {
                             setDrawingData(prev => ({
                                 ...prev,
-                                [item.text]: prev[item.text].map(drawing =>
+                                [item.id]: prev[item.id].map(drawing =>
                                     drawing.id === id
                                         ? { ...drawing, ...newProps }
                                         : drawing
@@ -197,7 +193,7 @@ function DrawingCanvas() {
 
                     syncDrawingLayer(
                         fabricCanvasRef.current!,
-                        item.text,
+                        item.id,
                         layerDrawingData, 
                         handleDrawingTransform,
                         item.active,
@@ -206,7 +202,8 @@ function DrawingCanvas() {
                     );
                 } else if (item.LayerType === 'Img') {
                     
-                    const layerImgData = imgData[item.text]
+                    const layerImgData = imgData[item.id]
+                    
                     if (layerImgData) {
                         const handleImgTransform = (
                             top: number,
@@ -218,7 +215,7 @@ function DrawingCanvas() {
                             if (setImgData){
                                 setImgData(prev => ({
                                   ...prev,
-                                   [item.text]: { ...prev[item.text], top, left, scaleX, scaleY, angle }
+                                   [item.id]: { ...prev[item.id], top, left, scaleX, scaleY, angle }
                                  }));
                             }
                         };
@@ -235,12 +232,12 @@ function DrawingCanvas() {
                 }
             });
         }
+        
     }, [
+        brushData,
         cutImageData,
         contextUserLayerDataType,
-        drawingData,
         fabricCanvasRef.current,
-        imgData
     ]);
     
 

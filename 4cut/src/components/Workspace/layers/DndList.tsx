@@ -44,6 +44,8 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const LONG_PRESS_DURATION = 300; // 1초로 변경
 
+  const [overlayScale, setOverlayScale] = useState(1);
+
   // 드래그/터치 종료 (공통 로직)
   const commonDragEndLogic = useCallback(() => {
     if (draggingId) {
@@ -286,28 +288,14 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
     }
   }, [draggingId, deletingIds]);
 
+  // 레이어 이름 변경 UserLayerDataType의 text변경
   const handleTextInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>, id: string) => {
-    setItems(prevItems => {
-      const oldName = prevItems.find(item => item.id === id)?.text;
-      const newName = e.target.value;
-      // Drawing 레이어의 이름이 바뀌면 DrawingData의 key도 바꾼다
-      if (setDrawingData && oldName && oldName !== newName) {
-        setDrawingData(prev => {
-          if (prev[oldName]) {
-            const newData = { ...prev };
-            newData[newName] = newData[oldName];
-            delete newData[oldName];
-            console.log(`[레이어 이름 변경] ${oldName} → ${newName}`);
-            return newData;
-          }
-          return prev;
-        });
-      }
-      return prevItems.map(item =>
-        item.id === id ? { ...item, text: newName } : item
-      );
-    });
-  }, [setItems, setDrawingData]);
+    setItems(prevItems =>
+      prevItems.map(item =>
+        item.id === id ? { ...item, text: e.target.value } : item
+      )
+    );
+  }, [setItems]);
 
   const handleTextBlur = useCallback(() => {
     setEditingId(null); // 편집 모드 종료
@@ -349,6 +337,16 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
       window.removeEventListener('touchend', (e) => handleTouchEnd(e, draggingId ?? undefined));
     };
   }, [draggingId, handleTouchMove, handleTouchEnd]);
+
+  // 드래그 오버레이 scale 트랜지션 효과
+  useEffect(() => {
+    if (draggingId) {
+      setOverlayScale(1); // 처음엔 1로
+      setTimeout(() => setOverlayScale(0.65), 0); // 다음 tick에 0.65로 변경
+    } else {
+      setOverlayScale(1); // 드래그 끝나면 원래대로
+    }
+  }, [draggingId]);
 
   return (
     <div className="list-container">
@@ -434,8 +432,9 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
             top: overlayPos.y,
             width: itemRects.current.get(draggingId)?.width || 'auto',
             height: itemRects.current.get(draggingId)?.height || 'auto',
-            transform: 'scale(0.65)',
+            transform: `scale(${overlayScale})`,
             transformOrigin: `${offset.x}px ${offset.y}px`,
+            transition: 'transform 0.2s ease-in-out',
           }}
         >
           {/* items 배열에서 draggingId와 일치하는 아이템을 찾아서 텍스트를 표시합니다. */}

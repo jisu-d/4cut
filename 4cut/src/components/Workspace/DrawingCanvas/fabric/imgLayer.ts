@@ -48,10 +48,6 @@ class ImgLayerManager {
       // 비율 유지해서 최대한 맞춤
       const scale = Math.min(scaleX, scaleY);
 
-      //센터
-      // (canvasWidth - imgWidth * scale) / 2
-      // (canvasHeight - imgHeight * scale) / 2
-
       
       if (imgData.left == 0 && imgData.top == 0){
         imgData.left = (canvasWidth - imgWidth * scale) / 2
@@ -80,6 +76,7 @@ class ImgLayerManager {
           );
         });
       }
+      
       this.canvas.add(img);
       this.imgMap.set(id, img);
       this.canvas.renderAll();
@@ -123,6 +120,7 @@ class ImgLayerManager {
     zIndex: number
   ): Promise<void> {
     let img = this.imgMap.get(imgData.id);
+    
 
     if (!img) {
       await this.createImg(imgData.id, imgData, active, visible, zIndex, onImgTransform);
