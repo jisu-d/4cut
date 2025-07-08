@@ -8,13 +8,27 @@ import {useEffect, useMemo, useState, useRef} from 'react';
 import ExportContent from '../components/Workspace/export/ExportContent';
 import DrawingCanvas from '../components/Workspace/DrawingCanvas/DrawingCanvas';
 
-import type {AppContextType, CanvasSize, HSL, ListCutImage, ListDrawingItem, UserLayerDataType, ImgData, BrushData} from '../types/types'
+import type {AppContextType, CanvasSize, HSL, ListCutImage, ListDrawingItem, UserLayerDataType, ImgData, BrushData, ImagesData} from '../types/types'
 import * as fabric from 'fabric';
 
 function Workspace() {
+  const [imagesData, setImagesData] = useState<ImagesData[]>([
+    { src: '/src/assets/Icon/test.jpg', alt: '캠퍼스 맵' },
+    { src: '/src/assets/Icon/AlertCrcle.svg', alt: '파일 미리보기 큰 캘린더' },
+    { src: '/src/assets/Icon/test.jpg', alt: '캠퍼스 맵' },
+    { src: '/src/assets/Icon/brush.svg', alt: '짧은 텍스트 미리보기' },
+    { src: '/src/assets/Icon/brush.svg', alt: '파일 미리보기 작은 캘린더' },
+    { src: '/src/assets/Icon/test.jpg', alt: '캠퍼스 맵' },
+    { src: '/src/assets/Icon/brush.svg', alt: '짧은 텍스트 미리보기' },
+    { src: '/src/assets/Icon/brush.svg', alt: '파일 미리보기 작은 캘린더' },
+    { src: '/src/assets/Icon/brush.svg', alt: '짧은 텍스트 미리보기' },
+    { src: '/src/assets/Icon/brush.svg', alt: '파일 미리보기 작은 캘린더' },
+  ])
+
+
   const [brushData, setBrushData] = useState<BrushData>({
-    brushType: 'pen',
-    penSize: 1,
+    brushType: 'test',
+    brushSize: 1,
     eraserSize: 1,
   })
 
@@ -48,7 +62,7 @@ function Workspace() {
   ])
 
   const [imgData, setImgData] = useState<ImgData>({
-    'img-1': {
+    '3': {
       id: 'img-123',
       url: '/src/assets/Icon/test.jpg',
       left: 100,
@@ -60,7 +74,7 @@ function Workspace() {
   })
 
   const [hsl, setHsl] = useState<HSL>({h:0, s:0, l:0})
-  const [alpha, setAlpha] = useState<number>(0)
+  const [alpha, setAlpha] = useState<number>(1)
   const [historyColor, setHistoryColor] = useState<{
     hslData: { hsl: HSL },
     alphaData: { alpha: number }
@@ -144,7 +158,7 @@ function Workspace() {
     ]);
 
     setDrawingData({
-      'drawing-1': [
+      '2': [
         { 
           id: 'drawing-1',
           brushType: "pen",
@@ -176,7 +190,7 @@ function Workspace() {
         },
         {
           id: 'drawing-2',
-          brushType: "marker",
+          brushType: "pen",
           jsonData: {
             points: [
               { x: 20, y: 30 },
@@ -210,7 +224,10 @@ function Workspace() {
   }, []);
 
   const appProvidedValue: AppContextType = useMemo(() => ({
-    addImg: null,
+    addImg: {
+      imagesData: imagesData,
+      setImageData: setImagesData
+    },
     export: null,
     brush: {
       brushData: brushData,
@@ -258,6 +275,8 @@ function Workspace() {
       setBackgroundColor: setBackgroundColor
     }
   }), [
+    //브러쉬 관련
+    brushData,
     // 레이어 관련
     cutImages, 
     userLayerDataType, 
@@ -281,7 +300,6 @@ function Workspace() {
           <Dashboard openExportPopup={openExportPopup} isExportPopupOpen={isExportPopupOpen} />
         </div>
         <div className='canvas-area'>
-          {/* 캔버스 관련 내용이 여기에 들어갈 수 있습니다 */}
           <DrawingCanvas />
         </div>
       </AppContext.Provider>

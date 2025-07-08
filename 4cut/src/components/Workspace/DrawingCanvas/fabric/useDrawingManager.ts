@@ -98,7 +98,7 @@ export function useDrawingManager({
     if (!pointer) return;
     setIsDrawing(true);
     setDrawingPoints([pointer]);
-    setDrawingLayerName(selectedLayer.text);
+    setDrawingLayerName(selectedLayer.id);
   }, [contextUserLayerDataType, activeTool, canvasRef, scale]);
 
   // 드로잉 중 이동
@@ -118,29 +118,31 @@ export function useDrawingManager({
       return;
     }
     if (setDrawingData) {
-      setDrawingData((prev: any) => {
+      setDrawingData((prev: ListDrawingItem) => {
         const newId = `drawing-${Date.now()}`;
         const newDrawing: DrawingItem = {
           id: newId,
-          brushType: 'pen',
+          brushType: 'test',
           jsonData: {
             points: drawingPoints,
             options: {
               stroke: hslToHex(hsl.h, hsl.s, hsl.l),
-              strokeWidth: brushData.penSize,
+              strokeWidth: brushData.brushSize,
               strokeLineCap: 'round',
               strokeLineJoin: 'round',
               fill: '',
-              left: Math.min(...drawingPoints.map(p => p.x)) - brushData.penSize / 2,
-              top: Math.min(...drawingPoints.map(p => p.y)) - brushData.penSize / 2,
-              width: Math.max(...drawingPoints.map(p => p.x)) - Math.min(...drawingPoints.map(p => p.x)) + brushData.penSize,
-              height: Math.max(...drawingPoints.map(p => p.y)) - Math.min(...drawingPoints.map(p => p.y)) + brushData.penSize,
+              left: Math.min(...drawingPoints.map(p => p.x)) - brushData.brushSize / 2,
+              top: Math.min(...drawingPoints.map(p => p.y)) - brushData.brushSize / 2,
+              width: Math.max(...drawingPoints.map(p => p.x)) - Math.min(...drawingPoints.map(p => p.x)) + brushData.brushSize,
+              height: Math.max(...drawingPoints.map(p => p.y)) - Math.min(...drawingPoints.map(p => p.y)) + brushData.brushSize,
               angle: 0,
               scaleX: 1,
               scaleY: 1,
+              opacity: alpha,
             }
           }
         };
+        
         return {
           ...prev,
           [drawingLayerName]: [
@@ -172,13 +174,13 @@ export function useDrawingManager({
       // 새로운 Path 객체 생성
       const newPathObj = new fabric.Path(pathData, {
         stroke: hslToHex(hsl.h, hsl.s, hsl.l),
-        strokeWidth: brushData.penSize,
+        strokeWidth: brushData.brushSize,
         strokeLineCap: 'round',
         strokeLineJoin: 'round',
         fill: '',
         selectable: false,
         evented: false,
-        opacity: 1,
+        opacity: alpha,
       });
       
       // 새로운 Path 객체 추가
@@ -191,7 +193,7 @@ export function useDrawingManager({
       fabricCanvasRef.current.remove(tempPathObj);
       setTempPathObj(null);
     }
-  }, [isDrawing, drawingPoints, fabricCanvasRef]); // tempPathObj 의존성 제거
+  }, [brushData, isDrawing, drawingPoints, fabricCanvasRef]); // tempPathObj 의존성 제거
 
   return {
     handleCanvasPointerDown,

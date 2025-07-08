@@ -3,15 +3,25 @@ import type { PathProps, TOptions } from 'fabric';
 
 export interface DrawingItem {
   id: string;
-  brushType: "pen" | "marker" | "eraser";
+  brushType: "pen" | "marker" | "eraser" | "test";
   jsonData: {
     points: { x: number; y: number }[];
     options: Partial<TOptions<PathProps>>;
   }
 }
 
+export interface BrushType {
+  brushType: string;
+  brushPath: string
+}
+
 export interface ListDrawingItem {
   [layerName: string]: DrawingItem[]
+}
+
+export interface ImagesData {
+  src: string;
+  alt: string;
 }
 
 
@@ -83,12 +93,15 @@ export interface CanvasSize {
 
 export interface BrushData {
   brushType: string;
-  penSize: number;
+  brushSize: number;
   eraserSize: number
 }
 
 export interface AppContextType {
-  addImg: null,
+  addImg: {
+    imagesData: ImagesData[];
+    setImageData: React.Dispatch<React.SetStateAction<ImagesData[]>>
+  },
   export: null,
   brush: {
     brushData: BrushData;
@@ -111,7 +124,7 @@ export interface AppContextType {
       imgData: ImgData
       setImgData: React.Dispatch<React.SetStateAction<ImgData>>;
     }
-  } | null,
+  },
   colors: {
     chosenColor: {
       hslData: {
@@ -128,13 +141,13 @@ export interface AppContextType {
       setHistoryColor: React.Dispatch<React.SetStateAction<HistoryColor[]>>;
       addHistoryColor: () => void;
     }
-  } | null,
+  },
   canvas: {
     canvasSize: CanvasSize
     setCanvasSize: React.Dispatch<React.SetStateAction<CanvasSize>>;
     backgroundColor: string;
     setBackgroundColor: React.Dispatch<React.SetStateAction<string>>;
-  } | null,
+  },
 }
 
 
