@@ -8,6 +8,9 @@
   overflow-y: auto;
   /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
   position: relative;
+  /* 스크롤바 숨기기 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE, Edge */
 }
 
 .list-item {
@@ -70,10 +73,8 @@
 .dragged-overlay {
   position: fixed;
   pointer-events: none;
-  background-color: white;
   padding: 15px 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
   z-index: 100;
   width: var(--dragged-width);
   height: var(--dragged-height);
