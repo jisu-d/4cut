@@ -1,5 +1,3 @@
-// src/components/Dashboard.js
-// import React, { useState } from 'react';
 import '../styles/Workspace/Workspace.css';
 
 import Dashboard from '../components/Workspace/Dashboard';
@@ -39,6 +37,20 @@ function Workspace() {
 
   const [userLayerDataType, setUserLayerDataType] = useState<UserLayerDataType[]>([
     {
+      id: '3',
+      text: 'img-1',
+      LayerType: 'Img',
+      visible: true,
+      active: false,
+    },
+    {
+      id: '4',
+      text: 'img-2',
+      LayerType: 'Img',
+      visible: true,
+      active: false,
+    },
+    {
       id: '1',
       text: 'cutData',
       LayerType: 'Cut',
@@ -52,23 +64,25 @@ function Workspace() {
       visible: true,
       active: false,
     },
-    {
-      id: '3',
-      text: 'img-1',
-      LayerType: 'Img',
-      visible: true,
-      active: false,
-    }
   ])
 
   const [imgData, setImgData] = useState<ImgData>({
     '3': {
       id: 'img-123',
-      url: '/src/assets/Icon/test.jpg',
-      left: 100,
-      top: 100,
-      scaleX: 1,
-      scaleY: 1,
+      url: '/src/assets/test/Bear.png',
+      left: 146,
+      top: 4086,
+      scaleX: 0.5,
+      scaleY: 0.5,
+      angle: 0
+    },
+    '4': {
+      id: 'img-456',
+      url: '/src/assets/test/Carrot.png',
+      left: 2272,
+      top: 140,
+      scaleX: 0.5,
+      scaleY: 0.5,
       angle: 0
     },
   })
@@ -107,10 +121,10 @@ function Workspace() {
         id: 'cut1',
         AspectRatio: '3:4',
         jsonData: {
-          left: 100,
-          top: 100,
-          width: 120,
-          height: 160,
+          left: 150,
+          top: 217, 
+          width: 1463,
+          height: 1950,
           angle: 0,
           selectable: true
         },
@@ -120,10 +134,10 @@ function Workspace() {
         id: 'cut2',
         AspectRatio: '3:4',
         jsonData: {
-          left: 100,
-          top: 150,
-          width: 120,
-          height: 160,
+          left: 1703,
+          top: 729,
+          width: 1463,
+          height: 1950,
           angle: 0,
           selectable: true
         },
@@ -133,10 +147,10 @@ function Workspace() {
         id: 'cut3',
         AspectRatio: '3:4',
         jsonData: {
-          left: 100,
-          top: 200,
-          width: 120,
-          height: 160,
+          left: 137,
+          top: 2242,
+          width: 1463,
+          height: 1950,
           angle: 0,
           selectable: true
         },
@@ -146,10 +160,10 @@ function Workspace() {
         id: 'cut4',
         AspectRatio: '3:4',
         jsonData: {
-          left: 100,
-          top: 250,
-          width: 120,
-          height: 160,
+          left: 1690,
+          top: 2754,
+          width: 1463,
+          height: 1950,
           angle: 0,
           selectable: true
         },
@@ -159,35 +173,6 @@ function Workspace() {
 
     setDrawingData({
       '2': [
-        { 
-          id: 'drawing-1',
-          brushType: "pen",
-          jsonData: {
-            points: [
-              { x: 10, y: 10 },
-              { x: 100, y: 10 },
-              { x: 100, y: 100 },
-              { x: 200, y: 100 },
-              { x: 200, y: 200 },
-              { x: 100, y: 200 },
-              { x: 100, y: 300 },
-            ],
-            options: {
-              stroke: 'black',
-              strokeWidth: 2,
-              strokeLineCap: 'round',
-              strokeLineJoin: 'round',
-              fill: '',
-              left: 10,
-              top: 10,
-              width: 190,
-              height: 290,
-              angle: 0,
-              scaleX: 1,
-              scaleY: 1,
-            }
-          }
-        },
         {
           id: 'drawing-2',
           brushType: "pen",
@@ -216,7 +201,7 @@ function Workspace() {
     });
 
     setCanvasSize({
-      width: 1652,
+      width: 3304,
       height: 4920
     });
 
@@ -275,6 +260,8 @@ function Workspace() {
       setBackgroundColor: setBackgroundColor
     }
   }), [
+    // 이미지 관련
+    imagesData,
     //브러쉬 관련
     brushData,
     // 레이어 관련
