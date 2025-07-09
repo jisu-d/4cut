@@ -35,6 +35,7 @@
 .current-hex-alpha-display{
     width: 98px;
     display: flex;
+    font-family: 'Pretendard-Medium', sans-serif;
     justify-content: space-between;
 }
 
