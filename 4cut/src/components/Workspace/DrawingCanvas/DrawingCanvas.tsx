@@ -42,10 +42,14 @@ function DrawingCanvas() {
     // 캔버스 화면 조정
     const {containerRef, canvasSize} = useCanvasResize({
         aspectRatio: currentCanvasSize.width / currentCanvasSize.height,
-        maxSizeRatio: 0.9,
+        maxSizeRatio: 0.8,
         minWidth: 200,
         minHeight: 150,
     });
+
+    //console.log(canvasSize.width / currentCanvasSize.width, canvasSize.height / currentCanvasSize.height);
+    //console.log(canvasSize.width);
+    
 
     // 줌/패닝 훅 사용
     const {
@@ -119,6 +123,13 @@ function DrawingCanvas() {
 
 
     // 모든 cut의 사각형을 그리고, 클릭/이동/크기조절/회전 시 데이터 갱신 - TODO -> 레이어 그리는 부분 최적화가 필요
+    
+    const scaleX = canvasSize.width / currentCanvasSize.width;
+    const scaleY = canvasSize.height / currentCanvasSize.height;
+    const canvasScale  = { scaleX: scaleX, scaleY: scaleY };
+    //console.log(scaleX);
+    
+
     useEffect(() => {
         if (fabricCanvasRef.current && contextUserLayerDataType) {
             contextUserLayerDataType.forEach((item, index) => {
@@ -152,13 +163,13 @@ function DrawingCanvas() {
                                             ...item,
                                             jsonData: {
                                                 ...item.jsonData,
-                                                left: position.x,
-                                                top: position.y,
-                                                width: size.width,
-                                                height: size.height,
+                                                left: position.x / canvasScale.scaleX,
+                                                top: position.y / canvasScale.scaleY,
+                                                width: size.width / canvasScale.scaleX,
+                                                height: size.height / canvasScale.scaleY,
                                                 angle: angle
-                                            } as unknown as fabric.Rect
-                                        } 
+                                            }
+                                        }
                                         : item
                                 )
                             );
@@ -172,7 +183,8 @@ function DrawingCanvas() {
                         handleRectTransform,
                         item.active,
                         item.visible,
-                        idx
+                        idx,
+                        canvasScale 
                     );
                 } else if (item.LayerType === 'Drawing') {
                     // Drawing 레이어 처리
@@ -212,17 +224,29 @@ function DrawingCanvas() {
                             scaleY: number,
                             angle: number
                         ) => {
+                            
                             if (setImgData){
                                 setImgData(prev => ({
                                   ...prev,
-                                   [item.id]: { ...prev[item.id], top, left, scaleX, scaleY, angle }
+                                   [item.id]: {
+                                     ...prev[item.id],
+                                     top: top / canvasScale.scaleY,
+                                     left: left / canvasScale.scaleX,
+                                     scaleX: scaleX,
+                                     scaleY: scaleY,
+                                     angle
+                                   }
                                  }));
                             }
                         };
 
                         syncImgLayers(
                             fabricCanvasRef.current!,
-                            layerImgData,
+                            {
+                              ...layerImgData,
+                              top: layerImgData.top * canvasScale.scaleY,
+                              left: layerImgData.left * canvasScale.scaleX,
+                            },
                             handleImgTransform,
                             item.active,
                             item.visible,
@@ -234,8 +258,8 @@ function DrawingCanvas() {
         }
         
     }, [
-        brushData,
         cutImageData,
+        drawingData,
         contextUserLayerDataType,
         fabricCanvasRef.current,
     ]);

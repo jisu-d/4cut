@@ -136,3 +136,87 @@ export async function imageStampBrush(
   
     return group;
   }
+
+
+
+
+// 드로잉 전용
+// 그룹 생성 (마우스 다운)
+export function createImageStampGroup(
+  startPoint: {x: number, y: number},
+  brush: BrushType,
+  options: { stroke: string, strokeWidth: number, opacity: number }
+): fabric.Group {
+  // 이미지 캐시 사용
+  let loadedImage: HTMLImageElement;
+  if (imageCache.has(brush.brushType)) {
+    loadedImage = imageCache.get(brush.brushType)!;
+  } else {
+    loadedImage = new window.Image();
+    loadedImage.src = brush.brushPath;
+    imageCache.set(brush.brushType, loadedImage);
+  }
+  // 색상 변환
+  const tintedImage = tintImage(loadedImage, options.stroke);
+  const maxOriginalSize = Math.max(tintedImage.width, tintedImage.height);
+  const penSize = options.strokeWidth;
+  const scaleFactor = penSize / maxOriginalSize;
+
+  const fabricImage = new fabric.FabricImage(tintedImage, {
+    left: startPoint.x,
+    top: startPoint.y,
+    originX: 'center',
+    originY: 'center',
+    selectable: false,
+    evented: false,
+    scaleX: scaleFactor,
+    scaleY: scaleFactor,
+    opacity: options.opacity,
+  });
+  const group = new fabric.Group([fabricImage], {
+    hasControls: true,
+    hasBorders: true,
+    selectable: true,
+    evented: true,
+  });
+  return group;
+}
+
+// 그룹에 이미지 추가 (마우스 무브)
+export function addImageStampToGroup(
+  group: fabric.Group,
+  newPoint: {x: number, y: number},
+  brush: BrushType,
+  options: { stroke: string, strokeWidth: number, opacity: number }
+): void {
+  let loadedImage: HTMLImageElement;
+  if (imageCache.has(brush.brushType)) {
+    loadedImage = imageCache.get(brush.brushType)!;
+  } else {
+    loadedImage = new window.Image();
+    loadedImage.src = brush.brushPath;
+    imageCache.set(brush.brushType, loadedImage);
+  }
+  // 색상 변환
+  const tintedImage = tintImage(loadedImage, options.stroke);
+  const maxOriginalSize = Math.max(tintedImage.width, tintedImage.height);
+  const penSize = options.strokeWidth;
+  const scaleFactor = penSize / maxOriginalSize;
+
+  const fabricImage = new fabric.FabricImage(tintedImage, {
+    left: newPoint.x,
+    top: newPoint.y,
+    originX: 'center',
+    originY: 'center',
+    selectable: false,
+    evented: false,
+    scaleX: scaleFactor,
+    scaleY: scaleFactor,
+    opacity: options.opacity,
+  });
+  group.add(fabricImage);
+  group.setCoords();
+  if (group.canvas) {
+    group.canvas.requestRenderAll();
+  }
+}
