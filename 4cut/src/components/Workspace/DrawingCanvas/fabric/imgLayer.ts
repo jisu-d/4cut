@@ -31,25 +31,29 @@ class ImgLayerManager {
   ): Promise<void> {
     try { 
       // URL이 이미 전체 경로인지 확인하고 처리
-      const fullUrl = imgData.url.startsWith('http') ? imgData.url : `http://localhost:5173${imgData.url}`;
+      const fullUrl = imgData.url.startsWith('http') ? imgData.url : `https://ptvc38g6-5173.asse.devtunnels.ms${imgData.url}`;
       const img = await fabric.FabricImage.fromURL(fullUrl);
 
-      // 캔버스 크기
-      const canvasWidth = this.canvas.getWidth();
-      const canvasHeight = this.canvas.getHeight();
-
-      // 이미지 원본 크기
-      const imgWidth = img.width ?? 1;
-      const imgHeight = img.height ?? 1;
-
-      // 캔버스에 맞는 최대 스케일 계산
-      const scaleX = Math.min(1, canvasWidth / imgWidth);
-      const scaleY = Math.min(1, canvasHeight / imgHeight);
-      // 비율 유지해서 최대한 맞춤
-      const scale = Math.min(scaleX, scaleY);
-
-      
-      if (imgData.left == 0 && imgData.top == 0){
+      if(imgData.scaleX === 1 && 
+        imgData.scaleY === 1 && 
+        imgData.left == 0 && 
+        imgData.top == 0
+      ){ // 처음 추가한 이미지 일때 초기상태 세팅
+        // 캔버스 크기
+        const canvasWidth = this.canvas.getWidth();
+        const canvasHeight = this.canvas.getHeight();
+  
+        // 이미지 원본 크기
+        const imgWidth = img.width;
+        const imgHeight = img.height;
+  
+        // 캔버스에 맞는 최대 스케일 계산
+        const scaleX = Math.min(1, canvasWidth / imgWidth);
+        const scaleY = Math.min(1, canvasHeight / imgHeight);
+        // 비율 유지해서 최대한 맞춤
+        const scale = Math.min(scaleX, scaleY);
+        imgData.scaleX = scale
+        imgData.scaleY = scale
         imgData.left = (canvasWidth - imgWidth * scale) / 2
         imgData.top = (canvasHeight - imgHeight * scale) / 2
       }
@@ -57,8 +61,8 @@ class ImgLayerManager {
       img.set({
         left: imgData.left,
         top: imgData.top,
-        scaleX: scale,
-        scaleY: scale,
+        scaleX: imgData.scaleX,
+        scaleY: imgData.scaleY,
         angle: imgData.angle,
         selectable: active,
         evented: active,
@@ -68,11 +72,11 @@ class ImgLayerManager {
       if (onImgTransform) {
         img.on('modified', () => {
           onImgTransform(
-            img.top ?? 0,
-            img.left ?? 0,
+            img.top,
+            img.left,
             img.scaleX,
             img.scaleY,
-            img.angle ?? 0
+            img.angle
           );
         });
       }
@@ -120,6 +124,9 @@ class ImgLayerManager {
     zIndex: number
   ): Promise<void> {
     let img = this.imgMap.get(imgData.id);
+
+    console.log(imgData);
+    
     
 
     if (!img) {
