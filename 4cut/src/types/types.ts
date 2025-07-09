@@ -3,7 +3,7 @@ import type { PathProps, TOptions } from 'fabric';
 
 export interface DrawingItem {
   id: string;
-  brushType: "pen" | "marker" | "eraser" | "test";
+  brushType: string;
   jsonData: {
     points: { x: number; y: number }[];
     options: Partial<TOptions<PathProps>>;

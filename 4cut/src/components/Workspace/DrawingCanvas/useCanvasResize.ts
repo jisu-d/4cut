@@ -42,8 +42,7 @@ export const useCanvasResize = (
         setCanvasSize({ width: defaultWidth, height: defaultHeight });
         return;
       }
-
-      // 컨테이너 크기의 지정된 비율로 제한
+      
       const maxWidth = containerWidth * maxSizeRatio;
       const maxHeight = containerHeight * maxSizeRatio;
 
