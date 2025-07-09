@@ -41,13 +41,17 @@ function calculateSizeByAspectRatio(width: number, height: number, aspectRatio: 
 class CutLayerManager {
   private canvas: fabric.Canvas;
   private rectMap: Map<string, fabric.Rect>;
+  private scaleX: number;
+  private scaleY: number;
 
-  constructor(canvas: fabric.Canvas) {
+  constructor(canvas: fabric.Canvas, scale: { scaleX: number, scaleY: number }) {
     this.canvas = canvas;
     if (!canvas._aspectRects) {
       canvas._aspectRects = new Map();
     }
     this.rectMap = canvas._aspectRects;
+    this.scaleX = scale.scaleX;
+    this.scaleY = scale.scaleY;
   }
 
   // 컨트롤 설정을 업데이트하는 메서드
@@ -77,7 +81,7 @@ class CutLayerManager {
       ...rectData,
       fill: 'rgb(255, 255, 255)',
       stroke: cut.checked ? 'red' : 'black',
-      strokeWidth: 3,
+      strokeWidth: 1.5,
       selectable: active,
       evented: active,
       visible: visible,
@@ -96,7 +100,9 @@ class CutLayerManager {
 
     // 이벤트 등록
     if (onRectClick) {
-      rect.on('mousedown', () => onRectClick(cut.id));
+      rect.on('mousedown', () => {
+        onRectClick(cut.id)
+      });
     }
 
     if (onRectTransform) {
@@ -160,7 +166,7 @@ class CutLayerManager {
     }
   }
 
-  // rect 데이터를 계산하는 메서드
+  // rect 데이터를 계산하는 메서드 
   private calculateRectData(cut: ListCutImage, idx: number): {
     left: number;
     top: number;
@@ -177,11 +183,12 @@ class CutLayerManager {
     width = calculatedWidth;
     height = calculatedHeight;
     
+    // 화면 좌표로 변환
     return {
-      left: jsonData.left ?? (50 + idx * 250),
-      top: jsonData.top ?? ((this.canvas.height! - height) / 2),
-      width,
-      height,
+      left: jsonData.left * this.scaleX,
+      top: jsonData.top * this.scaleY,
+      width: width * this.scaleX,
+      height: height * this.scaleY,
       angle: jsonData.angle ?? 0
     };
   }
@@ -238,8 +245,9 @@ export function syncAspectRatioRects(
   onRectTransform: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void,
   active: boolean,
   visible: boolean,
-  zindx: number
+  zindx: number,
+  scale: { scaleX: number, scaleY: number }
 ) {
-  const manager = new CutLayerManager(canvas);
+  const manager = new CutLayerManager(canvas, scale);
   manager.syncRects(cuts, onRectClick, onRectTransform, active, visible, zindx);
 }
