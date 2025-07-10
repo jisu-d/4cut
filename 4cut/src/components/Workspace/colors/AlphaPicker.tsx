@@ -34,6 +34,7 @@ const AlphaPicker= () => {
                     className="alpha-gradient-overlay"
                     style={{
                         background: `linear-gradient(to right, rgba(255,255,255,0), ${hslString})`,
+                        pointerEvents: 'none'
                     }}
                 ></div>
             </div>
