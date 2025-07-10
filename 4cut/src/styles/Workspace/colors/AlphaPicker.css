@@ -35,21 +35,14 @@
     border-radius: 20px;
 }
 
-/* 웹킷 기반 브라우저 (Chrome, Safari, Edge)의 슬라이더 썸 스타일 */
 .alpha-picker-range::-webkit-slider-thumb {
     -webkit-appearance: none;
-    /* 기본 스타일 제거 */
-    /* appearance: none; */
     width: 30px;
-    /* 썸의 너비 설정 */
     height: 30px;
-    /* 썸의 높이 설정 */
     border-radius: 50%;
-    /* 썸을 원형으로 만듭니다 */
-    background: #ffffff;
-    /* 썸의 배경색 */
-    border: 2px solid #333;
-    /* 썸의 테두리 */
+    background: #fff;
+    border: 1px solid #333;
+    box-shadow: 0 0 0 1px #0006;
 }
 
 /* 웹킷 썸에 호버 및 활성 상태 스타일 추가 */
