@@ -13,10 +13,12 @@
 
 /* 웹킷 기반 브라우저 (Chrome, Safari, Edge)의 슬라이더 썸 스타일 */
 .color-picker-range::-webkit-slider-thumb {
-    background: #ffffff; /* 썸의 배경색 */
-    width: 30px; /* 썸의 너비 설정 */
-    height: 30px; /* 썸의 높이 설정 */
-    border-radius: 50%; /* 썸을 원형으로 만듭니다 */
+    background: #fff;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid #333;
+    box-shadow: 0 0 0 1px #0006;
     appearance: none;
 }
 
