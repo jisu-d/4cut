@@ -1,3 +1,12 @@
 .gradient-picker-box {
     touch-action: none;
 }
+
+.color-thumb {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid #333;
+    box-shadow: 0 0 0 1px #0006;
+    background: #fff;
+}
