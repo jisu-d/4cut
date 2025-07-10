@@ -136,18 +136,15 @@ const GradientColorPicker: React.FC = () => {
       onTouchStart={handleTouchStart}
     >
       <div
+        className="color-thumb"
         style={{
           position: 'absolute',
           left: `calc(${x * 100}% - 16px)`,
           top: `calc(${y * 100}% - 16px)`,
-          width: 32,
-          height: 32,
-          borderRadius: '50%',
           border: `3px solid ${markerColorStr}`,
-          boxSizing: 'border-box',
-          pointerEvents: 'none',
           backgroundColor: markerColorStr,
           boxShadow: '0 0 0 2px #0006',
+          pointerEvents: 'none',
         }}
       />
     </div>
