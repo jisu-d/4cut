@@ -3,6 +3,11 @@
   display: flex;
   padding: 15px 30px;
   background-color: hsl(0, 0%, 80%);
+  /*드래그 방지*/
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none
 }
 
 .main-layout .tools-panel {
