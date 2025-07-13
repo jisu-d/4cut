@@ -18,9 +18,10 @@ const LayerList = () => {
   const { drawingData, setDrawingData } = context.layer.DrawingData;
 
   const handleAddLayer = () => {
+    const layerId = `drawing-${Date.now()}`
     
     const newLayer: UserLayerDataType = {
-      id: String(userLayerDataType.length + 1),
+      id: layerId,
       text: `drawing-${userLayerDataType.length + 1}`,
       LayerType: 'Drawing',
       visible: true,
@@ -28,7 +29,7 @@ const LayerList = () => {
     };
 
     const newDrawingData: ListDrawingItem = {
-      [newLayer.text]: []
+      [layerId]: []
     }
     
 
@@ -45,10 +46,7 @@ const LayerList = () => {
           cursor: "pointer"
         }} alt="" />
       </div>
-      <DndList
-        items={userLayerDataType}
-        setItems={setUserLayerDataType}
-      />
+      <DndList />
     </div>
   );
 }

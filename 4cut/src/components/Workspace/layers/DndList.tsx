@@ -1,9 +1,10 @@
 import '../../../styles/Workspace/layers/DndList.css';
 import React, {useCallback, useEffect, useRef, useState, useContext} from 'react';
-import type {UserLayerDataType} from '../../../types/types';
 import trash from '../../../assets/Icon/trash.svg';
 import {CustomCheckbox} from '../CustomCheckbox';
 import AppContext from '../../../contexts/AppContext';
+import { removeDrawingById } from '../DrawingCanvas/fabric/drawingLayer';
+import { removeImgById } from '../DrawingCanvas/fabric/imgLayer';
 
 // arrayMove 유틸리티 함수 (기존과 동일)
 const arrayMove = <T,>(arr: T[], oldIndex: number, newIndex: number): T[] => {
@@ -18,14 +19,15 @@ const arrayMove = <T,>(arr: T[], oldIndex: number, newIndex: number): T[] => {
 
 const TRANSITION_DURATION = 300; // 0.3초 (ms 단위)
 
-interface DndListProps {
-  items: UserLayerDataType[];
-  setItems: React.Dispatch<React.SetStateAction<UserLayerDataType[]>>;
-}
 
-const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
+const DndList = () => {
   const appContext = useContext(AppContext);
   const setDrawingData = appContext?.layer?.DrawingData.setDrawingData;
+  const setImgData = appContext?.layer?.imgData.setImgData;
+  const canvas = appContext.canvas.fabricCanvasRef;
+  const { userLayerDataType, setUserLayerDataType } = appContext.layer.userLayerDataType; // 중복 선언 제거
+
+
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [overlayPos, setOverlayPos] = useState<{ x: number; y: number } | null>(null);
   const [offset, setOffset] = useState<{ x: number; y: number } | null>(null);
@@ -58,23 +60,46 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
       document.body.style.cursor = '';
       document.body.style.overflow = '';
 
-      items.forEach(item => {
+      userLayerDataType.forEach(item => {
         const el = itemRefs.current.get(item.id);
         if (el) {
           el.style.transform = '';
         }
       });
     }
-  }, [draggingId, items]);
+  }, [draggingId, userLayerDataType]);
 
-  const onDelete = useCallback((id: string) => {
-    // 1. 해당 항목에 'is-deleting' 클래스를 추가하기 위해 deletingIds에 ID를 추가합니다.
+  const onDelete = useCallback((id: string, LayerType:  "Drawing" | "Img") => {
+    setUserLayerDataType(prevItems => prevItems.filter(item => item.id !== id));
+    if (canvas.current) {
+      if (LayerType === 'Img') {
+        removeImgById(canvas.current, id);
+        if (setImgData) {
+          setImgData(prev => {
+            const copy = { ...prev };
+            delete copy[id];
+            return copy;
+          });
+        }
+      } else if (LayerType === 'Drawing') {
+        removeDrawingById(canvas.current, id);
+        if (setDrawingData) {
+          setDrawingData((prev) => {
+            const copy = { ...prev };
+            if (copy[id]) delete copy[id];
+            return copy;
+          });
+        }
+      }
+    }
+
+    // 2. 해당 항목에 'is-deleting' 클래스를 추가하기 위해 deletingIds에 ID를 추가합니다.
     setDeletingIds(prevIds => new Set(prevIds.add(id)));
 
-    // 2. 애니메이션 지속 시간 후에 실제로 items 상태에서 항목을 제거합니다.
+    // 3. 애니메이션 지속 시간 후에 실제로 items 상태에서 항목을 제거합니다.
     setTimeout(() => {
-      setItems(prevItems => prevItems.filter(item => item.id !== id));
-      // 3. 삭제 애니메이션이 끝났으므로 deletingIds에서도 해당 ID를 제거합니다.
+      
+      // 4. 삭제 애니메이션이 끝났으므로 deletingIds에서도 해당 ID를 제거합니다.
       setDeletingIds(prevIds => {
         const newSet = new Set(prevIds);
         newSet.delete(id);
@@ -96,7 +121,7 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
         setEditingId(null);
       }
     }, TRANSITION_DURATION); // CSS transition 시간과 일치시킵니다.
-  }, [setItems, draggingId, editingId]);
+  }, [setUserLayerDataType, draggingId, editingId, canvas, setDrawingData, setImgData]);
 
 
   // 드래그/터치 시작 시 공통 로직
@@ -136,10 +161,10 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
       y: clientY - rect.top,
     });
 
-    setOriginalIndex(items.findIndex(item => item.id === id));
+    setOriginalIndex(userLayerDataType.findIndex(item => item.id === id));
 
     const newRects = new Map<string, DOMRect>();
-    items.forEach(item => {
+    userLayerDataType.forEach(item => {
       const el = itemRefs.current.get(item.id);
       if (el) newRects.set(item.id, el.getBoundingClientRect());
     });
@@ -148,21 +173,21 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
     document.body.style.userSelect = 'none';
     document.body.style.cursor = 'grabbing';
     document.body.style.overflow = 'hidden';
-  }, [items, deletingIds, editingId]);
+  }, [userLayerDataType, deletingIds, editingId]);
 
   // 레이어 선택(active) 함수 (radio처럼 동작)
   const selectLayer = useCallback((id: string) => {
-    setItems(prevItems => prevItems.map(item => ({ ...item, active: item.id === id })));
-  }, [setItems]);
+    setUserLayerDataType(prevItems => prevItems.map(item => ({ ...item, active: item.id === id })));
+  }, [setUserLayerDataType]);
 
   // 체크박스 토글 함수 (visible만 변경)
   const toggleVisible = useCallback((id: string) => {
-    setItems(prevItems =>
+    setUserLayerDataType(prevItems =>
       prevItems.map(item =>
         item.id === id ? { ...item, visible: !item.visible } : item
       )
     );
-  }, [setItems]);
+  }, [setUserLayerDataType]);
 
   // 마우스/터치 다운 핸들러 (롱프레스/클릭 분기)
   const handlePointerDown = useCallback((clientX: number, clientY: number, id: string, target: EventTarget) => {
@@ -222,10 +247,10 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
 
     let newTargetIndex = originalIndex;
 
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].id === draggingId) continue;
+    for (let i = 0; i < userLayerDataType.length; i++) {
+      if (userLayerDataType[i].id === draggingId) continue;
 
-      const targetRect = itemRects.current.get(items[i].id);
+      const targetRect = itemRects.current.get(userLayerDataType[i].id);
       if (targetRect) {
         const targetCenterY = targetRect.top + targetRect.height / 2;
 
@@ -242,8 +267,8 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
       }
     }
 
-    if (newTargetIndex !== null && newTargetIndex !== items.findIndex(item => item.id === draggingId)) {
-      setItems(prevItems => {
+    if (newTargetIndex !== null && newTargetIndex !== userLayerDataType.findIndex(item => item.id === draggingId)) {
+      setUserLayerDataType(prevItems => {
         const currentDraggingIndex = prevItems.findIndex(item => item.id === draggingId);
         const movedItems = arrayMove(prevItems, currentDraggingIndex, newTargetIndex!);
 
@@ -268,7 +293,7 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
       });
       setOriginalIndex(newTargetIndex);
     }
-  }, [draggingId, offset, originalIndex, items, setItems]);
+  }, [draggingId, offset, originalIndex, userLayerDataType, setUserLayerDataType]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     commonDragMoveLogic(e.clientX, e.clientY);
@@ -290,12 +315,12 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
 
   // 레이어 이름 변경 UserLayerDataType의 text변경
   const handleTextInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>, id: string) => {
-    setItems(prevItems =>
+    setUserLayerDataType(prevItems =>
       prevItems.map(item =>
         item.id === id ? { ...item, text: e.target.value } : item
       )
     );
-  }, [setItems]);
+  }, [setUserLayerDataType]);
 
   const handleTextBlur = useCallback(() => {
     setEditingId(null); // 편집 모드 종료
@@ -350,7 +375,7 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
 
   return (
     <div className="list-container">
-      {items.map(item => {
+      {userLayerDataType.map(item => {
         const isDeleting = deletingIds.has(item.id);
         const isCurrentlyDragging = item.id === draggingId;
         const isEditing = item.id === editingId;
@@ -414,7 +439,9 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
                   className="delete-icon"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onDelete(item.id);
+                    if(item.LayerType !== 'Cut'){
+                      onDelete(item.id, item.LayerType);
+                    }
                   }}
                 />
               )}
@@ -426,7 +453,7 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
       {/* 드래그 중인 항목을 위한 오버레이*/}
       {draggingId && overlayPos && offset && (
         <div
-          className={`list-item dragged-overlay${items.find(item => item.id === draggingId)?.active ? ' selected' : ''}`}
+          className={`list-item dragged-overlay${userLayerDataType.find(item => item.id === draggingId)?.active ? ' selected' : ''}`}
           style={{
             left: overlayPos.x,
             top: overlayPos.y,
@@ -438,23 +465,19 @@ const DndList: React.FC<DndListProps> = ({ items, setItems }) => {
           }}
         >
           {/* items 배열에서 draggingId와 일치하는 아이템을 찾아서 텍스트를 표시합니다. */}
-          {items.find(item => item.id === draggingId)?.text}
+          {userLayerDataType.find(item => item.id === draggingId)?.text}
           <div className="list-item-controls">
             {/* CustomCheckbox에 드래그 중인 아이템의 ID와 체크 상태를 전달합니다. */}
             <CustomCheckbox
               id={draggingId}
-              visible={items.find(item => item.id === draggingId)?.visible ?? true}
+              visible={userLayerDataType.find(item => item.id === draggingId)?.visible ?? true}
               onToggleVisible={toggleVisible}
             />
-            {items.find(item => item.id === draggingId)?.LayerType !== 'Cut' && ( // Cut 타입은 삭제 불가
+            {userLayerDataType.find(item => item.id === draggingId)?.LayerType !== 'Cut' && ( // Cut 타입은 삭제 불가
               <img
                 src={trash}
                 alt="Delete"
                 className="delete-icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(draggingId); // onDelete 함수에 드래그 중인 아이템의 ID를 전달합니다.
-                }}
               />
             )}
           </div>
