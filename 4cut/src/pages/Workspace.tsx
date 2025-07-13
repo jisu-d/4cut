@@ -14,10 +14,10 @@ function Workspace() {
     { src: '/src/assets/Icon/test.jpg', alt: '캠퍼스 맵' },
     { src: '/src/assets/Icon/AlertCrcle.svg', alt: '파일 미리보기 큰 캘린더' },
     { src: '/src/assets/Icon/test.jpg', alt: '캠퍼스 맵' },
-    { src: '/src/assets/Icon/brush.svg', alt: '짧은 텍스트 미리보기' },
+    { src: '/src/assets/test/Bear.png', alt: '곰' },
     { src: '/src/assets/Icon/brush.svg', alt: '파일 미리보기 작은 캘린더' },
     { src: '/src/assets/Icon/test.jpg', alt: '캠퍼스 맵' },
-    { src: '/src/assets/Icon/brush.svg', alt: '짧은 텍스트 미리보기' },
+    { src: '/src/assets/test/Carrot.png', alt: '당근' },
     { src: '/src/assets/Icon/brush.svg', alt: '파일 미리보기 작은 캘린더' },
     { src: '/src/assets/Icon/brush.svg', alt: '짧은 텍스트 미리보기' },
     { src: '/src/assets/Icon/brush.svg', alt: '파일 미리보기 작은 캘린더' },
@@ -37,14 +37,14 @@ function Workspace() {
 
   const [userLayerDataType, setUserLayerDataType] = useState<UserLayerDataType[]>([
     {
-      id: '3',
+      id: 'img-456',
       text: 'img-1',
       LayerType: 'Img',
       visible: true,
       active: false,
     },
     {
-      id: '4',
+      id: 'img-123',
       text: 'img-2',
       LayerType: 'Img',
       visible: true,
@@ -58,7 +58,7 @@ function Workspace() {
       active: true,
     },
     {
-      id: '2',
+      id: 'drawing-123',
       text: 'drawing-1',
       LayerType: 'Drawing',
       visible: true,
@@ -67,7 +67,7 @@ function Workspace() {
   ])
 
   const [imgData, setImgData] = useState<ImgData>({
-    '3': {
+    'img-123': {
       id: 'img-123',
       url: '/src/assets/test/Bear.png',
       left: 146,
@@ -76,7 +76,7 @@ function Workspace() {
       scaleY: 0.5,
       angle: 0
     },
-    '4': {
+    'img-456': {
       id: 'img-456',
       url: '/src/assets/test/Carrot.png',
       left: 2272,
@@ -114,6 +114,8 @@ function Workspace() {
       return next;
     });
   };
+
+  const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
 
   useEffect(() => { // 임시 데이터
     setCutImages([
@@ -172,7 +174,7 @@ function Workspace() {
     ]);
 
     setDrawingData({
-      '2': [
+      'drawing-123': [
         {
           id: 'drawing-2',
           brushType: "pen",
@@ -257,7 +259,8 @@ function Workspace() {
       canvasSize: canvasSize,
       setCanvasSize: setCanvasSize,
       backgroundColor: backgroundColor,
-      setBackgroundColor: setBackgroundColor
+      setBackgroundColor: setBackgroundColor,
+      fabricCanvasRef: fabricCanvasRef,
     }
   }), [
     // 이미지 관련
@@ -275,6 +278,7 @@ function Workspace() {
     // 캔버스 관련
     canvasSize, 
     backgroundColor,
+    fabricCanvasRef,
   ]);
 
   const openExportPopup = () => setIsExportPopupOpen(true);

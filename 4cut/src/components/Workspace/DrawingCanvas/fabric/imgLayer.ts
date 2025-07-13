@@ -15,10 +15,10 @@ class ImgLayerManager {
 
   constructor(canvas: fabric.Canvas) {
     this.canvas = canvas;
-    if (!(canvas as any)._imgLayers) {
-      (canvas as any)._imgLayers = new Map();
+    if (!canvas._imgLayers) {
+      canvas._imgLayers = new Map();
     }
-    this.imgMap = (canvas as any)._imgLayers;
+    this.imgMap = canvas._imgLayers;
   }
 
   private async createImg(
@@ -124,11 +124,6 @@ class ImgLayerManager {
     zIndex: number
   ): Promise<void> {
     let img = this.imgMap.get(imgData.id);
-
-    console.log(imgData);
-    
-    
-
     if (!img) {
       await this.createImg(imgData.id, imgData, active, visible, zIndex, onImgTransform);
     } else {
@@ -158,6 +153,21 @@ export async function syncImgLayers(
 ) {
   const manager = new ImgLayerManager(canvas);
   await manager.syncImgs(imgData, onImgTransform, active, visible, zIndex);
-  
+}
+
+// canvas와 id로 이미지를 삭제하는 export 함수
+export function removeImgById(canvas: fabric.Canvas, imgId: string) {
+  if (canvas._imgLayers) {
+    const imgMap = canvas._imgLayers as Map<string, fabric.FabricImage>;
+    const img = imgMap.get(imgId);
+    console.log(img);
+    console.log(canvas._imgLayers, imgId);
+    
+    if (img) {
+      canvas.remove(img);
+      imgMap.delete(imgId);
+      canvas.renderAll();
+    }
+  }
 }
 
