@@ -16,9 +16,9 @@ const ColorHistoryBar: React.FC<ColorHistoryBarProps> = ({ historyColor, onSelec
   useEffect(() => {
     if (!historyListRef.current) return;
     const update = () => {
-      const width = historyListRef.current!.offsetWidth - 12;
-      const count = Math.max(1, Math.floor(width / 48)); // 32px + 8px gap
-      setMaxVisible(Math.max(7, count));
+      const width = historyListRef.current!.offsetWidth - 24; // 양쪽 패딩
+      const count = Math.max(1, Math.floor(width / 50)); // 32px + 8px gap
+      setMaxVisible(count);
     };
     update();
     window.addEventListener('resize', update);
