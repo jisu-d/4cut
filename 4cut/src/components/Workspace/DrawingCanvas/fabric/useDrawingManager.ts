@@ -14,7 +14,7 @@ interface UseDrawingManagerProps {
   alpha: number;
   setDrawingData?: React.Dispatch<React.SetStateAction<ListDrawingItem>>;
   canvasRef: RefObject<HTMLCanvasElement | null>;
-  fabricCanvasRef?: RefObject<fabric.Canvas | null>;
+  contextfabricCanvasRef?: RefObject<fabric.Canvas | null>;
   scale?: number;
 }
 
@@ -83,7 +83,7 @@ export function useDrawingManager({
   alpha,
   setDrawingData,
   canvasRef,
-  fabricCanvasRef,
+  contextfabricCanvasRef,
   scale,
 }: UseDrawingManagerProps) {
   const [isDrawing, setIsDrawing] = useState(false);
@@ -162,23 +162,23 @@ export function useDrawingManager({
 
   // 드로잉 중일 때 임시 path를 캔버스에 실시간으로 표시
   useEffect(() => {
-    if (!fabricCanvasRef?.current) return;
+    if (!contextfabricCanvasRef?.current) return;
     
     const drawAsync = async () => {
       // 드로잉 중이고, 포인트가 2개 이상일 때만
       if (isDrawing && drawingPoints.length > 1) {
 
         // 기존 임시 path가 있으면 제거
-        if (tempPathObj && fabricCanvasRef.current) {
-          fabricCanvasRef.current.remove(tempPathObj);
+        if (tempPathObj && contextfabricCanvasRef.current) {
+          contextfabricCanvasRef.current.remove(tempPathObj);
         }
-
+        // TODO brushData.brushType따라서 브러시 다르게 하는 코드 구현 필요
         // if(brushData.brushType === 'pen'){
         if(brushData.brushType){
           // points -> pathData 변환
           const pathData = pointsToPathData(drawingPoints);
 
-          if (fabricCanvasRef.current) {
+          if (contextfabricCanvasRef.current) {
             const newPathObj = new fabric.Path(pathData, {
               stroke: hslToHex(hsl.h, hsl.s, hsl.l),
               strokeWidth: brushData.brushSize,
@@ -190,7 +190,7 @@ export function useDrawingManager({
               opacity: alpha,
             });
 
-            fabricCanvasRef.current.add(newPathObj);
+            contextfabricCanvasRef.current.add(newPathObj);
             setTempPathObj(newPathObj);
           }
         } else {
@@ -219,28 +219,28 @@ export function useDrawingManager({
           // };
           // const obj = await imageStampBrush(newDrawing, matchedBrush)
           //
-          // if (fabricCanvasRef.current) {
-          //   fabricCanvasRef.current.add(obj);
+          // if (contextfabricCanvasRef.current) {
+          //   contextfabricCanvasRef.current.add(obj);
           //   setTempPathObj(obj);
           // }
         }
 
         // 새로운 Path 객체 생성
 
-        if (fabricCanvasRef.current) {
-          fabricCanvasRef.current.requestRenderAll();
+        if (contextfabricCanvasRef.current) {
+          contextfabricCanvasRef.current.requestRenderAll();
         }
       } else if (!isDrawing && tempPathObj) {
         // 드로잉이 끝나면 임시 path 제거
-        if (fabricCanvasRef.current) {
-          fabricCanvasRef.current.remove(tempPathObj);
+        if (contextfabricCanvasRef.current) {
+          contextfabricCanvasRef.current.remove(tempPathObj);
         }
         setTempPathObj(null);
       }
     };
 
     drawAsync();
-  }, [isDrawing, drawingPoints, fabricCanvasRef]);
+  }, [isDrawing, drawingPoints, contextfabricCanvasRef]);
 
   return {
     handleCanvasPointerDown,
