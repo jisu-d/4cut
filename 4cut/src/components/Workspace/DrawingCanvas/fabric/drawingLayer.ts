@@ -1,11 +1,7 @@
 import * as fabric from 'fabric';
 import type { DrawingItem, BrushType } from '../../../../types/types';
 
-import AppContext from '../../../../contexts/AppContext';
-
 import {imageStampBrush} from './imageStampBrush'
-import { useContext } from 'react';
-
 import {brushType} from '../../../../assets/brush/brushType'
 
 // Canvas에 _drawingLayerObjects 속성 추가를 위한 타입 확장
@@ -143,15 +139,15 @@ class DrawingLayerManager {
   }
 
   // 사용하지 않는 드로잉 객체 제거
-  private removeUnusedDrawings(drawings: DrawingItem[]) {
-    
-    for (const [id, obj] of this.drawingMap.entries()) {
-      if (!drawings.find(d => d.id === id)) {
-        this.canvas.remove(obj);
-        this.drawingMap.delete(id);
-      }
-    }
-  }
+  //private removeUnusedDrawings(drawings: DrawingItem[]) {
+  //  for (const [id, obj] of this.drawingMap.entries()) {
+  //    if (!drawings.find(d => d.id === id)) {
+  //      
+  //      this.canvas.remove(obj);
+  //      this.drawingMap.delete(id);
+  //    }
+  //  }
+  //}
 
   // 메인 동기화 메서드
   syncDrawings(
@@ -161,8 +157,9 @@ class DrawingLayerManager {
     visible: boolean,
     zIndex: number
   ) {
-    // 1. 사용하지 않는 드로잉 제거
-    this.removeUnusedDrawings(drawings);
+    // TODO 이런 방식으로 레이어를 삭제하는 방식은 처음 drawings데이터를 받을때 부터 코드를 수정해야함, 
+    // 현재 외부에서 함수 호출로 canvas map에서 삭제하는 방식으로 하고 있음
+    //this.removeUnusedDrawings(drawings);
     
     // 2. drawings 처리
     drawings.forEach(async drawing => {
@@ -193,4 +190,19 @@ export function syncDrawingLayer(
 ) {
   const manager = new DrawingLayerManager(canvas, layerId);
   manager.syncDrawings(drawingItems, onDrawingTransform, active, visible, zIndex);
+}
+
+// id로 드로잉 오브젝트를 삭제하는 함수
+export function removeDrawingById(canvas: fabric.Canvas, layerId: string) {
+  if (canvas._drawingLayerObjects && canvas._drawingLayerObjects.has(layerId)) {
+    const drawingMap = canvas._drawingLayerObjects.get(layerId);
+    if(drawingMap){
+      for (const [id, obj] of drawingMap.entries()) {
+        canvas.remove(obj);
+        drawingMap.delete(id);
+      }
+      canvas.renderAll();
+    }
+
+  }
 }

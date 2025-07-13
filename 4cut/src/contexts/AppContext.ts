@@ -57,6 +57,7 @@ const AppContext = React.createContext<AppContextType>({
     setCanvasSize: () => {},
     backgroundColor: '#ffffff',
     setBackgroundColor: () => {},
+    fabricCanvasRef: { current: null },
   },
 });
 
