@@ -1,5 +1,6 @@
 export type AspectRatio = '4:3' | '3:4' | '1:1' | '16:9';
 import type { PathProps, TOptions } from 'fabric';
+import * as fabric from 'fabric';
 
 export interface DrawingItem {
   id: string;
@@ -147,6 +148,7 @@ export interface AppContextType {
     setCanvasSize: React.Dispatch<React.SetStateAction<CanvasSize>>;
     backgroundColor: string;
     setBackgroundColor: React.Dispatch<React.SetStateAction<string>>;
+    fabricCanvasRef: React.RefObject<fabric.Canvas | null>;
   },
 }
 

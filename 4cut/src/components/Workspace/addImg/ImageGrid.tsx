@@ -30,9 +30,10 @@ function ImageGrid() {
         const { setImgData } = context.layer.imgData;
 
         const layerName = `img-${userLayerDataType.length + 1}`
+        const layerId = `img-${Date.now()}`
         
         const newLayerData: UserLayerDataType = {
-            id: `${userLayerDataType.length + 1}`,
+            id: layerId,
             text: layerName,
             LayerType: 'Img',
             visible: true,
@@ -42,7 +43,7 @@ function ImageGrid() {
         setUserLayerDataType(prev => [newLayerData, ...prev]);
 
         const newImgData: ImgDataItem = {
-            id: `img-${Date.now()}`,
+            id: layerId,
             url: imageSrc,
             left: 0,
             top: 0,
@@ -53,7 +54,7 @@ function ImageGrid() {
 
         setImgData(prev => ({
             ...prev,
-            [userLayerDataType.length + 1]: newImgData
+            [layerId]: newImgData
         }));
     };
 

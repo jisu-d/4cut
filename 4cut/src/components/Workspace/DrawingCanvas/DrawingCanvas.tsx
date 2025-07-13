@@ -5,10 +5,9 @@ import {useCanvasZoom} from './useCanvasZoom';
 import CanvasResetButton from './CanvasResetButton';
 import CanvasToolBar from './CanvasToolBar';
 import AppContext from '../../../contexts/AppContext';
-import {createFabricCanvas, syncFabricBackgroundColor} from './fabric/fabric';
+import {createFabricCanvas} from './fabric/fabric';
 import {syncAspectRatioRects} from './fabric/cutLayer';
 import {syncDrawingLayer} from './fabric/drawingLayer';
-import * as fabric from 'fabric';
 import { useDrawingManager } from './fabric/useDrawingManager';
 import { syncImgLayers } from './fabric/imgLayer';
 
@@ -23,12 +22,13 @@ function DrawingCanvas() {
     const drawingData = appContext.layer?.DrawingData.drawingData || {};
     const setDrawingData = appContext.layer?.DrawingData.setDrawingData;
 
-
     const cutImageData = appContext.layer?.cutImageData.cutImageData || [];
     const setCutImageData = appContext.layer?.cutImageData.setCutImageData;
 
     const imgData = appContext.layer?.imgData.imgData || {}
     const setImgData = appContext.layer?.imgData.setImgData
+
+    const contextfabricCanvasRef  = appContext.canvas.fabricCanvasRef
 
     const brushData = appContext.brush?.brushData
 
@@ -46,10 +46,6 @@ function DrawingCanvas() {
         minWidth: 200,
         minHeight: 150,
     });
-
-    //console.log(canvasSize.width / currentCanvasSize.width, canvasSize.height / currentCanvasSize.height);
-    //console.log(canvasSize.width);
-    
 
     // 줌/패닝 훅 사용
     const {
@@ -72,7 +68,7 @@ function DrawingCanvas() {
 
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
+    //const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
 
     // useDrawingManager 훅 사용
     const {
@@ -87,7 +83,7 @@ function DrawingCanvas() {
         alpha,
         setDrawingData,
         canvasRef,
-        fabricCanvasRef,
+        contextfabricCanvasRef,
         scale
     });
 
@@ -101,25 +97,33 @@ function DrawingCanvas() {
                 canvasSize.height,
                 currentBackgroundColor
             );
-            fabricCanvasRef.current = fabricCanvas;
+            contextfabricCanvasRef.current = fabricCanvas;
+            
+            // AppContext의 fabricCanvasRef 직접 업데이트
+            //if (contextfabricCanvasRef.current) {
+                //contextfabricCanvasRef.current = fabricCanvas;
+            //}
             
             return () => {
                 fabricCanvas.dispose();
-                fabricCanvasRef.current = null;
+                contextfabricCanvasRef.current = null;
+                //if (contextfabricCanvasRef) {
+                    //contextfabricCanvasRef.current = null;
+                //}
             };
         }
     }, [canvasRef, canvasSize, currentBackgroundColor]);
 
     useEffect(() => {
-        if (!fabricCanvasRef.current) return;
+        if (!contextfabricCanvasRef.current) return;
         if (activeTool === 'pen') {
-            fabricCanvasRef.current.isDrawingMode = true;
-            fabricCanvasRef.current.selection = false;
+            contextfabricCanvasRef.current.isDrawingMode = true;
+            contextfabricCanvasRef.current.selection = false;
         } else if (activeTool === 'select'){
-            fabricCanvasRef.current.isDrawingMode = false;
-            fabricCanvasRef.current.selection = true;
+            contextfabricCanvasRef.current.isDrawingMode = false;
+            contextfabricCanvasRef.current.selection = true;
         }
-    }, [activeTool, fabricCanvasRef.current]);
+    }, [activeTool, contextfabricCanvasRef.current]);
 
 
     // 모든 cut의 사각형을 그리고, 클릭/이동/크기조절/회전 시 데이터 갱신 - TODO -> 레이어 그리는 부분 최적화가 필요
@@ -127,11 +131,10 @@ function DrawingCanvas() {
     const scaleX = canvasSize.width / currentCanvasSize.width;
     const scaleY = canvasSize.height / currentCanvasSize.height;
     const canvasScale  = { scaleX: scaleX, scaleY: scaleY };
-    //console.log(scaleX);
     
 
     useEffect(() => {
-        if (fabricCanvasRef.current && contextUserLayerDataType) {
+        if (contextfabricCanvasRef.current && contextUserLayerDataType) {
             contextUserLayerDataType.forEach((item, index) => {
                 const idx = contextUserLayerDataType.length - index
                 
@@ -177,7 +180,7 @@ function DrawingCanvas() {
                     };
                     
                     syncAspectRatioRects(
-                        fabricCanvasRef.current!,
+                        contextfabricCanvasRef.current!,
                         cutImageData ?? [],
                         handleRectClick,
                         handleRectTransform,
@@ -204,7 +207,7 @@ function DrawingCanvas() {
                     };
 
                     syncDrawingLayer(
-                        fabricCanvasRef.current!,
+                        contextfabricCanvasRef.current!,
                         item.id,
                         layerDrawingData, 
                         handleDrawingTransform,
@@ -241,7 +244,7 @@ function DrawingCanvas() {
                         };
 
                         syncImgLayers(
-                            fabricCanvasRef.current!,
+                            contextfabricCanvasRef.current!,
                             {
                               ...layerImgData,
                               top: layerImgData.top * canvasScale.scaleY,
@@ -261,7 +264,7 @@ function DrawingCanvas() {
         cutImageData,
         drawingData,
         contextUserLayerDataType,
-        fabricCanvasRef.current,
+        contextfabricCanvasRef.current,
     ]);
     
 
@@ -273,7 +276,7 @@ function DrawingCanvas() {
         if (canvasRef.current && canvasRef.current.contains(target)) return;
 
         // fabric.js 활성 객체가 있으면 해제하지 않음
-        if (fabricCanvasRef.current && fabricCanvasRef.current.getActiveObject()) return;
+        if (contextfabricCanvasRef.current && contextfabricCanvasRef.current.getActiveObject()) return;
 
         // 그 외(진짜 빈 영역)만 해제
         const setCutImageData = appContext.layer?.cutImageData.setCutImageData;
@@ -281,9 +284,9 @@ function DrawingCanvas() {
             setCutImageData(prev => prev.map(item => ({...item, checked: false})));
         }
 
-        if (fabricCanvasRef.current) {
-            fabricCanvasRef.current.discardActiveObject();
-            fabricCanvasRef.current.requestRenderAll();
+        if (contextfabricCanvasRef.current) {
+            contextfabricCanvasRef.current.discardActiveObject();
+            contextfabricCanvasRef.current.requestRenderAll();
         }
     };
 
@@ -295,7 +298,7 @@ function DrawingCanvas() {
 
             // 클릭된 요소가 캔버스나 캔버스 관련 요소인지 확인
             const isCanvas = target.tagName === 'CANVAS';
-            const isFabricObject = fabricCanvasRef.current?.getActiveObject();
+            const isFabricObject = contextfabricCanvasRef.current?.getActiveObject();
 
             // ImageRatioSelector 관련 요소인지 확인
             const isImageRatioSelector = target.closest('.image-ratio-selector-section');
@@ -308,8 +311,8 @@ function DrawingCanvas() {
                 }
 
                 // fabric.js 활성 객체 해제
-                fabricCanvasRef.current?.discardActiveObject();
-                fabricCanvasRef.current?.requestRenderAll();
+                contextfabricCanvasRef.current?.discardActiveObject();
+                contextfabricCanvasRef.current?.requestRenderAll();
             }
         };
 
