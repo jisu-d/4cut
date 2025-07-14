@@ -94,6 +94,7 @@ export interface CanvasSize {
 
 export interface BrushData {
   brushType: string;
+  brushPath: string;
   brushSize: number;
   eraserSize: number
 }

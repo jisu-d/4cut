@@ -133,7 +133,7 @@ export function useDrawingManager({
         const newId = `drawing-${Date.now()}`;
         const newDrawing: DrawingItem = {
           id: newId,
-          brushType: 'test',
+          brushType: brushData.brushType,
           jsonData: {
             points: drawingPoints,
             options: {
@@ -245,6 +245,7 @@ export function useDrawingManager({
         }
         setTempPathObj(null);
       }
+      // TODO 드로잉이 끝난후 삭제 되지 않는 오류가 있음
     };
 
     drawAsync();
