@@ -12,7 +12,7 @@ import * as fabric from 'fabric';
 function Workspace() {
   const [imagesData, setImagesData] = useState<ImagesData[]>([
     { src: '/src/assets/Icon/test.jpg', alt: '캠퍼스 맵' },
-    { src: '/src/assets/Icon/AlertCrcle.svg', alt: '파일 미리보기 큰 캘린더' },
+    { src: '/Wsrc/assets/Icon/AlertCrcle.svg', alt: '파일 미리보기 큰 캘린더' },
     { src: '/src/assets/Icon/test.jpg', alt: '캠퍼스 맵' },
     { src: '/src/assets/test/Bear.png', alt: '곰' },
     { src: '/src/assets/Icon/brush.svg', alt: '파일 미리보기 작은 캘린더' },
@@ -25,7 +25,8 @@ function Workspace() {
 
 
   const [brushData, setBrushData] = useState<BrushData>({
-    brushType: 'test',
+    brushType: 'pen',
+    brushPath: '',
     brushSize: 1,
     eraserSize: 1,
   })
