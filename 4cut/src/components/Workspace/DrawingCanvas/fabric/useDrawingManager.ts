@@ -3,7 +3,7 @@ import type { RefObject } from 'react';
 import type {DrawingItem, ListDrawingItem, UserLayerDataType, BrushData, HSL, BrushType} from '../../../../types/types';
 import * as fabric from 'fabric';
 
-import { imageStampBrush } from './imageStampBrush.ts'
+import { createImageStampGroup, addImageStampToGroup } from './imageStampBrush.ts';
 import {brushType} from "../../../../assets/brush/brushType.ts";
 
 interface UseDrawingManagerProps {
@@ -90,6 +90,7 @@ export function useDrawingManager({
   const [drawingPoints, setDrawingPoints] = useState<{ x: number; y: number }[]>([]);
   const [drawingLayerName, setDrawingLayerName] = useState<string | null>(null);
   const [tempPathObj, setTempPathObj] = useState<fabric.Path | fabric.Group | null>(null);
+  const [matchedBrush, setMatchedBrush] = useState<BrushType | null>(null);
 
   // 드로잉 시작
   const handleCanvasPointerDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -102,7 +103,14 @@ export function useDrawingManager({
     setIsDrawing(true);
     setDrawingPoints([pointer]);
     setDrawingLayerName(selectedLayer.id);
-  }, [contextUserLayerDataType, activeTool, canvasRef, scale]);
+    // brushType이 pen이 아니면 matchedBrush를 찾아서 저장
+    if (brushData.brushType !== 'pen') {
+      const found = brushType.find(b => b.brushType === brushData.brushType) || null;
+      setMatchedBrush(found);
+    } else {
+      setMatchedBrush(null);
+    }
+  }, [contextUserLayerDataType, activeTool, canvasRef, scale, brushData.brushType]);
 
   // 드로잉 중 이동
   const handleCanvasPointerMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -172,9 +180,10 @@ export function useDrawingManager({
         if (tempPathObj && contextfabricCanvasRef.current) {
           contextfabricCanvasRef.current.remove(tempPathObj);
         }
-        // TODO brushData.brushType따라서 브러시 다르게 하는 코드 구현 필요
-        // if(brushData.brushType === 'pen'){
-        if(brushData.brushType){
+        
+        // TODO brushData.brushType 따라서 브러시 실시간 표시 구현 완료
+        // 하지만 최적화 필요....ㅜㅜㅜ
+        if(brushData.brushType == 'pen'){
           // points -> pathData 변환
           const pathData = pointsToPathData(drawingPoints);
 
@@ -194,41 +203,40 @@ export function useDrawingManager({
             setTempPathObj(newPathObj);
           }
         } else {
-          // const matchedBrush = brushType.find(b => b.brushType === brushData.brushType) as BrushType
-          // const newDrawing: DrawingItem = {
-          //   id: `drawing-${Date.now()}`,
-          //   brushType: matchedBrush.brushType,
-          //   jsonData: {
-          //     points: drawingPoints,
-          //     options: {
-          //       stroke: hslToHex(hsl.h, hsl.s, hsl.l),
-          //       strokeWidth: brushData.brushSize,
-          //       strokeLineCap: 'round',
-          //       strokeLineJoin: 'round',
-          //       fill: '',
-          //       left: Math.min(...drawingPoints.map(p => p.x)) - brushData.brushSize / 2,
-          //       top: Math.min(...drawingPoints.map(p => p.y)) - brushData.brushSize / 2,
-          //       width: Math.max(...drawingPoints.map(p => p.x)) - Math.min(...drawingPoints.map(p => p.x)) + brushData.brushSize,
-          //       height: Math.max(...drawingPoints.map(p => p.y)) - Math.min(...drawingPoints.map(p => p.y)) + brushData.brushSize,
-          //       angle: 0,
-          //       scaleX: 1,
-          //       scaleY: 1,
-          //       opacity: alpha,
-          //     }
-          //   }
-          // };
-          // const obj = await imageStampBrush(newDrawing, matchedBrush)
-          //
-          // if (contextfabricCanvasRef.current) {
-          //   contextfabricCanvasRef.current.add(obj);
-          //   setTempPathObj(obj);
-          // }
-        }
-
-        // 새로운 Path 객체 생성
-
-        if (contextfabricCanvasRef.current) {
-          contextfabricCanvasRef.current.requestRenderAll();
+          // 이미지 스탬프 브러시 처리
+          if (contextfabricCanvasRef.current) {
+            // 그룹이 없으면 새로 생성 (마우스 다운 시점)
+            if (brushData.brushType !== 'pen' && !matchedBrush) return;
+            if (!tempPathObj) {
+              const group = await createImageStampGroup(
+                drawingPoints[0],
+                matchedBrush!,
+                {
+                  stroke: hslToHex(hsl.h, hsl.s, hsl.l),
+                  strokeWidth: brushData.brushSize,
+                  opacity: alpha,
+                }
+              );
+              contextfabricCanvasRef.current.add(group);
+              setTempPathObj(group);
+            } else{
+              for (let i = (tempPathObj as fabric.Group)._objects.length; i < drawingPoints.length; i++) {
+                await addImageStampToGroup(
+                  (tempPathObj as fabric.Group),
+                  drawingPoints[i],
+                  matchedBrush!,
+                  {
+                    stroke: hslToHex(hsl.h, hsl.s, hsl.l),
+                    strokeWidth: brushData.brushSize,
+                    opacity: alpha,
+                  }
+                );
+              }
+              contextfabricCanvasRef.current?.remove(tempPathObj as fabric.Group);
+              contextfabricCanvasRef.current?.add(tempPathObj as fabric.Group);
+              contextfabricCanvasRef.current?.requestRenderAll();
+            }
+          }
         }
       } else if (!isDrawing && tempPathObj) {
         // 드로잉이 끝나면 임시 path 제거
@@ -240,7 +248,7 @@ export function useDrawingManager({
     };
 
     drawAsync();
-  }, [isDrawing, drawingPoints, contextfabricCanvasRef]);
+  }, [isDrawing, drawingPoints, contextfabricCanvasRef, brushData.brushType, matchedBrush]);
 
   return {
     handleCanvasPointerDown,
