@@ -103,7 +103,6 @@
       const minDist: number = strokeWidth * 0.7;
 
       const images: fabric.FabricImage[] = [];
-      
       // 이미지 로딩 (비동기 처리)
       const loadedImage = await loadImage(brushtype);
       
