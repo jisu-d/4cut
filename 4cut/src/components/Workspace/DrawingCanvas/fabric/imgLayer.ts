@@ -31,7 +31,7 @@ class ImgLayerManager {
   ): Promise<void> {
     try { 
       // URL이 이미 전체 경로인지 확인하고 처리
-      const fullUrl = imgData.url.startsWith('http') ? imgData.url : `https://ptvc38g6-5173.asse.devtunnels.ms${imgData.url}`;
+      const fullUrl = imgData.url.startsWith('http') ? imgData.url : `http://localhost:5173${imgData.url}`;
       const img = await fabric.FabricImage.fromURL(fullUrl);
 
       if(imgData.scaleX === 1 && 
