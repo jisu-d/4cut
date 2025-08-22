@@ -4,19 +4,7 @@ import type {DrawingItem, ListDrawingItem, UserLayerDataType, BrushData, HSL, Br
 import * as fabric from 'fabric';
 
 import { createImageStampGroup, addImageStampToGroup } from './imageStampBrush.ts';
-import {brushType} from "../../../../assets/brush/brushType.ts";
 
-interface UseDrawingManagerProps {
-  contextUserLayerDataType: UserLayerDataType[] | undefined;
-  activeTool: string;
-  brushData: BrushData;
-  hsl: HSL;
-  alpha: number;
-  setDrawingData?: React.Dispatch<React.SetStateAction<ListDrawingItem>>;
-  canvasRef: RefObject<HTMLCanvasElement | null>;
-  contextfabricCanvasRef?: RefObject<fabric.Canvas | null>;
-  scale?: number;
-}
 
 // HSL을 hex로 변환하는 함수
 function hslToHex(h: number, s: number, l: number): string {
@@ -30,24 +18,6 @@ function hslToHex(h: number, s: number, l: number): string {
   return `#${f(0)}${f(8)}${f(4)}`;
 }
 
-// 좌표 변환 
-function getPointerFromEvent(e: React.MouseEvent | React.TouchEvent, canvasRef: RefObject<HTMLCanvasElement | null>, scale?: number) {
-  let clientX, clientY;
-  if ('touches' in e && e.touches.length > 0) {
-    clientX = e.touches[0].clientX;
-    clientY = e.touches[0].clientY;
-  } else if ('clientX' in e) {
-    clientX = e.clientX;
-    clientY = e.clientY;
-  } else {
-    return null;
-  }
-  const rect = canvasRef.current?.getBoundingClientRect();
-  if (!rect || !scale) return null;
-  const x = (clientX - rect.left) / scale;
-  const y = (clientY - rect.top) / scale;
-  return { x, y };
-}
 
 // points 배열을 SVG PathData로 변환하는 유틸 함수 - 부드러운 곡선으로 변경
 function pointsToPathData(points: {x: number, y: number}[]): string {
@@ -75,6 +45,19 @@ function pointsToPathData(points: {x: number, y: number}[]): string {
   return d;
 }
 
+interface UseDrawingManagerProps {
+  contextUserLayerDataType: UserLayerDataType[] | undefined;
+  activeTool: string;
+  brushData: BrushData;
+  hsl: HSL;
+  alpha: number;
+  setDrawingData: React.Dispatch<React.SetStateAction<ListDrawingItem>>;
+  canvasRef: RefObject<HTMLCanvasElement | null>;
+  contextfabricCanvasRef: RefObject<fabric.Canvas | null>;
+  scale: number;
+  pointerRef: React.RefObject<{x:number, y:number}>;
+}
+
 export function useDrawingManager({
   contextUserLayerDataType,
   activeTool,
@@ -85,171 +68,173 @@ export function useDrawingManager({
   canvasRef,
   contextfabricCanvasRef,
   scale,
+  pointerRef,
 }: UseDrawingManagerProps) {
   const [isDrawing, setIsDrawing] = useState(false);
+  const [isErasing, setIsErasing] = useState(false); // isErasing 상태 추가
   const [drawingPoints, setDrawingPoints] = useState<{ x: number; y: number }[]>([]);
   const [drawingLayerName, setDrawingLayerName] = useState<string | null>(null);
   const [tempPathObj, setTempPathObj] = useState<fabric.Path | fabric.Group | null>(null);
-  const [matchedBrush, setMatchedBrush] = useState<BrushType | null>(null);
 
   // 드로잉 시작
-  const handleCanvasPointerDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (!contextUserLayerDataType || activeTool !== 'pen') return;
-    // Drawing 레이어, 선택되어 있는 레이어를 찾는다
-    const selectedLayer = contextUserLayerDataType.find(layer => layer.active && layer.LayerType === 'Drawing');
+  const handleCanvasPointerDown = useCallback(() => {
+    if (!pointerRef) return;
+
+    const selectedLayer = contextUserLayerDataType?.find(layer => layer.active);
     if (!selectedLayer) return;
-    const pointer = getPointerFromEvent(e, canvasRef, scale);
-    if (!pointer) return;
-    setIsDrawing(true);
-    setDrawingPoints([pointer]);
-    setDrawingLayerName(selectedLayer.id);
-    // brushType이 pen이 아니면 matchedBrush를 찾아서 저장
-    if (brushData.brushType !== 'pen') {
-      const found = brushType.find(b => b.brushType === brushData.brushType) || null;
-      setMatchedBrush(found);
-    } else {
-      setMatchedBrush(null);
+
+    if (activeTool === 'pen') {
+      if (selectedLayer.LayerType !== 'Drawing') return;
+      setIsDrawing(true);
+      setDrawingPoints([pointerRef.current]);
+      setDrawingLayerName(selectedLayer.id);
+    } else if (activeTool === 'eraser') {
+      if (selectedLayer.LayerType !== 'Drawing') return;
+      setIsErasing(true);
+      setDrawingLayerName(selectedLayer.id);
     }
-  }, [contextUserLayerDataType, activeTool, canvasRef, scale, brushData.brushType]);
+  }, [pointerRef, contextUserLayerDataType, activeTool, canvasRef, scale, contextfabricCanvasRef, setDrawingData]);
 
   // 드로잉 중 이동
-  const handleCanvasPointerMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDrawing) return;
-    const pointer = getPointerFromEvent(e, canvasRef, scale);
-    if (!pointer) return;
-    setDrawingPoints(prev => [...prev, pointer]);
-  }, [isDrawing, canvasRef, scale]);
+  const handleCanvasPointerMove = useCallback(() => {
+    if (!pointerRef.current) return;
+
+    if (isDrawing) {
+      setDrawingPoints(prev => [...prev, pointerRef.current]);
+    }
+  }, [pointerRef, isDrawing, isErasing, drawingLayerName, canvasRef, scale, contextfabricCanvasRef, setDrawingData]);
 
   // 드로잉 끝
   const handleCanvasPointerUp = useCallback(() => {
-    if (!isDrawing || !drawingLayerName || drawingPoints.length < 2) {
+    if (isDrawing) {
+      
+      if (!drawingLayerName || drawingPoints.length < 2) {
+        setIsDrawing(false);
+        setDrawingPoints([]);
+        setDrawingLayerName(null);
+        return;
+      }
+      if (setDrawingData) {
+        setDrawingData((prev: ListDrawingItem) => {
+          const newId = `drawing-${Date.now()}`;
+          const newDrawing: DrawingItem = {
+            id: newId,  
+            brushType: brushData.brushType,
+            jsonData: {
+              points: drawingPoints,
+              options: {
+                stroke: hslToHex(hsl.h, hsl.s, hsl.l),
+                strokeWidth: brushData.brushSize,
+                strokeLineCap: 'round',
+                strokeLineJoin: 'round',
+                fill: '',
+                left: Math.min(...drawingPoints.map(p => p.x)) - brushData.brushSize / 2,
+                top: Math.min(...drawingPoints.map(p => p.y)) - brushData.brushSize / 2,
+                width: Math.max(...drawingPoints.map(p => p.x)) - Math.min(...drawingPoints.map(p => p.x)) + brushData.brushSize,
+                height: Math.max(...drawingPoints.map(p => p.y)) - Math.min(...drawingPoints.map(p => p.y)) + brushData.brushSize,
+                angle: 0,
+                scaleX: 1,
+                scaleY: 1,
+                opacity: alpha,
+                globalCompositeOperation: 'source-over'
+              }
+            }
+          };
+          
+          return {
+            ...prev,
+            [drawingLayerName]: [
+              newDrawing,
+              ...(prev[drawingLayerName] || []),
+            ]
+          };
+        });
+      }
+      
       setIsDrawing(false);
       setDrawingPoints([]);
       setDrawingLayerName(null);
+    } else if (isErasing) {
+      setIsErasing(false);
+      setDrawingLayerName(null);
+    }
+  }, [isDrawing, isErasing, drawingLayerName, drawingPoints, setDrawingData, brushData, hsl, alpha]);
+
+  // 드로잉 중일 때 임시 path를 그리고, 업데이트하는 Hook
+  useEffect(() => {
+    const fabricCanvas = contextfabricCanvasRef?.current;
+    if (!fabricCanvas || !isDrawing) {
       return;
     }
-    if (setDrawingData) {
-      setDrawingData((prev: ListDrawingItem) => {
-        const newId = `drawing-${Date.now()}`;
-        const newDrawing: DrawingItem = {
-          id: newId,
-          brushType: brushData.brushType,
-          jsonData: {
-            points: drawingPoints,
-            options: {
-              stroke: hslToHex(hsl.h, hsl.s, hsl.l),
-              strokeWidth: brushData.brushSize,
-              strokeLineCap: 'round',
-              strokeLineJoin: 'round',
-              fill: '',
-              left: Math.min(...drawingPoints.map(p => p.x)) - brushData.brushSize / 2,
-              top: Math.min(...drawingPoints.map(p => p.y)) - brushData.brushSize / 2,
-              width: Math.max(...drawingPoints.map(p => p.x)) - Math.min(...drawingPoints.map(p => p.x)) + brushData.brushSize,
-              height: Math.max(...drawingPoints.map(p => p.y)) - Math.min(...drawingPoints.map(p => p.y)) + brushData.brushSize,
-              angle: 0,
-              scaleX: 1,
-              scaleY: 1,
-              opacity: alpha,
-            }
-          }
-        };
-        
-        return {
-          ...prev,
-          [drawingLayerName]: [
-            ...(prev[drawingLayerName]),
-            newDrawing
-          ]
-        };
-      });
-    }
-    setIsDrawing(false);
-    setDrawingPoints([]);
-    setDrawingLayerName(null);
-  }, [isDrawing, drawingLayerName, drawingPoints, setDrawingData]);
 
-  // 드로잉 중일 때 임시 path를 캔버스에 실시간으로 표시
-  useEffect(() => {
-    if (!contextfabricCanvasRef?.current) return;
-    
+    let isCancelled = false;
+
     const drawAsync = async () => {
-      // 드로잉 중이고, 포인트가 2개 이상일 때만
-      if (isDrawing && drawingPoints.length > 1) {
+      if (drawingPoints.length === 0) return;
 
-        // 기존 임시 path가 있으면 제거
-        if (tempPathObj && contextfabricCanvasRef.current) {
-          contextfabricCanvasRef.current.remove(tempPathObj);
-        }
+      if (brushData.brushType === 'pen') {
+        if (tempPathObj) fabricCanvas.remove(tempPathObj);
         
-        // TODO brushData.brushType 따라서 브러시 실시간 표시 구현 완료
-        // 하지만 최적화 필요....ㅜㅜㅜ
-        if(brushData.brushType == 'pen'){
-          // points -> pathData 변환
-          const pathData = pointsToPathData(drawingPoints);
+        const pathData = pointsToPathData(drawingPoints);
+        const newPathObj = new fabric.Path(pathData, {
+          stroke: hslToHex(hsl.h, hsl.s, hsl.l),
+          strokeWidth: brushData.brushSize,
+          strokeLineCap: 'round',
+          strokeLineJoin: 'round',
+          fill: '',
+          selectable: false,
+          evented: false,
+          opacity: alpha,
+        });
 
-          if (contextfabricCanvasRef.current) {
-            const newPathObj = new fabric.Path(pathData, {
-              stroke: hslToHex(hsl.h, hsl.s, hsl.l),
-              strokeWidth: brushData.brushSize,
-              strokeLineCap: 'round',
-              strokeLineJoin: 'round',
-              fill: '',
-              selectable: false,
-              evented: false,
-              opacity: alpha,
-            });
-
-            contextfabricCanvasRef.current.add(newPathObj);
-            setTempPathObj(newPathObj);
-          }
+        if (isCancelled) return;
+        fabricCanvas.add(newPathObj);
+        setTempPathObj(newPathObj);
+      } else if (brushData) {
+        if (!tempPathObj) {
+          const group = await createImageStampGroup(
+            drawingPoints[0],
+              brushData,
+            { stroke: hslToHex(hsl.h, hsl.s, hsl.l), strokeWidth: brushData.brushSize, opacity: alpha }
+          );
+          if (isCancelled) return;
+          fabricCanvas.add(group);
+          setTempPathObj(group);
         } else {
-          // 이미지 스탬프 브러시 처리
-          if (contextfabricCanvasRef.current) {
-            // 그룹이 없으면 새로 생성 (마우스 다운 시점)
-            if (brushData.brushType !== 'pen' && !matchedBrush) return;
-            if (!tempPathObj) {
-              const group = await createImageStampGroup(
-                drawingPoints[0],
-                matchedBrush!,
-                {
-                  stroke: hslToHex(hsl.h, hsl.s, hsl.l),
-                  strokeWidth: brushData.brushSize,
-                  opacity: alpha,
-                }
-              );
-              contextfabricCanvasRef.current.add(group);
-              setTempPathObj(group);
-            } else{
-              for (let i = (tempPathObj as fabric.Group)._objects.length; i < drawingPoints.length; i++) {
-                await addImageStampToGroup(
-                  (tempPathObj as fabric.Group),
-                  drawingPoints[i],
-                  matchedBrush!,
-                  {
-                    stroke: hslToHex(hsl.h, hsl.s, hsl.l),
-                    strokeWidth: brushData.brushSize,
-                    opacity: alpha,
-                  }
-                );
-              }
-              contextfabricCanvasRef.current?.remove(tempPathObj as fabric.Group);
-              contextfabricCanvasRef.current?.add(tempPathObj as fabric.Group);
-              contextfabricCanvasRef.current?.requestRenderAll();
-            }
+          const group = tempPathObj as fabric.Group;
+          const lastPoint = drawingPoints[drawingPoints.length - 2];
+          const newPoint = drawingPoints[drawingPoints.length - 1];
+
+          if (lastPoint && newPoint) {
+            await addImageStampToGroup(
+                group,
+                newPoint,
+                lastPoint, // lastPoint 전달
+                brushData,
+              { stroke: hslToHex(hsl.h, hsl.s, hsl.l), strokeWidth: brushData.brushSize, opacity: alpha }
+            );
+            if (isCancelled) return;
           }
+          fabricCanvas.requestRenderAll();
         }
-      } else if (!isDrawing && tempPathObj) {
-        // 드로잉이 끝나면 임시 path 제거
-        if (contextfabricCanvasRef.current) {
-          contextfabricCanvasRef.current.remove(tempPathObj);
-        }
-        setTempPathObj(null);
       }
-      // TODO 드로잉이 끝난후 삭제 되지 않는 오류가 있음
     };
 
     drawAsync();
-  }, [isDrawing, drawingPoints, contextfabricCanvasRef, brushData.brushType, matchedBrush]);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isDrawing, drawingPoints, contextfabricCanvasRef, brushData, hsl, alpha]);
+
+  // 드로잉이 끝났을 때 임시 path를 정리하는 Hook
+  useEffect(() => {
+    if (!isDrawing && tempPathObj && contextfabricCanvasRef?.current) {
+      contextfabricCanvasRef.current.remove(tempPathObj);
+      contextfabricCanvasRef.current.requestRenderAll();
+      setTempPathObj(null);
+    }
+  }, [isDrawing]);
 
   return {
     handleCanvasPointerDown,

@@ -1,9 +1,7 @@
 import * as fabric from 'fabric';
-import type { DrawingItem, BrushType } from '../../../../types/types';
+import type { DrawingItem, BrushType, BrushData } from '../../../../types/types';
 
 import {imageStampBrush} from './imageStampBrush'
-import {brushType} from '../../../../assets/brush/brushType'
-
 // Canvas에 _drawingLayerObjects 속성 추가를 위한 타입 확장
 // (캔버스 단위로 레이어별 드로잉 객체를 관리)
 declare module 'fabric' {
@@ -24,16 +22,19 @@ function createFabricDrawing(drawingData: DrawingItem): fabric.Path {
 
     // TODO 주요 옵션만 추출 -> 이거를 이렇게 처리해야 하는 이유를 잘 모르겠음
     const {
-      stroke, strokeWidth, fill, left, top, width, height, angle, scaleX, scaleY, strokeLineCap, strokeLineJoin, opacity
+      stroke, strokeWidth, fill, left, top, width, height, 
+      angle, scaleX, scaleY, strokeLineCap, strokeLineJoin, opacity,
+      globalCompositeOperation,
     } = drawingData.jsonData.options || {};
 
     return new fabric.Path(pathData, {
-      stroke, strokeWidth, fill, left, top, width, height, angle, scaleX, scaleY, strokeLineCap, strokeLineJoin, opacity
+      stroke, strokeWidth, fill, left, top, width, height, 
+      angle, scaleX, scaleY, strokeLineCap, strokeLineJoin, opacity,
+      globalCompositeOperation,
     });
   }
   return new fabric.Path('');
 }
-
 
 // points 배열을 SVG PathData로 변환하는 유틸 함수
 function pointsToPathData(points: {x: number, y: number}[]): string {
@@ -105,7 +106,7 @@ class DrawingLayerManager {
   }
 
   // 드로잉 객체 생성
-  private async createDrawing(drawingData: DrawingItem, active: boolean, visible: boolean, zIndex:number, onDrawingTransform?: (id: string, newProps: any) => void): Promise<fabric.Path | fabric.Group> {
+  private async createDrawing(drawingData: DrawingItem, brushData:BrushData , active: boolean, visible: boolean, zIndex:number, onDrawingTransform?: (id: string, newProps: any) => void): Promise<fabric.Path | fabric.Group> {
     //const obj = createFabricDrawing(drawingData);
     //const obj = await createGroupedImages(drawingData.jsonData.points, 'http://localhost:5173/src/assets/brush/brush1.png');
     // visible, active 속성에 따라 제어
@@ -116,8 +117,7 @@ class DrawingLayerManager {
     if(drawingData.brushType === 'pen'){
       obj = createFabricDrawing(drawingData);
     } else{
-      const matchedBrush = brushType.find(b => b.brushType === drawingData.brushType) as BrushType
-      obj = await imageStampBrush(drawingData, matchedBrush);
+      obj = await imageStampBrush(drawingData, brushData);
     }
 
     obj.set({
@@ -139,15 +139,15 @@ class DrawingLayerManager {
   }
 
   // 사용하지 않는 드로잉 객체 제거
-  //private removeUnusedDrawings(drawings: DrawingItem[]) {
-  //  for (const [id, obj] of this.drawingMap.entries()) {
-  //    if (!drawings.find(d => d.id === id)) {
-  //      
-  //      this.canvas.remove(obj);
-  //      this.drawingMap.delete(id);
-  //    }
-  //  }
-  //}
+  private removeUnusedDrawings(drawings: DrawingItem[]) {
+    const drawingIds = new Set(drawings.map(d => d.id));
+    for (const [id, obj] of this.drawingMap.entries()) {
+      if (!drawingIds.has(id)) {
+        this.canvas.remove(obj);
+        this.drawingMap.delete(id);
+      }
+    }
+  }
 
   // 메인 동기화 메서드
   syncDrawings(
@@ -155,18 +155,17 @@ class DrawingLayerManager {
     onDrawingTransform: (id: string, newProps: any) => void,
     active: boolean,
     visible: boolean,
-    zIndex: number
+    zIndex: number,
+    brushData: BrushData,
   ) {
-    // TODO 이런 방식으로 레이어를 삭제하는 방식은 처음 drawings데이터를 받을때 부터 코드를 수정해야함, 
-    // 현재 외부에서 함수 호출로 canvas map에서 삭제하는 방식으로 하고 있음
-    //this.removeUnusedDrawings(drawings);
+    this.removeUnusedDrawings(drawings);
     
     // 2. drawings 처리
     drawings.forEach(async drawing => {
       let obj = this.drawingMap.get(drawing.id);
       if (!obj) {
         // 새 드로잉 객체 생성
-        obj = await this.createDrawing(drawing, active, visible, zIndex, onDrawingTransform);
+        obj = await this.createDrawing(drawing, brushData, active, visible, zIndex, onDrawingTransform);
         this.canvas.add(obj);
         this.drawingMap.set(drawing.id, obj);
       } else {
@@ -183,13 +182,14 @@ export function syncDrawingLayer(
   canvas: fabric.Canvas,
   layerId: string,
   drawingItems: DrawingItem[],
+  brushData: BrushData,
   onDrawingTransform: (id: string, newProps: any) => void,
   active: boolean,
   visible: boolean,
   zIndex: number,
 ) {
   const manager = new DrawingLayerManager(canvas, layerId);
-  manager.syncDrawings(drawingItems, onDrawingTransform, active, visible, zIndex);
+  manager.syncDrawings(drawingItems, onDrawingTransform, active, visible, zIndex, brushData);
 }
 
 // id로 드로잉 오브젝트를 삭제하는 함수
