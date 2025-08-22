@@ -5,7 +5,6 @@ import BrushItem from './BrushItem';
 
 import type {BrushType} from '../../../types/types'
 
-
 import AppContext from '../../../contexts/AppContext';
 
 import {brushType} from "../../../assets/brush/brushType.ts";
@@ -13,7 +12,7 @@ import {brushType} from "../../../assets/brush/brushType.ts";
 const BrushesContent = () => {
     const appContext = useContext(AppContext);
     const [selectedCategory, setSelectedCategory] = useState('최근 사용');
-    const [selectedBrush, setSelectedBrush] = useState('pen');
+    //const [selectedBrush, setSelectedBrush] = useState('pen');
 
     const { brushData, setBrushData} = appContext.brush
 
@@ -48,11 +47,11 @@ const BrushesContent = () => {
         if(brush.id !== 'pen'){
             found = brushType.find(b => b.brushType === brush.id) as BrushType
         }
-        setSelectedBrush(brush.id);
+        //setSelectedBrush(brush.id);
         setBrushData(prev => ({
             ...prev,
             brushType: brush.id,
-            brushData: found.brushPath
+            brushPath: found.brushPath,
         }))
     }
 
@@ -86,7 +85,7 @@ const BrushesContent = () => {
                         <BrushItem
                             key={brush.id + brush.name}
                             brush={brush}
-                            selected={selectedBrush === brush.id}
+                            selected={brushData.brushType === brush.id}
                             onClick={() => handleSelectBrush(brush)}
                         />
                     ))}

@@ -8,7 +8,7 @@ export interface DrawingItem {
   jsonData: {
     points: { x: number; y: number }[];
     options: Partial<TOptions<PathProps>>;
-  }
+  };
 }
 
 export interface BrushType {
@@ -96,7 +96,7 @@ export interface BrushData {
   brushType: string;
   brushPath: string;
   brushSize: number;
-  eraserSize: number
+  eraserSize: number;
 }
 
 export interface AppContextType {

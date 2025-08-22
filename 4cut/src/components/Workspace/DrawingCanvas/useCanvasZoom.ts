@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export interface Position {
   x: number;
@@ -43,40 +43,42 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
     const touch2 = touches[1];
     return {
       x: (touch1.clientX + touch2.clientX) / 2,
-      y: (touch1.clientY + touch2.clientY) / 2
+      y: (touch1.clientY + touch2.clientY) / 2,
     };
   };
 
   // 터치 이벤트 핸들러 (모바일)
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+   //e.preventDefault(); // 기본 터치 동작 방지
+    
     if (e.touches.length === 2) {
-      // 두 손 터치: 캔버스 이동 모드
-      
-      setIsDragging(true);
-      const touchCenter = getTouchCenter(e.touches);
-      setDragStart({
-        x: touchCenter.x - position.x,
-        y: touchCenter.y - position.y
-      });
+      // 두 손 터치: 핀치 줌 + 패닝 시작
+      setIsDragging(false); // 단일 터치 드래그 비활성화
       setLastTouchDistance(getTouchDistance(e.touches));
-      setLastTouchCenter(touchCenter);
+      setLastTouchCenter(getTouchCenter(e.touches));
+    } else {
+      // 한 손 터치: 패닝 비활성화 (두 손으로만 조작)
+      setIsDragging(false);
+      setLastTouchDistance(0);
     }
-  }, [position]);
+  }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length === 2 && isDragging) {
-      // 두 손 터치: 캔버스 이동 + 핀치 줌
-      
-      const currentCenter = getTouchCenter(e.touches);
+    //e.preventDefault(); // 기본 터치 동작 방지
+    
+    if (e.touches.length === 2) {
+      // 두 손 터치: 핀치 줌 + 패닝
       const currentDistance = getTouchDistance(e.touches);
+      const currentCenter = getTouchCenter(e.touches);
       
-      // 핀치 줌 (두 손가락 중심점 기준)
       if (lastTouchDistance > 0) {
+        const rect = (e.target as HTMLElement).getBoundingClientRect();
+        
+        // 줌 처리
         const scaleFactor = currentDistance / lastTouchDistance;
         const newScale = Math.max(minScale, Math.min(maxScale, scale * scaleFactor));
         
         // 터치 중심점을 기준으로 줌
-        const rect = (e.target as HTMLElement).getBoundingClientRect();
         const touchX = currentCenter.x - rect.left;
         const touchY = currentCenter.y - rect.top;
         
@@ -84,79 +86,83 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
         const logicalX = (touchX - position.x) / scale;
         const logicalY = (touchY - position.y) / scale;
         
+        // 패닝 처리 (터치 중심점 이동)
+        const centerDeltaX = currentCenter.x - lastTouchCenter.x;
+        const centerDeltaY = currentCenter.y - lastTouchCenter.y;
+        
         setScale(newScale);
-        setPosition({
-          x: touchX - logicalX * newScale,
-          y: touchY - logicalY * newScale,
-        });
-      } else {
-        // 캔버스 이동 (줌이 없을 때)
-        setPosition({
-          x: currentCenter.x - dragStart.x,
-          y: currentCenter.y - dragStart.y
-        });
+        setPosition(prevPosition => ({
+          x: touchX - logicalX * newScale + centerDeltaX,
+          y: touchY - logicalY * newScale + centerDeltaY,
+        }));
+        
+        setLastTouchDistance(currentDistance);
+        setLastTouchCenter(currentCenter);
       }
-      
-      setLastTouchDistance(currentDistance);
-      setLastTouchCenter(currentCenter);
     }
-  }, [lastTouchDistance, isDragging, dragStart, minScale, maxScale, scale, position]);
+  }, [lastTouchDistance, lastTouchCenter, minScale, maxScale, scale, position]);
 
-  const handleTouchEnd = useCallback(() => {
-    if (isDragging) {
-      setIsDragging(false);
-      setLastTouchDistance(0);
-      setLastTouchCenter({ x: 0, y: 0 });
-    }
-  }, [isDragging]);
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    //e.preventDefault(); // 기본 터치 동작 방지
+    
+    setIsDragging(false);
+    setLastTouchDistance(0);
+    setLastTouchCenter({ x: 0, y: 0 });
+  }, []);
 
   // 마우스 이벤트 핸들러 (PC)
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button === 1) { // 중간 클릭 (스크롤 클릭)
-      
+    // 중간 클릭(휠 클릭)으로만 드래그 시작
+    if (e.button === 1) {
+      //e.preventDefault(); // 기본 마우스 동작 방지
       setIsDragging(true);
       setDragStart({
         x: e.clientX - position.x,
-        y: e.clientY - position.y
+        y: e.clientY - position.y,
       });
     }
   }, [position]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (isDragging) {
-      // 중간 클릭 드래그: 캔버스 이동
       setPosition({
         x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y
+        y: e.clientY - dragStart.y,
       });
     }
   }, [isDragging, dragStart]);
 
   const handleMouseUp = useCallback((e: React.MouseEvent) => {
-    if (e.button === 1) { // 중간 클릭 해제
+    if (e.button === 1) {
       setIsDragging(false);
     }
   }, []);
 
-  // 마우스 휠 줌 (이미 마우스 위치 기준으로 구현됨)
+  // 마우스 휠 줌
   const handleWheel = useCallback((e: React.WheelEvent) => {
+    //e.preventDefault(); // 기본 스크롤 동작 방지
+    
     const rect = (e.target as HTMLElement).getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
+    const delta = e.deltaY > 0 ? (1 - zoomSpeed) : (1 + zoomSpeed);
 
     setScale(prevScale => {
-      const delta = e.deltaY > 0 ? (1 - zoomSpeed) : (1 + zoomSpeed);
-      const newScale = Math.max(minScale, Math.min(maxScale, prevScale * delta));
-      // 논리 좌표(캔버스 내부 좌표계)
-      const logicalX = (mouseX - position.x) / prevScale;
-      const logicalY = (mouseY - position.y) / prevScale;
-      setPosition({
-        x: mouseX - logicalX * newScale,
-        y: mouseY - logicalY * newScale,
-      });
-      return newScale;
+        const newScale = Math.max(minScale, Math.min(maxScale, prevScale * delta));
+
+        setPosition(prevPosition => {
+            const logicalX = (mouseX - prevPosition.x) / prevScale;
+            const logicalY = (mouseY - prevPosition.y) / prevScale;
+
+            return {
+                x: mouseX - logicalX * newScale,
+                y: mouseY - logicalY * newScale,
+            };
+        });
+
+        return newScale;
     });
-  }, [zoomSpeed, minScale, maxScale, position]);
+  }, [zoomSpeed, minScale, maxScale]);
 
   // 리셋 함수
   const resetView = useCallback(() => {
@@ -168,7 +174,7 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === '0' && e.ctrlKey) {
-        
+        //e.preventDefault();
         resetView();
       }
     };
@@ -188,6 +194,6 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
     handleMouseMove,
     handleMouseUp,
     handleWheel,
-    resetView
+    resetView,
   };
 };
