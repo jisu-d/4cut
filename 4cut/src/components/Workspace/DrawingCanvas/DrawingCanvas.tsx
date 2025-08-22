@@ -11,6 +11,12 @@ import {syncDrawingLayer} from './fabric/drawingLayer';
 import { useDrawingManager } from './fabric/useDrawingManager';
 import { syncImgLayers } from './fabric/imgLayer';
 
+import * as fabric from 'fabric';
+
+import { getPointerFromEvent } from './pointerUtils'
+import { useEraserManager } from './fabric/useEraserManager'
+import type { DrawingItem } from '../../../types/types';
+
 function DrawingCanvas() {
     const appContext = useContext(AppContext);
 
@@ -35,10 +41,11 @@ function DrawingCanvas() {
     // 색상 데이터 가져오기
     const hsl = appContext.colors?.chosenColor.hslData.hsl || { h: 0, s: 0, l: 0 };
     const alpha = appContext.colors?.chosenColor.alphaData.alpha;
+
+    const pointerRef = useRef({x: 0, y: 0})
     
     // 도구 상태 관리
     const [activeTool, setActiveTool] = useState<"pen" | "select" | "eraser">("select");
-
     // 캔버스 화면 조정
     const {containerRef, canvasSize} = useCanvasResize({
         aspectRatio: currentCanvasSize.width / currentCanvasSize.height,
@@ -84,13 +91,89 @@ function DrawingCanvas() {
         setDrawingData,
         canvasRef,
         contextfabricCanvasRef,
-        scale
+        scale,
+        pointerRef,
     });
 
-    // Fabric.js 캔버스 생성 (캔버스 요소만)
+    const customCursorRef = useRef<fabric.Circle | null>(null);
+    const selectedLayerData = useRef<{
+        id: string;
+        drawingData: DrawingItem[];
+    } | null>(null);
+
+    useEffect(() => {
+        if (contextUserLayerDataType) {
+            const selectedLayer = contextUserLayerDataType.find(layer => layer.active);
+            selectedLayerData.current = {
+                id: selectedLayer?.id ?? 'drawing-123',
+                drawingData: drawingData[selectedLayer?.id ?? 'drawing-123']
+            }
+        }
+    }, [contextUserLayerDataType, drawingData]);
+
+    // useEraserManager 훅
+    const {
+        handleEraserMove,
+        handleEraserDown,
+        handleEraserUp
+    } = useEraserManager({
+        brushData,
+        contextfabricCanvasRef,
+        customCursorRef,
+        pointerRef,
+        selectedLayerData,
+        contextsetDrawingData: setDrawingData,
+    })
+
+
+    const setPointerRef = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+        if (!canvasRef.current || !scale) return; 
+        const pointer = getPointerFromEvent(e, canvasRef, scale);
+        if (pointer) {
+            pointerRef.current = { x: pointer.x, y: pointer.y }
+        }
+    }, [pointerRef, scale]);
+
+    useEffect(() => {
+        if (!contextfabricCanvasRef.current) return;
+        if (!customCursorRef.current) return;
+
+        let cursortext = 'default'
+
+        if (activeTool === 'eraser') {
+            contextfabricCanvasRef.current.isDrawingMode = false;
+            contextfabricCanvasRef.current.selection = false;
+            customCursorRef.current.set({
+                radius: (brushData?.eraserSize), // eraserSize의 절반으로 설정
+            });
+            //contextfabricCanvasRef.current.bringObjectToFront(customCursorRef.current)
+            cursortext = 'none'
+        } else {
+            // 다른 도구일 때 커스텀 커서 숨기기
+            customCursorRef.current.set({ visible: false });
+            if (activeTool === 'pen') {
+                contextfabricCanvasRef.current.isDrawingMode = true;
+                contextfabricCanvasRef.current.selection = false;
+                cursortext = 'crosshair'
+            } else if (activeTool === 'select'){
+                contextfabricCanvasRef.current.isDrawingMode = false;
+                contextfabricCanvasRef.current.selection = true;
+                cursortext = 'default'
+            }
+        }
+
+        contextfabricCanvasRef.current.hoverCursor = cursortext
+        contextfabricCanvasRef.current.defaultCursor = cursortext
+        contextfabricCanvasRef.current.moveCursor = cursortext
+        contextfabricCanvasRef.current.freeDrawingCursor = cursortext
+        contextfabricCanvasRef.current.requestRenderAll()
+
+    }, [activeTool, brushData.eraserSize]);
+
+    // Fabric.js 캔버스 생성, 지우개 생성
     useEffect(() => {
         if (canvasRef.current && canvasSize.width > 0 && canvasSize.height > 0) {
-            
+
             const fabricCanvas = createFabricCanvas(
                 canvasRef.current,
                 canvasSize.width,
@@ -98,46 +181,44 @@ function DrawingCanvas() {
                 currentBackgroundColor
             );
             contextfabricCanvasRef.current = fabricCanvas;
-            
-            // AppContext의 fabricCanvasRef 직접 업데이트
-            //if (contextfabricCanvasRef.current) {
-                //contextfabricCanvasRef.current = fabricCanvas;
-            //}
-            
+
+            const customCursor = new fabric.Circle({
+                left: 0,
+                top: 0,
+                radius: brushData?.eraserSize, // 초기값
+                fill: "white", // 회색으로 채움
+                stroke: "grey",
+                originX: 'center',
+                originY: 'center',
+                selectable: false, // 선택 불가능하게
+                evented: false, // 이벤트 발생 안하게
+                visible: false, // 초기에는 숨김
+            });
+
+            contextfabricCanvasRef.current.add(customCursor);
+            customCursorRef.current = customCursor;
+
             return () => {
                 fabricCanvas.dispose();
                 contextfabricCanvasRef.current = null;
-                //if (contextfabricCanvasRef) {
-                    //contextfabricCanvasRef.current = null;
-                //}
             };
         }
     }, [canvasRef, canvasSize, currentBackgroundColor]);
 
-    useEffect(() => {
-        if (!contextfabricCanvasRef.current) return;
-        if (activeTool === 'pen') {
-            contextfabricCanvasRef.current.isDrawingMode = true;
-            contextfabricCanvasRef.current.selection = false;
-        } else if (activeTool === 'select'){
-            contextfabricCanvasRef.current.isDrawingMode = false;
-            contextfabricCanvasRef.current.selection = true;
-        }
-    }, [activeTool, contextfabricCanvasRef.current]);
 
 
     // 모든 cut의 사각형을 그리고, 클릭/이동/크기조절/회전 시 데이터 갱신 - TODO -> 레이어 그리는 부분 최적화가 필요
-    
+
     const scaleX = canvasSize.width / currentCanvasSize.width;
     const scaleY = canvasSize.height / currentCanvasSize.height;
     const canvasScale  = { scaleX: scaleX, scaleY: scaleY };
-    
+
 
     useEffect(() => {
         if (contextfabricCanvasRef.current && contextUserLayerDataType) {
             contextUserLayerDataType.forEach((item, index) => {
                 const idx = contextUserLayerDataType.length - index
-                
+
                 if (item.LayerType === 'Cut') {
                     // 클릭/변형 핸들러: selected=true일 때만 활성화
                     const handleRectClick = (id: string) => {
@@ -153,9 +234,9 @@ function DrawingCanvas() {
                     };
 
                     const handleRectTransform = (
-                        id: string, 
-                        position: { x: number, y: number }, 
-                        size: { width: number, height: number }, 
+                        id: string,
+                        position: { x: number, y: number },
+                        size: { width: number, height: number },
                         angle: number
                     ) => {
                         if (setCutImageData) {
@@ -178,7 +259,7 @@ function DrawingCanvas() {
                             );
                         }
                     };
-                    
+
                     syncAspectRatioRects(
                         contextfabricCanvasRef.current!,
                         cutImageData ?? [],
@@ -187,10 +268,9 @@ function DrawingCanvas() {
                         item.active,
                         item.visible,
                         idx,
-                        canvasScale 
+                        canvasScale
                     );
                 } else if (item.LayerType === 'Drawing') {
-                    // Drawing 레이어 처리
                     const layerDrawingData = drawingData[item.id];
 
                     const handleDrawingTransform = (id: string, newProps: any) => {
@@ -209,16 +289,17 @@ function DrawingCanvas() {
                     syncDrawingLayer(
                         contextfabricCanvasRef.current!,
                         item.id,
-                        layerDrawingData, 
+                        layerDrawingData,
+                        brushData,
                         handleDrawingTransform,
                         item.active,
                         item.visible,
                         idx
                     );
                 } else if (item.LayerType === 'Img') {
-                    
+
                     const layerImgData = imgData[item.id]
-                    
+
                     if (layerImgData) {
                         const handleImgTransform = (
                             top: number,
@@ -227,7 +308,7 @@ function DrawingCanvas() {
                             scaleY: number,
                             angle: number
                         ) => {
-                            
+
                             if (setImgData){
                                 setImgData(prev => ({
                                   ...prev,
@@ -259,14 +340,14 @@ function DrawingCanvas() {
                 }
             });
         }
-        
+
     }, [
         cutImageData,
         drawingData,
         contextUserLayerDataType,
         contextfabricCanvasRef.current,
     ]);
-    
+
 
     // drawing-canvas 영역 클릭 시 모두 해제 (캔버스 내부, rect 선택 시 제외)
     const handleCanvasAreaClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -320,35 +401,54 @@ function DrawingCanvas() {
         return () => {
             document.body.removeEventListener('mousedown', handleBodyClick);
         };
-    }, [appContext.layer?.cutImageData, canvasSize]); // canvasSize 의존성 그대로 유지
+    }, [appContext.layer?.cutImageData, canvasSize]);
 
-    // 기존 핸들러에 드로잉용 핸들러 추가
+    
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
-        handleCanvasPointerDown(e);
+        setPointerRef(e);
+        handleCanvasPointerDown();
         handleZoomTouchStart(e);
+        if(activeTool == 'eraser'){
+            handleEraserDown();
+        }
     }, [handleCanvasPointerDown, handleZoomTouchStart]);
 
     const handleTouchMove = useCallback((e: React.TouchEvent) => {
-        handleCanvasPointerMove(e);
+        setPointerRef(e)
+        handleCanvasPointerMove();
         handleZoomTouchMove(e);
+        
+        if(activeTool == 'eraser'){
+            handleEraserMove(contextUserLayerDataType, drawingData, setDrawingData);
+        }
     }, [handleCanvasPointerMove, handleZoomTouchMove]);
-
+    
     const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+        setPointerRef(e);
         handleCanvasPointerUp();
-        handleZoomTouchEnd();
+        handleZoomTouchEnd(e);
+        if(activeTool == 'eraser'){
+            handleEraserUp();
+        }
     }, [handleCanvasPointerUp, handleZoomTouchEnd]);
 
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
-        handleCanvasPointerDown(e);
+        setPointerRef(e);
+        handleCanvasPointerDown();
         handleZoomMouseDown(e);
     }, [handleCanvasPointerDown, handleZoomMouseDown]);
 
     const handleMouseMove = useCallback((e: React.MouseEvent) => {
-        handleCanvasPointerMove(e);
+        setPointerRef(e);
+        handleCanvasPointerMove();
         handleZoomMouseMove(e);
-    }, [handleCanvasPointerMove, handleZoomMouseMove]);
+        if(activeTool == 'eraser'){
+            handleEraserMove(contextUserLayerDataType, drawingData, setDrawingData);
+        }
+    }, [handleCanvasPointerMove, handleZoomMouseMove, customCursorRef, contextfabricCanvasRef, activeTool]);
 
     const handleMouseUp = useCallback((e: React.MouseEvent) => {
+        setPointerRef(e);
         handleCanvasPointerUp();
         handleZoomMouseUp(e);
     }, [handleCanvasPointerUp, handleZoomMouseUp]);
@@ -367,7 +467,6 @@ function DrawingCanvas() {
             onMouseLeave={handleMouseUp}
             onWheel={handleWheel}
             style={{
-                cursor: isDragging ? 'grabbing' : 'grab',
                 userSelect: 'none',
                 touchAction: 'none'
             }}
