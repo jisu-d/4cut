@@ -1,8 +1,9 @@
 import {defineConfig} from 'vite';
 import react from '@vitejs/plugin-react';
+import svgr from 'vite-plugin-svgr';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), svgr()],
   // 파일 변경 확인을 위해 사용함 / 맥os 윈도우 에서는 어쩔 수 없이 이 방식을 사용할 수 밖에 없는 듯
   server: {
     host: true, // Docker 환경에서 컨테이너 외부 접근 허용
