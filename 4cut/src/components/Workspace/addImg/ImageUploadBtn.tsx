@@ -3,7 +3,7 @@ import '../../../styles/Workspace/addImg/ImageUploadBtn.css'
 
 function ImageUploadBtn(){
     return (
-        <button>업로드</button>
+        <button className='upload-btn'>업로드</button>
     )
 }
 
