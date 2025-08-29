@@ -1,7 +1,7 @@
 import '../../../styles/Workspace/layers/DndList.css';
 import React, {useCallback, useEffect, useRef, useState, useContext} from 'react';
 import trash from '../../../assets/Icon/trash.svg';
-import {CustomCheckbox} from '../CustomCheckbox';
+import {CustomCheckbox} from '../../CustomCheckBox';
 import AppContext from '../../../contexts/AppContext';
 import { removeDrawingById } from '../DrawingCanvas/fabric/drawingLayer';
 import { removeImgById } from '../DrawingCanvas/fabric/imgLayer';
@@ -431,7 +431,7 @@ const DndList = () => {
               </span>
             )}
             <div className="list-item-controls">
-              <CustomCheckbox id={item.id} visible={item.visible} onToggleVisible={toggleVisible} />
+              <CustomCheckbox id={item.id} visible={item.visible} onToggleVisible={toggleVisible} size={24} />
               {item.LayerType !== 'Cut' && ( // Cut 타입은 삭제 불가
                 <img
                   src={trash}
@@ -472,6 +472,7 @@ const DndList = () => {
               id={draggingId}
               visible={userLayerDataType.find(item => item.id === draggingId)?.visible ?? true}
               onToggleVisible={toggleVisible}
+              size={24} 
             />
             {userLayerDataType.find(item => item.id === draggingId)?.LayerType !== 'Cut' && ( // Cut 타입은 삭제 불가
               <img
