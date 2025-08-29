@@ -20,8 +20,6 @@
 
 /* 체크 마크 SVG 스타일 */
 .custom-checkbox svg {
-  width: 16px; /* SVG 아이콘 크기 */
-  height: 16px; /* SVG 아이콘 크기 */
   stroke: white; /* 체크 마크 색상 */
 }
 
