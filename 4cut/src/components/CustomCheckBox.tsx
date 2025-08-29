@@ -5,7 +5,7 @@ interface CustomCheckboxProps {
   id: string; // 어떤 항목의 체크박스인지 식별하기 위한 ID
   visible: boolean; // 체크 상태
   onToggleVisible: (id: string) => void; // 체크 상태를 토글하는 함수
-  size?: number; // 체크박스 크기를 위한 prop (기본값 24)
+  size: number; // 체크박스 크기를 위한 prop (기본값 24)
 }
 
 export const CustomCheckbox: React.FC<CustomCheckboxProps> = ({ id, visible, onToggleVisible, size = 24 }) => {
