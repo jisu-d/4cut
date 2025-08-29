@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {CustomCheckbox} from '../CustomCheckbox';
+import {CustomCheckbox} from '../../CustomCheckBox';
 import '../../../styles/Workspace/export/AgreementSection.css';
 
 const initialAgreements = [
@@ -37,7 +37,7 @@ const AgreementSection: React.FC<AgreementSectionProps> = ({ onValidityChange })
     <div className="agreement-section">
       <div className="agreement-item all-agreement">
         <div className="agreement-left">
-          <CustomCheckbox id="all" visible={isAllChecked} onToggleVisible={handleToggleAll} />
+          <CustomCheckbox id="all" visible={isAllChecked} onToggleVisible={handleToggleAll} size={24} />
           <span className="agreement-label all-label">약관에 모두 동의</span>
         </div>
       </div>
@@ -45,7 +45,7 @@ const AgreementSection: React.FC<AgreementSectionProps> = ({ onValidityChange })
       {agreements.map(item => (
         <div key={item.id} className="agreement-item">
           <div className="agreement-left">
-            <CustomCheckbox id={item.id} visible={item.checked} onToggleVisible={() => handleToggleItem(item.id)} />
+            <CustomCheckbox id={item.id} visible={item.checked} onToggleVisible={() => handleToggleItem(item.id)} size={24} />
             <span className="agreement-label">{item.label}</span>
           </div>
           <span className="agreement-arrow">&gt;</span>
