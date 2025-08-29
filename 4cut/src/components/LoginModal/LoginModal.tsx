@@ -2,7 +2,7 @@ import '../../styles/LoginModal/LoginModal.css';
 import React, { useState } from 'react';
 
 import Cross from '../../assets/Icon/SignUpModal/cross.svg?react'
-import { CustomCheckbox } from '../Workspace/CustomCheckbox';
+import { CustomCheckbox } from '../CustomCheckBox';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -21,7 +21,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         </button>
         <div className="login-title">로그인</div>
 
-        <form className="login-form" onSubmit={(e) => e.preventDefault()}>
+        <div className="login-form" onSubmit={(e) => e.preventDefault()}>
           <label className="login-label">아이디 또는 이메일</label>
           <input className="login-input" type="text" placeholder="아이디" />
 
@@ -30,7 +30,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
           <div className="login-row">
             <div className="login-remember">
-              <CustomCheckbox id="remember" visible={remember} onToggleVisible={() => setRemember(!remember)} />
+              {/* <CustomCheckbox id="remember" visible={remember} onToggleVisible={() => setRemember(!remember)} /> */}
+              <CustomCheckbox
+                id="remember-checkbox"
+                visible={remember}
+                onToggleVisible={() => setRemember(!remember)}
+                size={18} // 30px 크기의 체크박스
+              />  
               <span>아이디 정보 저장</span>
             </div>
             {/* <button type="button" className="login-link">아이디/비밀번호 찾기</button> */}
@@ -42,7 +48,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           </div>
 
           <button type="submit" className="login-submit">로그인</button>
-        </form>
+        </div>
 
         <div className="login-footer">
           <span>계정이 없으신가요?</span>

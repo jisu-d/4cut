@@ -1,0 +1,56 @@
+/* customCheckbox.css */
+
+.custom-checkbox {
+    /* width와 height는 CustomCheckbox.tsx 컴포넌트에서 
+      style prop으로 동적으로 전달되므로 여기서는 제거합니다.
+    */
+    border-radius: 50%; /* 둥근 모서리 정도를 조절할 수 있습니다. (예: 6px) */
+    padding-left: 1%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-sizing: border-box;
+    border: 2px solid #4F46E5; /* 비활성화 시 보더 색상 */
+    background-color: white; /* 비활성화 시 배경색 */
+  }
+  
+  .custom-checkbox.checked {
+    border-color: #4F46E5; /* 활성화 시 보더 색상 */
+    background-color: #4F46E5; /* 활성화 시 배경색 */
+  }
+  
+  /* 체크 마크 SVG 스타일
+    SVG의 크기와 색상은 컴포넌트에서 props로 직접 제어하므로
+    별도의 스타일이 필요하지 않습니다.
+  */
+  
+  
+  /* Custom Radio - 기존 코드 유지 */
+  .custom-radio {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%; /* 라디오 버튼 형태 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-sizing: border-box;
+    border: 2px solid #4F46E5; /* 비활성화 시 보더 색상 */
+    background-color: white; /* 비활성화 시 배경색 */
+  }
+  
+  .custom-radio.checked {
+    border-color: #4F46E5; /* 활성화 시 보더 색상 */
+    background-color: white; /* 활성화 시 배경색은 유지 (내부 원이 채워짐) */
+  }
+  
+  .custom-radio.checked .radio-inner-circle {
+    width: 12px; /* 내부 원 크기 */
+    height: 12px; /* 내부 원 크기 */
+    border-radius: 50%;
+    background-color: #4F46E5; /* 내부 원 색상 */
+    display: block;
+  }
