@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState } from 'react';
 import '../../styles/SignUpModal/SignUpModal.css';
 
@@ -165,3 +166,5 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
     </div>
   );
 }
+=======
+>>>>>>> f8dc0ad (SignUp 페이지 레이아웃 스타일 일부 완성)
