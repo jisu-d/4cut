@@ -1,0 +1,45 @@
+.brushes-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 32px 20px;
+  border-radius: 10px;
+}
+
+.brushes-title {
+    color: #111827;
+  font-family: 'Pretendard-Black', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 46px;
+}
+
+.brushes-content-wrapper {
+  display: flex;
+  padding: 0 15px;
+  flex-grow: 1;
+  flex-basis: 0;
+  gap: 8px;
+}
+
+.brush-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-self: flex-start;
+}
+
+.brush-list-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-self: flex-start;
+  gap: 8px;
+}
+
+.brush-preview-container {
+  height: 30px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+} 

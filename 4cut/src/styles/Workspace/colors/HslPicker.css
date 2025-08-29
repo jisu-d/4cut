@@ -1,0 +1,33 @@
+/* ColorPicker.css */
+
+.color-picker-range{
+    width: 100%;
+    height: 30px;
+    background: linear-gradient(to right, hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%), hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(360, 100%, 50%));
+    border-Radius: 20px;
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+    touch-action: none;
+}
+
+/* 웹킷 기반 브라우저 (Chrome, Safari, Edge)의 슬라이더 썸 스타일 */
+.color-picker-range::-webkit-slider-thumb {
+    background: #fff;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid #333;
+    box-shadow: 0 0 0 1px #0006;
+    appearance: none;
+}
+
+/* 웹킷 썸에 호버 및 활성 상태 스타일 추가 */
+.color-picker-range::-webkit-slider-thumb:hover {
+  background: #f0f0f0;
+  transform: scale(1.1); /* 호버 시 약간 커지게 */
+}
+
+
+
+

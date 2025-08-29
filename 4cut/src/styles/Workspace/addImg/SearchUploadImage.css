@@ -1,0 +1,28 @@
+.search-upload-image-container{
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 12px;
+    gap: 21px;
+}
+
+.search-upload-image-container > input{
+    padding: 0;
+    border: none;
+    background-color: #FAFAF8;
+    color: #111827;
+    font-size: 20px;
+}
+
+.search-upload-image-container > input::placeholder{
+    color: #989DA4;
+    font-size: 20px;
+    font-family: 'Pretendard-Bold', sans-serif;
+}
+
+
+.search-upload-image-container > input:focus {
+  outline: none;
+}

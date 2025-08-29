@@ -1,0 +1,20 @@
+.export-button {
+  padding: 10px 0;
+  background: #4F46E5;
+  color: #fff;
+  border: none;
+  margin-left: 88%;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: 'Pretendard-SemiBold', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px 0 rgba(99,102,241,0.08);
+}
+
+.export-button:disabled {
+  background: #E5E7EB;
+  color: #9CA3AF;
+  cursor: not-allowed;
+  box-shadow: none;
+}

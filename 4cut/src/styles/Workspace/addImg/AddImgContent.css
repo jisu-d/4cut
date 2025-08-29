@@ -1,0 +1,50 @@
+.addImg-panel-container {
+    display: flex;
+    flex-direction: column;
+    gap: 42px;
+    padding: 28px 18px;
+    height: 100%;
+}
+
+.image-preview-container {
+    flex-grow: 1;
+    /* This will make it take up the remaining space */
+    /* Add the following styles for y-axis scrolling */
+    overflow-y: auto;
+    /* This will add a scrollbar when content overflows vertically */
+    display: flex;
+    /* Ensure flexbox for internal layout */
+    flex-direction: column;
+    /* Stack children vertically */
+}
+
+.image-preview-container>div:nth-child(1) {
+    font-family: 'Pretendard-Bold', sans-serif;
+    font-size: 20px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+    /* Prevent the title from shrinking */
+}
+
+.image-uploader-container {
+    /* flex-basis: 30%; */
+}
+
+.image-uploader-container>div:nth-child(1) {
+    font-size: 32px;
+    margin-bottom: 20px;
+    font-family: 'Pretendard-Black', sans-serif;
+}
+
+.image-uploader-container>div:nth-child(2) {
+    padding: 0 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.image-grid-scroll-area{
+    flex-grow: 1;
+    flex-basis: 0;
+    overflow-y: auto;
+}

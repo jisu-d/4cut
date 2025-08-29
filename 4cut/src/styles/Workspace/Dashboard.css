@@ -1,0 +1,81 @@
+/* tool-header 영역 */
+
+.tool-header{
+    display: flex;
+    width: 100%;
+    padding: 8px 13px;
+    padding-left: 18px;
+    /* flex-basis: 50px; */
+    justify-content: space-between;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    background-color: #F9FAFB;
+}
+
+.tool-header > div:nth-child(1){
+    display: flex;
+    align-items: center;
+    gap: 16px; 
+}
+
+.tool-header > div:nth-child(1) > span{
+    width: 40px;
+    height: 40px;
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+}
+
+.tool-header > div:nth-child(2){
+    display: flex;
+    align-items: center;
+    gap: 18px; 
+}
+
+.tool-header > div > img{
+    cursor: pointer;
+}
+
+.tool-header .img-icon-img{
+    /* width: 20px;
+    height: 20px; */
+}
+
+.tool-header .upload-icon-img{
+    /* width: 20px;
+    height: 20px; */
+}
+
+.tool-header .brush-icon-img{
+    width: 23px;
+    height: 23px;
+}
+
+.tool-header .layer-icon-img{
+    width: 25px;
+    height: 26px;
+}
+
+.tool-header .color-icon{
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.selectedIcon{
+    background-color: #E5E7EB;
+    border-radius: 50%;
+    transform: scale(1.05);
+}
+
+/* tool-content 영역 */
+
+.tool-content{
+    width: 100%;
+    flex-basis: 0;
+    flex-grow: 1; 
+    border-radius: 10px;
+    background-color: #F9FAFB;
+}
+

@@ -1,0 +1,19 @@
+.image-ratio-selector-section{
+    display: flex;
+    padding-bottom: 70px;
+    flex-direction: column;
+    flex-basis: 30%;
+    
+}
+
+.image-ratio-selector-section > div:nth-child(1){
+  padding-bottom: 26px;
+}
+
+.image-ratio-selector-section > div:nth-child(1),
+.layer-control-section > div:nth-child(1) > div
+{
+  font-size: 32px;
+  font-family: 'Pretendard-Black', sans-serif;
+}
+

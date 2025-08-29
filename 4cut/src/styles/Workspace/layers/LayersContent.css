@@ -1,0 +1,7 @@
+
+.layer-panel-container{
+    height: 100%;
+    padding: 28px 18px;
+    display: flex;
+    flex-direction: column;
+}

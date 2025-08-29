@@ -1,0 +1,26 @@
+.color-history-list {
+    padding: 0 12px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    overflow-x: auto;
+    margin-top: 12px;
+}
+
+.color-history-item {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.color-history-item-color {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin: 0;
+} 
