@@ -5,7 +5,7 @@
       style prop으로 동적으로 전달되므로 여기서는 제거합니다.
     */
     border-radius: 50%; /* 둥근 모서리 정도를 조절할 수 있습니다. (예: 6px) */
-    padding-left: 1%;
+    /* padding-left: 1%; */
     display: flex;
     align-items: center;
     justify-content: center;

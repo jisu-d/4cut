@@ -1,9 +1,8 @@
 .export-button {
-  padding: 10px 0;
+  padding: 10px 25px;
   background: #4F46E5;
   color: #fff;
   border: none;
-  margin-left: 88%;
   border-radius: 8px;
   font-size: 16px;
   font-family: 'Pretendard-SemiBold', sans-serif;

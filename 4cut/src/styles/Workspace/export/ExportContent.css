@@ -46,6 +46,7 @@
 .export-content-button {
   display: flex;
   margin-top: 35px;
+  justify-content: flex-end;
   /* 자식인 버튼에 margin:auto를 적용하기 위함 */
 }
 
