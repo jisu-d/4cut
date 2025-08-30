@@ -1,6 +1,5 @@
  
 import { useState } from "react";
-import { CustomCheckbox } from "../components/CustomCheckBox";
 import appIcon from "../assets/Icon/Mypage/app_icon.png";
 
 import "../styles/SignUpModal/SignUpModal.css";
@@ -8,6 +7,12 @@ import "../styles/SignUpModal/SignUpModal.css";
 import AddIcon from '../assets/Icon/Mypage/add.svg?react'
 
 import UploadIcon from '../assets/Icon/Mypage/upload.svg?react'
+import EyeIcon from '../assets/Icon/eye.svg?react';
+import EyeOffIcon from '../assets/Icon/eye_off.svg?react';
+import InfoIcon from '../assets/Icon/Info.svg?react';
+import Tooltip from '../components/Tooltip';
+
+import { CustomCheckbox } from '../components/CustomCheckBox'
 
 function Header() {
   return (
@@ -52,13 +57,16 @@ function Header() {
 }
 
 type InputProps = {
-  label: string;
+  label: React.ReactNode;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   type?: string;
+  autoComplete?: string;
   rightButtonText?: string;
   onRightButtonClick?: () => void;
+  rightIcon?: React.ReactNode;
+  onRightIconClick?: () => void;
   isError?: boolean;
   helperText?: string;
 };
@@ -69,8 +77,11 @@ function FormInput({
   onChange,
   placeholder,
   type = "text",
+  autoComplete,
   rightButtonText,
   onRightButtonClick,
+  rightIcon,
+  onRightIconClick,
   isError,
   helperText,
 }: InputProps) {
@@ -83,12 +94,18 @@ function FormInput({
           type={type}
           value={value}
           placeholder={placeholder}
+          autoComplete={autoComplete}
           onChange={(e) => onChange(e.target.value)}
         />
         {rightButtonText && (
           <button type="button" className="su-right-btn" onClick={onRightButtonClick}>
             {rightButtonText}
           </button>
+        )}
+        {rightIcon && (
+          <div className="su-right-icon" onClick={onRightIconClick}>
+            {rightIcon}
+          </div>
         )}
       </div>
       {helperText ? <p className="su-helper">{helperText}</p> : null}
@@ -101,8 +118,12 @@ function Main(){
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [agreeEmail, setAgreeEmail] = useState(false);
+  const [isCodeSent, setAuthCodeSent] = useState(false);
+
+  const [authCode, setAuthCode] = useState('');
 
   const isPwMismatch = password.length > 0 && passwordConfirm.length > 0 && password !== passwordConfirm;
 
@@ -117,27 +138,53 @@ function Main(){
           </div>
 
           <FormInput
-            label="아이디"
+            label={
+              <>
+                아이디
+                <Tooltip content="특수문자를 제외하고 6~20자를 사용해 주세요.">
+                  <InfoIcon />
+                </Tooltip>
+              </>
+            }
             value={userId}
             onChange={setUserId}
-            placeholder="특수문자를 제외하고 6~20자를 사용해 주세요."
+            placeholder="아이디를 입력해 주세요."
             rightButtonText="중복확인"
+            autoComplete="username"
             onRightButtonClick={() => {}}
           />
 
           <FormInput
-            label="닉네임"
+            label={
+              <>
+                닉네임
+                <Tooltip content="특수문자를 제외하고 3~10자를 사용해 주세요.">
+                  <InfoIcon />
+                </Tooltip>
+              </>
+            }
             value={nickname}
             onChange={setNickname}
-            placeholder="특수문자를 제외하고 3~10자를 사용해 주세요."
+            placeholder="닉네임을 입력해 주세요."
+            autoComplete="nickname"
           />
 
           <FormInput
-            label="비밀번호"
+            label={
+              <>
+                비밀번호
+                <Tooltip content="8~16자의 영문 대/소문자, 숫자, 특수문자를 사용해 주세요.">
+                  <InfoIcon />
+                </Tooltip>
+              </>
+            }
             value={password}
             onChange={setPassword}
-            placeholder="8~16자의 영문 대/소문자, 숫자, 특수문자를 사용해 주세요."
-            type="password"
+            placeholder="비밀번호를 입력해 주세요."
+            type={isPasswordVisible ? "text" : "password"}
+            autoComplete="new-password"
+            rightIcon={isPasswordVisible ? <EyeIcon /> : <EyeOffIcon />}
+            onRightIconClick={() => setIsPasswordVisible((v) => !v)}
           />
 
           <FormInput
@@ -145,7 +192,8 @@ function Main(){
             value={passwordConfirm}
             onChange={setPasswordConfirm}
             placeholder="비밀번호를 다시 입력해 주세요."
-            type="password"
+            type={isPasswordVisible ? "text" : "password"}
+            autoComplete="new-password"
             isError={isPwMismatch}
             helperText={isPwMismatch ? "비밀번호가 일치하지 않습니다!" : ""}
           />
@@ -158,7 +206,7 @@ function Main(){
                   id="agreeEmail"
                   visible={agreeEmail}
                   onToggleVisible={() => setAgreeEmail((v) => !v)}
-                  size={15}
+                  size={16}
                 />
                 <span>이메일 수신동의</span>
               </div>
@@ -169,11 +217,31 @@ function Main(){
                 type="email"
                 value={email}
                 placeholder="honggildong@4cut.kr"
+                autoComplete="email"
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={isCodeSent}
               />
+              <button type="button" className="su-right-btn" onClick={() => setAuthCodeSent(true)} disabled={!agreeEmail}>
+                {isCodeSent ? "재전송" : "인증코드 전송"}
+              </button>
             </div>
           </div>
-          {/* TODO - 이메일 인증 번호입력 인풋 추가 */}
+
+          {isCodeSent && (
+            <div className="su-auth-field">
+              <FormInput
+                label="이메일 인증"
+                value={authCode}
+                onChange={setAuthCode}
+                placeholder="5자리 숫자 입력"
+                rightButtonText="확인"
+                onRightButtonClick={() => {
+                  // 여기에 인증 코드 확인 로직을 추가합니다.
+                }}
+              />
+            </div>
+          )}
+
           <button className="su-submit" type="submit">회원가입</button>
         </form>
       </div>
