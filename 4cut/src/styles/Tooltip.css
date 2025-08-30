@@ -1,0 +1,35 @@
+.tooltip-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px; /* 아이콘과 라벨 사이의 간격 */
+}
+
+.tooltip-content {
+  position: absolute;
+  bottom: 100%; /* 아이콘 위에 표시 */
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px; /* 아이콘과 툴팁 사이의 간격 */
+  background-color: #333;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'Pretendard-Regular', sans-serif;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 툴팁 꼬리 */
+.tooltip-content::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}

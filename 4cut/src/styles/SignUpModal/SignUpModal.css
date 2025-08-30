@@ -132,7 +132,7 @@ main {
 .su-form{
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 20px;
   margin: 48px 0 64px;
 }
 
@@ -163,10 +163,9 @@ main {
   color: #6b7280;
 }
 
-
-
 .su-label{
-  display: block;
+  display: flex;
+  justify-content: space-between;
   font-size: 16px;
   margin: 14px 0 8px;
   font-family: 'Pretendard-SemiBold', sans-serif;
@@ -190,7 +189,7 @@ main {
   height: 48px;
   padding: 0 14px;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 4px;
   background-color: #fff;
 }
 
@@ -201,6 +200,22 @@ main {
   border-color: #4F46E5;
 }
 
+.su-right-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.su-right-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
 .su-right-btn{
   position: absolute;
   right: 8px;
@@ -208,10 +223,27 @@ main {
   transform: translateY(-50%);
   height: 32px;
   padding: 0 12px;
-  border-radius: 8px;
+  border-radius: 3px;
   border: 1px solid #e5e7eb;
-  background: #fff;
+  background: #FAFAF8;
   color: #4f46e5;
+  cursor: pointer; 
+  transition: background-color 0.2s ease, transform 0.1s ease; /* 부드러운 색상 및 크기 전환 효과 */
+}
+
+/* 마우스를 올렸을 때 (hover) */
+.su-right-btn:hover {
+  background-color: #E5E7EB; /* 기존 배경색보다 약간 어둡게 */
+}
+
+/* 클릭했을 때 (active) */
+.su-right-btn:active {
+  background-color: #E5E7EB; /* 호버 색상보다 더 어둡게 */
+}
+
+.su-right-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .su-field-error .su-input{ border-color:#ef4444; background:#fff; }
@@ -224,12 +256,20 @@ main {
   font-family: 'Pretendard-Regular', sans-serif;
 }
 
-.su-submit{
+.su-submit {
+  font-size: 16px;
   margin-top: 24px;
   height: 52px;
   background: #4f46e5;
   color: #fff;
+  font-family: 'Pretendard-Regular', sans-serif;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   font-weight: 700;
+  cursor: pointer; 
+  transition: background-color 0.2s ease, transform 0.1s ease; 
+}
+
+.su-auth-field {
+  margin-top: -10px;
 }
