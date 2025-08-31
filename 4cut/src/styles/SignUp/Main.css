@@ -1,0 +1,74 @@
+/* Main Style */
+main {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+}
+
+.main-container{
+  width: 30%;
+}
+
+/* SignUp form */
+.su-form{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 48px 0 64px;
+}
+
+.title-container{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.su-logo{
+  width: 65px;
+  height: 65px;
+}
+
+.su-title{
+  font-size: 25px;
+  margin-top: 10px;
+  font-family: 'Pretendard-Bold', sans-serif;
+  color: #111827;
+}
+
+.su-subtitle{
+  font-size: 16px;
+  font-family: 'Pretendard-Medium', sans-serif;
+  text-align: center;
+  color: #6b7280;
+}
+
+.su-consent{ display:inline-flex; align-items:center; gap:8px; color:#6b7280; }
+
+.su-consent span{
+  font-size: 14px;
+  font-family: 'Pretendard-Regular', sans-serif;
+}
+
+.su-submit {
+  font-size: 16px;
+  margin-top: 24px;
+  height: 52px;
+  background: #4f46e5;
+  color: #fff;
+  font-family: 'Pretendard-Regular', sans-serif;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer; 
+  transition: background-color 0.2s ease, transform 0.1s ease; 
+}
+
+.su-auth-field {
+  margin-top: -10px;
+}
+
+.input-error {
+    border-color: #ef4444;
+}
