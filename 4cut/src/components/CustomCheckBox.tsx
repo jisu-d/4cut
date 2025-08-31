@@ -22,7 +22,6 @@ export const CustomCheckbox: React.FC<CustomCheckboxProps> = ({ id, visible, onT
 
   // 체크박스 크기에 비례하여 SVG 아이콘 크기 조절 (예: 2/3 비율)
   const svgSize = size * (2 / 3);
-  console.log(svgSize);
 
   return (
     <div
