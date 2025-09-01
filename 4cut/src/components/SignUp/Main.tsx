@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import appIcon from "../../assets/Icon/Mypage/app_icon.png";
 import EyeIcon from '../../assets/Icon/eye.svg?react';
 import EyeOffIcon from '../../assets/Icon/eye_off.svg?react';
@@ -181,7 +181,7 @@ export default function Main(){
                 {isCodeSent ? "재전송" : "인증코드 전송"}
               </button>
             </div>
-            {emailError && <p className="su-helper">{emailError}</p>}
+            {emailError ? <p className="su-helper">{emailError}</p> : <p className='su-helper' style={{opacity: '0'}}>테스트 텍스트</p>}
           </div>
 
           {isCodeSent && (
