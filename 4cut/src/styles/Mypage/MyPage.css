@@ -78,7 +78,7 @@ body::-webkit-scrollbar {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 23px;
 }
 
 .logout-lable {
