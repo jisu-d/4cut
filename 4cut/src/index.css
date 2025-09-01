@@ -7,6 +7,7 @@ html, body{
   margin: 0;
   padding: 0;
   height: 100%; /* 부모 컨테이너가 높이를 가질 수 있도록 */
+  overscroll-behavior-y: none; /* 모바일 화면당겨 새로고침 막을 수 있도록  */
 }
 
 
