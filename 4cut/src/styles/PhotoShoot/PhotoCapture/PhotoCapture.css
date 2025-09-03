@@ -1,0 +1,30 @@
+.photo-capture-layout {
+    display: grid;
+    background-color: #1A1A1A;
+    grid-template-rows: 10% 60% 30%;
+    grid-template-columns: 1fr;
+    height: 100vh;
+    width: 100vw;
+    justify-content: center;
+    align-content: center;
+}
+
+@media (min-aspect-ratio: 1/1) {
+    /*.photo-capture-layout {*/
+    /*    grid-template-columns: 20% 60% 20%;*/
+    /*    grid-template-rows: 1fr;*/
+    /*}*/
+
+    .photo-capture-layout {
+        grid-template-rows: 0 70% 30%;
+        grid-template-columns: 1fr;
+    }
+}
+
+.photo-capture-child-1,
+.photo-capture-child-2,
+.photo-capture-child-3 {
+    border: 1px solid blue;
+    display: grid;
+    place-items: center;
+}
