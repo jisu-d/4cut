@@ -3,6 +3,7 @@ import MainPage from './pages/MainPage';
 import Workspace from './pages/Workspace';
 import LoginPage from './pages/LoginPage';
 import Mypage from './pages/Mypage';
+import PhotoShootPage from './pages/PhotoShootPage.tsx';
 import Test from './pages/Test';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
         <Route path="/Workspace" element={<Workspace />} />
         <Route path="/LoginPage" element={<LoginPage />} />
         <Route path="/Mypage" element={<Mypage />} />
+        <Route path="/PhotoShoot" element={<PhotoShootPage />} />
         <Route path="/Test" element={<Test />} />
       </Routes>
     </BrowserRouter>
