@@ -14,6 +14,7 @@ const AppContext = React.createContext<AppContextType>({
       brushType: 'pen',
       brushSize: 1,
       eraserSize: 1,
+      brushPath: '',
     },
     setBrushData: () => {}
   },
