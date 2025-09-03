@@ -1,0 +1,30 @@
+.frame-filter-container {
+    margin-bottom: 0;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.filter-button {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-family: 'Pretendard-Regular', sans-serif;
+    background-color: #F3F4F6; /* gray-100 */
+    color: #4B5563; /* gray-600 */
+    border: 1px solid #E5E7EB; /* gray-200 */
+    border-radius: 20px; /* 알약 모양 */
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-button:hover {
+    background-color: #E5E7EB; /* gray-200 */
+}
+
+.filter-button.selected {
+    background-color: #4F46E5; /* indigo-600 */
+    color: white;
+    border-color: #4F46E5;
+}

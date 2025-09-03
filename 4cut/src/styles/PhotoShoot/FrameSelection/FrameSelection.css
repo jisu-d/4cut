@@ -1,0 +1,75 @@
+.photo-shoot-page {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    padding: 3vh 4vw;
+    background-color: #F9FAFB;
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+.content-panel {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    border-radius: 10px;
+    padding: 30px 50px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    position: relative; /* 완료 버튼 위치 기준 */
+}
+
+.frame-search-header {
+    margin-bottom: 40px;
+    font-family: 'Pretendard-Black', sans-serif;
+    font-size: 32px;
+}
+
+.header-title {
+    font-size: 28px;
+    font-family: 'Pretendard-Bold', sans-serif;
+    color: #111827;
+}
+
+.filter-and-search-container {
+    display: flex;
+    padding: 0 15px;
+    flex-direction: column;
+    margin-bottom: 30px;
+}
+
+.filter-subtitle {
+    font-size: 18px;
+    font-family: 'Pretendard-SemiBold', sans-serif;
+    color: #4B5563;
+    margin-bottom: 16px;
+}
+
+
+.done-button-container {
+    display: flex;
+    justify-content: right;
+    margin-top: 40px;
+}
+
+.done-button {
+    padding: 8px 20px;
+    font-size: 16px;
+    font-family: 'Pretendard-SemiBold', sans-serif;
+    color: white;
+    background-color: #4F46E5;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.done-button:hover {
+    background-color: #3730A3; /* indigo-600 */
+}
+
+.frame-grid-container {
+    flex-grow: 1;
+    overflow-y: auto;
+}
