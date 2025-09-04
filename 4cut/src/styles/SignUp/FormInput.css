@@ -1,0 +1,94 @@
+.su-label{
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  margin: 14px 0 8px;
+  font-family: 'Pretendard-SemiBold', sans-serif;
+  color: #111827;
+}
+
+.su-field > div:first-child{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+.su-input-wrap{
+  position: relative;
+  margin-top: 8px;
+}
+
+.su-input{
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.su-input::placeholder{ color:#9ca3af; }
+
+.su-input:focus{
+  outline: none;
+  border-color: #4F46E5;
+}
+
+.su-right-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.su-right-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.su-right-btn{
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 3px;
+  border: 1px solid #e5e7eb;
+  background: #FAFAF8;
+  color: #4f46e5;
+  cursor: pointer; 
+  transition: background-color 0.2s ease, transform 0.1s ease; /* 부드러운 색상 및 크기 전환 효과 */
+}
+
+/* 마우스를 올렸을 때 (hover) */
+.su-right-btn:hover {
+  background-color: #E5E7EB; /* 기존 배경색보다 약간 어둡게 */
+}
+
+/* 클릭했을 때 (active) */
+.su-right-btn:active {
+  background-color: #E5E7EB; /* 호버 색상보다 더 어둡게 */
+}
+
+.su-right-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.su-field-error .su-input{ border-color:#ef4444; background:#fff; }
+
+.su-helper{
+  font-size:10px;
+  font-family: 'Pretendard-Regular', sans-serif;
+  color:#ef4444;
+  margin-top:6px;
+  margin-bottom:0;
+}
+
+
