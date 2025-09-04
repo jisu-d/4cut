@@ -1,32 +1,54 @@
 import React, { useState } from 'react';
-//  import SignupModal from '../components/SignUpModal/SignUpModal'
 import LoginModal from '../components/LoginModal/LoginModal'
 
 function App() {
-  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  const openSignupModal = () => {
-    setIsSignupModalOpen(true);
-  };
+      const openLoginModal = () => {
+          setIsLoginModalOpen(true);
+      };
 
-  const closeSignupModal = () => {
-    setIsSignupModalOpen(false);
-  };
+      const closeLoginModal = () => {
+          setIsLoginModalOpen(false);
+      };
 
-  return (
-    <div>
-      
-        <button
-          onClick={openSignupModal}
-        >
-          회원가입 모달 열기
-        </button>
-      
-      <LoginModal 
-        isOpen={isSignupModalOpen} 
-        onClose={closeSignupModal} 
-      />
-    </div>
+    return (
+      <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: '100%',
+          height: '100vh',
+      }}>
+          <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '15px',
+          }}>
+              <button>
+                  <a href='/MainPage'>MainPage</a>
+              </button>
+              <button>
+                  <a href='/Workspace'>Workspace</a>
+              </button>
+              <button>
+                  <a href='/SignUp'>SignUp</a>
+              </button>
+              <button>
+                  <a href='/Mypage'>Mypage</a>
+              </button>
+              <button>
+                  <a href='/PhotoShoot'>PhotoShoot</a>
+              </button>
+              <button onClick={openLoginModal}>
+                  로그인 모달 열기
+              </button>
+              <LoginModal
+                  isOpen={isLoginModalOpen}
+                  onClose={closeLoginModal}
+              />
+          </div>
+      </div>
   );
 }
 
