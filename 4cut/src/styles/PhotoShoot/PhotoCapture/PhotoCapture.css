@@ -11,9 +11,6 @@
 
 @media (min-aspect-ratio: 1/1) {
     /*.photo-capture-layout {*/
-    /*    grid-template-columns: 20% 60% 20%;*/
-    /*    grid-template-rows: 1fr;*/
-    /*}*/
 
     .photo-capture-layout {
         grid-template-rows: 0 70% 30%;
@@ -22,9 +19,12 @@
 }
 
 .photo-capture-child-1,
-.photo-capture-child-2,
-.photo-capture-child-3 {
+.photo-capture-child-2 {
     border: 1px solid blue;
     display: grid;
     place-items: center;
+}
+
+.photo-capture-child-3 {
+    overflow: hidden;
 }
