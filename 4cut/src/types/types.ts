@@ -154,3 +154,9 @@ export interface AppContextType {
 }
 
 
+export interface ImageDataList {
+  id: number;
+  ratio: '16:9' | '4:3' | '3:4' | '1:1',
+  base64Img: string
+}
+
