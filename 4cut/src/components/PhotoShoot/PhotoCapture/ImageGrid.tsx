@@ -1,10 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import '../../../styles/PhotoShoot/PhotoCapture/ImageGrid.css';
 
-import type { ImageDataList } from '../../../types/types.ts';
+import type { CaptureImageData } from '../../../types/types.ts';
 
 interface ImageGridProps {
-    imageDataList: ImageDataList[];
+    imageDataList: CaptureImageData[];
     currentPhotoIndex: number;
 }
 

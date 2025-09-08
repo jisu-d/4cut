@@ -1,0 +1,16 @@
+.frame-composer-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    background-color: #F9FAFB;
+    flex-direction: column;
+    padding: 25px;
+    gap: 20px;
+}
+
+/*가로모드 일떄*/
+@media (min-aspect-ratio: 1/1) {
+    .frame-composer-container{
+        flex-direction: row;
+    }
+}

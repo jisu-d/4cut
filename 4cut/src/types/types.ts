@@ -154,9 +154,34 @@ export interface AppContextType {
 }
 
 
-export interface ImageDataList {
+export interface CaptureImageData {
   id: number;
   ratio: '16:9' | '4:3' | '3:4' | '1:1',
   base64Img: string
 }
 
+export interface ImgPlaceData {
+  ratio: '16:9' | '4:3' | '3:4' | '1:1';
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  angle: number;
+  imgSrc: string | null;
+}
+
+export interface PhotoCaptureContextType {
+  CaptureImgData: { // 촬영할 이미지
+    captureImageData: CaptureImageData[];
+    setCaptureImgData: React.Dispatch<React.SetStateAction<CaptureImageData[]>>;
+  };
+  FrameData: {
+    url: string;
+    imgPlaceData: ImgPlaceData[];
+        setImgPlaceData: React.Dispatch<React.SetStateAction<ImgPlaceData[]>>;
+    selectedSlotIndex: number | null;
+    setSelectedSlotIndex: React.Dispatch<React.SetStateAction<number | null>>;
+    updateSlotImage: (slotIndex: number, newImageSrc: string | null) => void;
+    placedImageOrder: { src: string; order: number }[];
+  }
+}

@@ -51,6 +51,8 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
 
         const context = canvas.getContext('2d');
         if (context) {
+            context.translate(sWidth, 0);
+            context.scale(-1, 1);
             context.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, sWidth, sHeight);
             const base64Img = canvas.toDataURL('image/jpeg');
             onCapture(base64Img, photoIndex);
@@ -159,7 +161,7 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
     return (
         <div className={`camera-container ${showCanvas ? 'canvas-visible' : ''}`}>
             <div style={videoStyle} className={`video-container ${classNameForRatio}`}>
-                <video ref={videoRef} autoPlay playsInline className="camera-video"></video>
+                <video ref={videoRef} autoPlay playsInline className="camera-video" style={{ transform: 'scaleX(-1)' }}></video>
             </div>
             <div className='canvas-container'>
                 <canvas ref={canvasRef} className="captured-image"></canvas>
