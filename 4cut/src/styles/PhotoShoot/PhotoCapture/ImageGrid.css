@@ -1,4 +1,4 @@
-.image-grid-container {
+.photo-capture-child-3 .image-grid-container {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -16,16 +16,16 @@
 }
 
 /* Webkit 기반 브라우저에서 스크롤바 숨기기 */
-.image-grid-container::-webkit-scrollbar {
+.photo-capture-child-3 .image-grid-container::-webkit-scrollbar {
     display: none;
 }
 
-.grid-item {
+.image-grid-container .grid-item {
     height: 100%;
     flex-shrink: 0;
 }
 
-.grid-item img {
+.image-grid-container .grid-item img {
     width: 100%;
     height: 100%;
     object-fit: contain;
