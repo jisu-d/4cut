@@ -39,7 +39,6 @@
 .image-slot {
     box-sizing: border-box;
     background-color: #f0f0f0;
-    border: 2px dashed #ccc;
     cursor: pointer;
     transition: border-color 0.2s;
     display: flex;

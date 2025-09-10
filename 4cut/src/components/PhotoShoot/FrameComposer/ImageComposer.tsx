@@ -5,7 +5,7 @@ import PhotoCaptureContext from "../../../contexts/PhotoCaptureContextType.ts";
 
 const ImageComposer = () => {
     const { FrameData } = useContext(PhotoCaptureContext);
-    const { imgPlaceData, selectedSlotIndex, setSelectedSlotIndex } = FrameData;
+    const { imgPlaceData } = FrameData.ImgPlaceData;
 
     const containerRef = useRef<HTMLDivElement>(null);
     const imageRef = useRef<HTMLImageElement>(null);
@@ -84,14 +84,11 @@ const ImageComposer = () => {
                         zIndex: 2,
                     };
 
-                    const isSelected = selectedSlotIndex === index;
-
                     return (
                         <div
                             key={index}
-                            className={`image-slot ${isSelected ? 'selected' : ''}`}
+                            className="image-slot"
                             style={style}
-                            onClick={() => setSelectedSlotIndex(index)}
                         >
                             {item.imgSrc ? (
                                 <img src={item.imgSrc} alt={`User image ${index + 1}`} />

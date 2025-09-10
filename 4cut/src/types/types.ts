@@ -177,11 +177,10 @@ export interface PhotoCaptureContextType {
   };
   FrameData: {
     url: string;
-    imgPlaceData: ImgPlaceData[];
-        setImgPlaceData: React.Dispatch<React.SetStateAction<ImgPlaceData[]>>;
-    selectedSlotIndex: number | null;
-    setSelectedSlotIndex: React.Dispatch<React.SetStateAction<number | null>>;
+    ImgPlaceData: {
+      imgPlaceData: ImgPlaceData[];
+      setimageData:React.Dispatch<React.SetStateAction<ImgPlaceData[]>>;
+    }
     updateSlotImage: (slotIndex: number, newImageSrc: string | null) => void;
-    placedImageOrder: { src: string; order: number }[];
   }
 }
