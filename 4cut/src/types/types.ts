@@ -170,7 +170,13 @@ export interface ImgPlaceData {
   imgSrc: string | null;
 }
 
+export type ModeType = 'frame' | 'capture' | 'compose';
+
 export interface PhotoCaptureContextType {
+  Mode: {
+    mode: ModeType;
+    setmode: React.Dispatch<React.SetStateAction<ModeType>>;
+  }
   CaptureImgData: { // 촬영할 이미지
     captureImageData: CaptureImageData[];
     setCaptureImgData: React.Dispatch<React.SetStateAction<CaptureImageData[]>>;

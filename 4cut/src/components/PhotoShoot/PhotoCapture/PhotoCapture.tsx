@@ -5,8 +5,9 @@ import Camera from './Camera.tsx';
 import PhotoCaptureContext from "../../../contexts/PhotoCaptureContextType.ts";
 
 function PhotoCapture() {
-    const { CaptureImgData } = useContext(PhotoCaptureContext);
+    const { CaptureImgData, Mode } = useContext(PhotoCaptureContext);
     const { captureImageData, setCaptureImgData } = CaptureImgData;
+    const { setmode } = Mode
 
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
@@ -23,9 +24,10 @@ function PhotoCapture() {
 
     useEffect(() => {
         if (isComplete) {
-            console.log("All photos captured:", captureImageData);
+            // console.log("All photos captured:", captureImageData);
+            setmode('compose')
         }
-    }, [isComplete, captureImageData]);
+    }, [isComplete, setmode]);
 
     const handleComplete = () => {
         if (currentPhotoIndex < captureImageData.length - 1) {

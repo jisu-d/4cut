@@ -40,7 +40,7 @@ const ImageGrid = () => {
             // 적합한 슬롯을 찾으면, 새 이미지로 업데이트합니다.
             updateSlotImage(targetSlotIndex, clickedImage.base64Img);
         } else {
-            alert('비율이 맞는 빈 슬롯이 없습니다.');
+            console.log('비율이 맞는 빈 슬롯이 없습니다.')
         }
     };
 
