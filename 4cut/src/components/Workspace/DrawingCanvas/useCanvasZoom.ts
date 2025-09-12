@@ -91,7 +91,7 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
         const centerDeltaY = currentCenter.y - lastTouchCenter.y;
         
         setScale(newScale);
-        setPosition(prevPosition => ({
+        setPosition(() => ({
           x: touchX - logicalX * newScale + centerDeltaX,
           y: touchY - logicalY * newScale + centerDeltaY,
         }));
@@ -102,9 +102,8 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
     }
   }, [lastTouchDistance, lastTouchCenter, minScale, maxScale, scale, position]);
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    //e.preventDefault(); // 기본 터치 동작 방지
-    
+  const handleTouchEnd = useCallback(() => {
+    //e.preventDefault(); // 기본 터치 동작 방지 e: React.TouchEvent
     setIsDragging(false);
     setLastTouchDistance(0);
     setLastTouchCenter({ x: 0, y: 0 });
@@ -186,7 +185,6 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
   return {
     scale,
     position,
-    isDragging,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
