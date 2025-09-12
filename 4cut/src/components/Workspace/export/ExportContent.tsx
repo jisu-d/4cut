@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import {useState} from 'react';
 import ExportInput from './ExportInput';
 import ExportTextarea from './ExportTextarea';
 import ExportSwitch from './ExportSwitch';

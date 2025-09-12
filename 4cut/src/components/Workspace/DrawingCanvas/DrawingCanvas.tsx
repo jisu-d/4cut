@@ -58,7 +58,6 @@ function DrawingCanvas() {
     const {
         scale,
         position,
-        isDragging,
         handleTouchStart: handleZoomTouchStart,
         handleTouchMove: handleZoomTouchMove,
         handleTouchEnd: handleZoomTouchEnd,

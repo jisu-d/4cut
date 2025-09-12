@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { RefObject } from 'react';
-import type {DrawingItem, ListDrawingItem, UserLayerDataType, BrushData, HSL, BrushType} from '../../../../types/types';
+import type {DrawingItem, ListDrawingItem, UserLayerDataType, BrushData, HSL} from '../../../../types/types';
 import * as fabric from 'fabric';
 
 import { createImageStampGroup, addImageStampToGroup } from './imageStampBrush.ts';
@@ -52,9 +52,7 @@ interface UseDrawingManagerProps {
   hsl: HSL;
   alpha: number;
   setDrawingData: React.Dispatch<React.SetStateAction<ListDrawingItem>>;
-  canvasRef: RefObject<HTMLCanvasElement | null>;
   contextfabricCanvasRef: RefObject<fabric.Canvas | null>;
-  scale: number;
   pointerRef: React.RefObject<{x:number, y:number}>;
 }
 
@@ -65,9 +63,7 @@ export function useDrawingManager({
   hsl,
   alpha,
   setDrawingData,
-  canvasRef,
   contextfabricCanvasRef,
-  scale,
   pointerRef,
 }: UseDrawingManagerProps) {
   const [isDrawing, setIsDrawing] = useState(false);
@@ -93,7 +89,7 @@ export function useDrawingManager({
       setIsErasing(true);
       setDrawingLayerName(selectedLayer.id);
     }
-  }, [pointerRef, contextUserLayerDataType, activeTool, canvasRef, scale, contextfabricCanvasRef, setDrawingData]);
+  }, [pointerRef, contextUserLayerDataType, activeTool]);
 
   // 드로잉 중 이동
   const handleCanvasPointerMove = useCallback(() => {
@@ -102,7 +98,7 @@ export function useDrawingManager({
     if (isDrawing) {
       setDrawingPoints(prev => [...prev, pointerRef.current]);
     }
-  }, [pointerRef, isDrawing, isErasing, drawingLayerName, canvasRef, scale, contextfabricCanvasRef, setDrawingData]);
+  }, [pointerRef, isDrawing]);
 
   // 드로잉 끝
   const handleCanvasPointerUp = useCallback(() => {
@@ -225,7 +221,7 @@ export function useDrawingManager({
     return () => {
       isCancelled = true;
     };
-  }, [isDrawing, drawingPoints, contextfabricCanvasRef, brushData, hsl, alpha]);
+  }, [isDrawing, drawingPoints, contextfabricCanvasRef, brushData, hsl, alpha, tempPathObj]);
 
   // 드로잉이 끝났을 때 임시 path를 정리하는 Hook
   useEffect(() => {
@@ -234,7 +230,7 @@ export function useDrawingManager({
       contextfabricCanvasRef.current.requestRenderAll();
       setTempPathObj(null);
     }
-  }, [isDrawing]);
+  }, [isDrawing, contextfabricCanvasRef, tempPathObj]);
 
   return {
     handleCanvasPointerDown,
