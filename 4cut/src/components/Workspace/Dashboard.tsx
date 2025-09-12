@@ -1,5 +1,5 @@
 // src/components/Dashboard.js
-import React, {useContext, useEffect, useState} from 'react';
+import {useContext, useEffect, useState} from 'react';
 
 import '../../styles/Workspace/Dashboard.css';
 
@@ -27,7 +27,6 @@ import ExportingSkeleton from './ExportingSkeleton';
 function Dashboard({ openExportPopup, isExportPopupOpen }: { openExportPopup: () => void, isExportPopupOpen: boolean }) {
   const [selectedMenu, setSelectedMenu] = useState('layers'); // 초기값
   const context = useContext(AppContext);
-  if (!context.colors) return null;
   const { hsl } = context.colors.chosenColor.hslData;
 
   const renderContent = () => {

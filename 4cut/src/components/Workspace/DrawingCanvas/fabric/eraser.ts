@@ -1,6 +1,3 @@
-import * as fabric from 'fabric';
-import type { ListDrawingItem } from '../../../../types/types';
-
 /**
  * 지우개 크기를 시각적으로 보여주는 원형 커서를 생성합니다.
  * @param size - 지우개 커서의 직경 (px)
