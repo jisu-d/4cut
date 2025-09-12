@@ -1,6 +1,5 @@
 import React, {useContext, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import '../../../styles/PhotoShoot/FrameComposer/ImageComposer.css';
-import all_test_Img from '../../../assets/test/all_test.png';
 import PhotoCaptureContext from "../../../contexts/PhotoCaptureContextType.ts";
 
 const ImageComposer = () => {
@@ -67,7 +66,7 @@ const ImageComposer = () => {
             >
                 <img
                     ref={imageRef}
-                    src={all_test_Img}
+                    src={FrameData.url}
                     onLoad={handleImageLoad}
                     className="frame-image"
                     style={{ zIndex: 10 }}

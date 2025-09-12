@@ -170,7 +170,7 @@ export interface ImgPlaceData {
   imgSrc: string | null;
 }
 
-export type ModeType = 'frame' | 'capture' | 'compose';
+export type ModeType = 'frame' | 'capture' | 'compose' | 'generator';
 
 export interface PhotoCaptureContextType {
   Mode: {

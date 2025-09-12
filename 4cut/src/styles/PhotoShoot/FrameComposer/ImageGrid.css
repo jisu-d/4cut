@@ -1,6 +1,5 @@
 .frame-composer-container .image-grid-container {
     border: 1px solid #E5E7EB;
-    flex: 2;
     background-color: white;
     border-radius: 10px;
     padding: 1rem;
@@ -8,9 +7,15 @@
     overflow: hidden;
 }
 
+.image-grid-container.portrait::-webkit-scrollbar {
+    display: none;
+}
+
 .image-grid-container.portrait {
     display: flex;
     overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 .image-grid-container.landscape {
@@ -23,7 +28,7 @@
 .image-item {
     overflow: hidden;
     border-radius: 8px;
-    position: relative; /* 자식 요소를 위한 기준점 */
+    position: relative;
 }
 
 .image-item img {
@@ -36,13 +41,6 @@
     width: 350px;
     height: 100%;
     flex-shrink: 0;
-}
-
-/*가로모드 일떄*/
-@media (min-aspect-ratio: 1/1) {
-    .frame-composer-container .image-grid-container {
-        flex: 1;
-    }
 }
 
 .slot-indicator {
