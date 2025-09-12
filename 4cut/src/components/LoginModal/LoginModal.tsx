@@ -1,5 +1,5 @@
 import '../../styles/LoginModal/LoginModal.css';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import Cross from '../../assets/Icon/SignUpModal/cross.svg?react'
 import { CustomCheckbox } from '../CustomCheckBox';
