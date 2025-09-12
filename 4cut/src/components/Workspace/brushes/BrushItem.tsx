@@ -1,4 +1,3 @@
-import React from 'react';
 import '../../../styles/Workspace/brushes/BrushItem.css';
 import {brushType} from "../../../assets/brush/brushType.ts";
 

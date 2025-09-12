@@ -1,4 +1,4 @@
-import React, {useState, useContext} from 'react';
+import {useState, useContext} from 'react';
 import '../../../styles/Workspace/brushes/BrushesContent.css';
 import BrushCategoryButton from './BrushCategoryButton';
 import BrushItem from './BrushItem';
