@@ -39,7 +39,7 @@
 
 .export-content-header>div:nth-child(1) {
   font-size: 32px;
-  font-family: 'Pretendard-Black';
+  font-family: 'Pretendard-Black', sans-serif;
   color: #111827;
 }
 

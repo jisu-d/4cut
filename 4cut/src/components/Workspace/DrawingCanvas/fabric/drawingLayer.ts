@@ -99,7 +99,7 @@ class DrawingLayerManager {
   }
 
   // 기존 드로잉 객체를 업데이트
-  private updateDrawing(obj: fabric.Path | fabric.Group, drawing: DrawingItem, active: boolean, visible: boolean, zIndex:number) {
+  private updateDrawing(obj: fabric.Path | fabric.Group, active: boolean, visible: boolean, zIndex:number) {
     obj.set({
       visible: visible,
       evented: active,
@@ -110,7 +110,7 @@ class DrawingLayerManager {
   }
 
   // 드로잉 객체 생성
-  private async createDrawing(drawingData: DrawingItem, brushData:BrushData , active: boolean, visible: boolean, zIndex:number, onDrawingTransform?: (id: string, newProps: any) => void): Promise<fabric.Path | fabric.Group> {
+  private async createDrawing(drawingData: DrawingItem, brushData:BrushData , active: boolean, visible: boolean, onDrawingTransform?: (id: string, newProps: any) => void): Promise<fabric.Path | fabric.Group> {
     let obj: fabric.Path | fabric.Group
 
     const scaledDrawingData = {
@@ -132,7 +132,7 @@ class DrawingLayerManager {
     if(drawingData.brushType === 'pen'){
       obj = createFabricDrawing(scaledDrawingData);
     } else{
-      obj = await imageStampBrush(scaledDrawingData, brushData, {x:this.scaleX, y:this.scaleY});
+      obj = await imageStampBrush(scaledDrawingData, brushData);
     }
 
     obj.set({
@@ -180,12 +180,12 @@ class DrawingLayerManager {
       let obj = this.drawingMap.get(drawing.id);
       if (!obj) {
         // 새 드로잉 객체 생성
-        obj = await this.createDrawing(drawing, brushData, active, visible, zIndex, onDrawingTransform);
+        obj = await this.createDrawing(drawing, brushData, active, visible, onDrawingTransform);
         this.canvas.add(obj);
         this.drawingMap.set(drawing.id, obj);
       } else {
         // 기존 드로잉 객체 업데이트
-        this.updateDrawing(obj, drawing, active, visible, zIndex);
+        this.updateDrawing(obj, active, visible, zIndex);
       }
     });
     this.canvas.renderAll();
