@@ -76,6 +76,10 @@ function DrawingCanvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     //const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
 
+    const scaleX = canvasSize.width / currentCanvasSize.width;
+    const scaleY = canvasSize.height / currentCanvasSize.height;
+    const canvasScale  = { scaleX: scaleX, scaleY: scaleY };
+
     // useDrawingManager 훅 사용
     const {
         handleCanvasPointerDown,
@@ -88,9 +92,8 @@ function DrawingCanvas() {
         hsl,
         alpha,
         setDrawingData,
-        canvasRef,
         contextfabricCanvasRef,
-        scale,
+        canvasScale,
         pointerRef,
     });
 
@@ -208,9 +211,7 @@ function DrawingCanvas() {
 
     // 모든 cut의 사각형을 그리고, 클릭/이동/크기조절/회전 시 데이터 갱신 - TODO -> 레이어 그리는 부분 최적화가 필요
 
-    const scaleX = canvasSize.width / currentCanvasSize.width;
-    const scaleY = canvasSize.height / currentCanvasSize.height;
-    const canvasScale  = { scaleX: scaleX, scaleY: scaleY };
+    
 
 
     useEffect(() => {
@@ -272,13 +273,13 @@ function DrawingCanvas() {
                 } else if (item.LayerType === 'Drawing') {
                     const layerDrawingData = drawingData[item.id];
 
-                    const handleDrawingTransform = (id: string, newProps: any) => {
+                    const handleDrawingTransform = (id: string) => {
                         if (setDrawingData) {
                             setDrawingData(prev => ({
                                 ...prev,
                                 [item.id]: prev[item.id].map(drawing =>
                                     drawing.id === id
-                                        ? { ...drawing, ...newProps }
+                                        ? { ...drawing }
                                         : drawing
                                 )
                             }));
@@ -293,7 +294,8 @@ function DrawingCanvas() {
                         handleDrawingTransform,
                         item.active,
                         item.visible,
-                        idx
+                        idx,
+                        canvasScale
                     );
                 } else if (item.LayerType === 'Img') {
 
@@ -315,8 +317,8 @@ function DrawingCanvas() {
                                      ...prev[item.id],
                                      top: top / canvasScale.scaleY,
                                      left: left / canvasScale.scaleX,
-                                     scaleX: scaleX,
-                                     scaleY: scaleY,
+                                     scaleX: scaleX / canvasScale.scaleX,
+                                     scaleY: scaleY / canvasScale.scaleY,
                                      angle
                                    }
                                  }));
@@ -325,15 +327,12 @@ function DrawingCanvas() {
 
                         syncImgLayers(
                             contextfabricCanvasRef.current!,
-                            {
-                              ...layerImgData,
-                              top: layerImgData.top * canvasScale.scaleY,
-                              left: layerImgData.left * canvasScale.scaleX,
-                            },
+                            layerImgData,
                             handleImgTransform,
                             item.active,
                             item.visible,
-                            idx
+                            idx,
+                            canvasScale
                         );
                     }
                 }
@@ -343,6 +342,7 @@ function DrawingCanvas() {
     }, [
         cutImageData,
         drawingData,
+        imgData,
         contextUserLayerDataType,
         contextfabricCanvasRef.current,
     ]);
@@ -425,7 +425,7 @@ function DrawingCanvas() {
     const handleTouchEnd = useCallback((e: React.TouchEvent) => {
         setPointerRef(e);
         handleCanvasPointerUp();
-        handleZoomTouchEnd(e);
+        handleZoomTouchEnd();
         if(activeTool == 'eraser'){
             handleEraserUp();
         }
@@ -450,7 +450,7 @@ function DrawingCanvas() {
         setPointerRef(e);
         handleCanvasPointerUp();
         handleZoomMouseUp(e);
-    }, [handleCanvasPointerUp, handleZoomMouseUp]);
+    }, [handleCanvasPointerUp, handleZoomMouseUp, setPointerRef]);
 
     return (
         <div

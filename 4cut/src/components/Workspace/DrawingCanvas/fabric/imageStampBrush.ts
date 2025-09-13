@@ -119,7 +119,7 @@ export async function imageStampBrush(
   for (const coord of densePoints) {
     const fabricImage = new fabric.FabricImage(tintedImage, {
       left: coord.x,
-      top: coord.y,
+      top: coord.y ,
       originX: 'center',
       originY: 'center',
       selectable: false,

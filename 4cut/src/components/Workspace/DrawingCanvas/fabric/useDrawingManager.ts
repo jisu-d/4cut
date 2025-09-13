@@ -54,6 +54,7 @@ interface UseDrawingManagerProps {
   setDrawingData: React.Dispatch<React.SetStateAction<ListDrawingItem>>;
   contextfabricCanvasRef: RefObject<fabric.Canvas | null>;
   pointerRef: React.RefObject<{x:number, y:number}>;
+  canvasScale: { scaleX: number, scaleY: number };
 }
 
 export function useDrawingManager({
@@ -65,6 +66,7 @@ export function useDrawingManager({
   setDrawingData,
   contextfabricCanvasRef,
   pointerRef,
+  canvasScale,
 }: UseDrawingManagerProps) {
   const [isDrawing, setIsDrawing] = useState(false);
   const [isErasing, setIsErasing] = useState(false); // isErasing 상태 추가
@@ -113,21 +115,29 @@ export function useDrawingManager({
       if (setDrawingData) {
         setDrawingData((prev: ListDrawingItem) => {
           const newId = `drawing-${Date.now()}`;
+
+          const unscaledDrawingPoints = drawingPoints.map(p => ({
+            x: p.x / canvasScale.scaleX,
+            y: p.y / canvasScale.scaleY,
+          }));
+
+          const unscaledBrushSize = brushData.brushSize / ((canvasScale.scaleX + canvasScale.scaleY) / 2);
+
           const newDrawing: DrawingItem = {
             id: newId,  
             brushType: brushData.brushType,
             jsonData: {
-              points: drawingPoints,
+              points: unscaledDrawingPoints,
               options: {
                 stroke: hslToHex(hsl.h, hsl.s, hsl.l),
-                strokeWidth: brushData.brushSize,
+                strokeWidth: unscaledBrushSize,
                 strokeLineCap: 'round',
                 strokeLineJoin: 'round',
                 fill: '',
-                left: Math.min(...drawingPoints.map(p => p.x)) - brushData.brushSize / 2,
-                top: Math.min(...drawingPoints.map(p => p.y)) - brushData.brushSize / 2,
-                width: Math.max(...drawingPoints.map(p => p.x)) - Math.min(...drawingPoints.map(p => p.x)) + brushData.brushSize,
-                height: Math.max(...drawingPoints.map(p => p.y)) - Math.min(...drawingPoints.map(p => p.y)) + brushData.brushSize,
+                left: (Math.min(...drawingPoints.map(p => p.x)) - brushData.brushSize / 2) / canvasScale.scaleX,
+                top: (Math.min(...drawingPoints.map(p => p.y)) - brushData.brushSize / 2) / canvasScale.scaleY,
+                width: (Math.max(...drawingPoints.map(p => p.x)) - Math.min(...drawingPoints.map(p => p.x)) + brushData.brushSize) / canvasScale.scaleX,
+                height: (Math.max(...drawingPoints.map(p => p.y)) - Math.min(...drawingPoints.map(p => p.y)) + brushData.brushSize) / canvasScale.scaleY,
                 angle: 0,
                 scaleX: 1,
                 scaleY: 1,
@@ -201,6 +211,7 @@ export function useDrawingManager({
           const lastPoint = drawingPoints[drawingPoints.length - 2];
           const newPoint = drawingPoints[drawingPoints.length - 1];
 
+
           if (lastPoint && newPoint) {
             await addImageStampToGroup(
                 group,
@@ -221,7 +232,7 @@ export function useDrawingManager({
     return () => {
       isCancelled = true;
     };
-  }, [isDrawing, drawingPoints, contextfabricCanvasRef, brushData, hsl, alpha, tempPathObj]);
+  }, [isDrawing, drawingPoints, contextfabricCanvasRef, brushData, hsl, alpha]);
 
   // 드로잉이 끝났을 때 임시 path를 정리하는 Hook
   useEffect(() => {

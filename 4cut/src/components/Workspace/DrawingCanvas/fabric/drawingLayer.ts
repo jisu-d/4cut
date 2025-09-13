@@ -1,5 +1,5 @@
 import * as fabric from 'fabric';
-import type { DrawingItem, BrushType, BrushData } from '../../../../types/types';
+import type { DrawingItem, BrushData } from '../../../../types/types';
 
 import {imageStampBrush} from './imageStampBrush'
 // Canvas에 _drawingLayerObjects 속성 추가를 위한 타입 확장
@@ -22,13 +22,13 @@ function createFabricDrawing(drawingData: DrawingItem): fabric.Path {
 
     // TODO 주요 옵션만 추출 -> 이거를 이렇게 처리해야 하는 이유를 잘 모르겠음
     const {
-      stroke, strokeWidth, fill, left, top, width, height, 
+      stroke, strokeWidth, fill, left, top, width, height,
       angle, scaleX, scaleY, strokeLineCap, strokeLineJoin, opacity,
       globalCompositeOperation,
     } = drawingData.jsonData.options || {};
 
     return new fabric.Path(pathData, {
-      stroke, strokeWidth, fill, left, top, width, height, 
+      stroke, strokeWidth, fill, left, top, width, height,
       angle, scaleX, scaleY, strokeLineCap, strokeLineJoin, opacity,
       globalCompositeOperation,
     });
@@ -47,8 +47,8 @@ function pointsToPathData(points: {x: number, y: number}[]): string {
 }
 
 // 변형 이벤트 핸들러 함수 분리
-function handleModifiedEvent(obj: fabric.Path | fabric.Group, drawingData: DrawingItem, onDrawingTransform: (id: string, newProps: any) => void) {
-  let points: {x: number, y: number}[] = [];
+function handleModifiedEvent(obj: fabric.Path | fabric.Group, drawingData: DrawingItem, onDrawingTransform: (id: string, newProps: any) => void, scaleX: number, scaleY: number) {
+  const points: {x: number, y: number}[] = [];
   if (obj instanceof fabric.Path) {
     const pathArr = obj.get('path');
     if (Array.isArray(pathArr)) {
@@ -63,16 +63,16 @@ function handleModifiedEvent(obj: fabric.Path | fabric.Group, drawingData: Drawi
     drawingData.id,
     {
       jsonData: {
-        points,
+        points: points.map(p => ({ x: p.x / scaleX, y: p.y / scaleY })),
         options: {
           ...((obj as any).toObject()),
-          left: obj.left,
-          top: obj.top,
-          width: obj.width,
-          height: obj.height,
+          left: obj.left / scaleX,
+          top: obj.top / scaleY,
+          width: obj.width / scaleX,
+          height: obj.height / scaleY,
           angle: obj.angle,
-          scaleX: obj.scaleX,
-          scaleY: obj.scaleY,
+          scaleX: obj.scaleX / scaleX,
+          scaleY: obj.scaleY / scaleY,
         }
       }
     }
@@ -82,8 +82,10 @@ function handleModifiedEvent(obj: fabric.Path | fabric.Group, drawingData: Drawi
 class DrawingLayerManager {
   private canvas: fabric.Canvas;
   private drawingMap: Map<string, fabric.Path | fabric.Group>;
+  private scaleX: number;
+  private scaleY: number;
 
-  constructor(canvas: fabric.Canvas, layerId: string) {
+  constructor(canvas: fabric.Canvas, layerId: string, scale: { scaleX: number, scaleY: number }) {
     this.canvas = canvas;
     if (!canvas._drawingLayerObjects) {
       canvas._drawingLayerObjects = new Map();
@@ -92,10 +94,12 @@ class DrawingLayerManager {
       canvas._drawingLayerObjects.set(layerId, new Map());
     }
     this.drawingMap = canvas._drawingLayerObjects.get(layerId)!;
+    this.scaleX = scale.scaleX;
+    this.scaleY = scale.scaleY;
   }
 
   // 기존 드로잉 객체를 업데이트
-  private updateDrawing(obj: fabric.Path | fabric.Group, active: boolean, visible: boolean, zIndex:number) {
+  private updateDrawing(obj: fabric.Path | fabric.Group, drawing: DrawingItem, active: boolean, visible: boolean, zIndex:number) {
     obj.set({
       visible: visible,
       evented: active,
@@ -107,17 +111,28 @@ class DrawingLayerManager {
 
   // 드로잉 객체 생성
   private async createDrawing(drawingData: DrawingItem, brushData:BrushData , active: boolean, visible: boolean, zIndex:number, onDrawingTransform?: (id: string, newProps: any) => void): Promise<fabric.Path | fabric.Group> {
-    //const obj = createFabricDrawing(drawingData);
-    //const obj = await createGroupedImages(drawingData.jsonData.points, 'http://localhost:5173/src/assets/brush/brush1.png');
-    // visible, active 속성에 따라 제어
-
     let obj: fabric.Path | fabric.Group
 
-    
+    const scaledDrawingData = {
+      ...drawingData,
+      jsonData: {
+        ...drawingData.jsonData,
+        points: drawingData.brushType == 'pen' ? drawingData.jsonData.points : drawingData.jsonData.points.map(p => ({x: p.x * this.scaleX, y: p.y * this.scaleY})),
+        options: {
+          ...drawingData.jsonData.options,
+          left: (drawingData.jsonData.options.left ?? 0) * this.scaleX,
+          top: (drawingData.jsonData.options.top ?? 0) * this.scaleY,
+          strokeWidth: drawingData.brushType == 'pen' ? (drawingData.jsonData.options.strokeWidth ?? 1) : (drawingData.jsonData.options.strokeWidth ?? 1) * this.scaleX,
+          scaleX: (drawingData.jsonData.options.scaleX ?? 1) * this.scaleX,
+          scaleY: (drawingData.jsonData.options.scaleY ?? 1) * this.scaleY,
+        }
+      }
+    };
+
     if(drawingData.brushType === 'pen'){
-      obj = createFabricDrawing(drawingData);
+      obj = createFabricDrawing(scaledDrawingData);
     } else{
-      obj = await imageStampBrush(drawingData, brushData);
+      obj = await imageStampBrush(scaledDrawingData, brushData, {x:this.scaleX, y:this.scaleY});
     }
 
     obj.set({
@@ -130,9 +145,9 @@ class DrawingLayerManager {
     // TODO -> 이거 오류때문에 임시로 이렇게 처리했는데 이유를 잘 모르겠음
     if (onDrawingTransform) {
       if(obj instanceof fabric.Path){
-        obj.on('modified', () => handleModifiedEvent(obj, drawingData, onDrawingTransform));
+        obj.on('modified', () => handleModifiedEvent(obj, drawingData, onDrawingTransform, this.scaleX, this.scaleY));
       }else if(obj instanceof fabric.Group){
-        obj.on('modified', () => handleModifiedEvent(obj, drawingData, onDrawingTransform));
+        obj.on('modified', () => handleModifiedEvent(obj, drawingData, onDrawingTransform, this.scaleX, this.scaleY));
       }
     }
     return obj;
@@ -152,7 +167,7 @@ class DrawingLayerManager {
   // 메인 동기화 메서드
   syncDrawings(
     drawings: DrawingItem[],
-    onDrawingTransform: (id: string, newProps: any) => void,
+    onDrawingTransform: (id: string) => void,
     active: boolean,
     visible: boolean,
     zIndex: number,
@@ -170,7 +185,7 @@ class DrawingLayerManager {
         this.drawingMap.set(drawing.id, obj);
       } else {
         // 기존 드로잉 객체 업데이트
-        this.updateDrawing(obj, active, visible, zIndex);
+        this.updateDrawing(obj, drawing, active, visible, zIndex);
       }
     });
     this.canvas.renderAll();
@@ -183,12 +198,13 @@ export function syncDrawingLayer(
   layerId: string,
   drawingItems: DrawingItem[],
   brushData: BrushData,
-  onDrawingTransform: (id: string, newProps: any) => void,
+  onDrawingTransform: (id: string) => void,
   active: boolean,
   visible: boolean,
   zIndex: number,
+  scale: { scaleX: number, scaleY: number },
 ) {
-  const manager = new DrawingLayerManager(canvas, layerId);
+  const manager = new DrawingLayerManager(canvas, layerId, scale);
   manager.syncDrawings(drawingItems, onDrawingTransform, active, visible, zIndex, brushData);
 }
 

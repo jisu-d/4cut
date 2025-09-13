@@ -73,8 +73,8 @@ function Workspace() {
       url: '/src/assets/test/Bear.png',
       left: 146,
       top: 4086,
-      scaleX: 0.5,
-      scaleY: 0.5,
+      scaleX: 1,
+      scaleY: 1,
       angle: 0
     },
     'img-456': {
@@ -82,8 +82,8 @@ function Workspace() {
       url: '/src/assets/test/Carrot.png',
       left: 2272,
       top: 140,
-      scaleX: 0.5,
-      scaleY: 0.5,
+      scaleX: 1,
+      scaleY: 1,
       angle: 0
     },
   })
@@ -294,14 +294,14 @@ function Workspace() {
         <div className='canvas-area'>
           <DrawingCanvas />
         </div>
-      </AppContext.Provider>
-      {isExportPopupOpen && (
-        <div className="popup-overlay" onClick={closeExportPopup}>
-          <div className="popup-content" onClick={e => e.stopPropagation()}>
-            <ExportContent />
+        {isExportPopupOpen && (
+          <div className="popup-overlay" onClick={closeExportPopup}>
+            <div className="popup-content" onClick={e => e.stopPropagation()}>
+              <ExportContent />
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </AppContext.Provider>
     </div>
   );
 }

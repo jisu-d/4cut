@@ -12,13 +12,17 @@ declare module 'fabric' {
 class ImgLayerManager {
   private canvas: fabric.Canvas;
   private imgMap: Map<string, fabric.FabricImage>;
+  private scaleX: number;
+  private scaleY: number;
 
-  constructor(canvas: fabric.Canvas) {
+  constructor(canvas: fabric.Canvas, scale: { scaleX: number, scaleY: number }) {
     this.canvas = canvas;
     if (!canvas._imgLayers) {
       canvas._imgLayers = new Map();
     }
     this.imgMap = canvas._imgLayers;
+    this.scaleX = scale.scaleX;
+    this.scaleY = scale.scaleY;
   }
 
   private async createImg(
@@ -26,7 +30,6 @@ class ImgLayerManager {
     imgData: ImgDataItem,
     active: boolean,
     visible: boolean,
-    zIndex:number,
     onImgTransform?: (top: number, left: number, width: number, height: number, angle: number) => void
   ): Promise<void> {
     try { 
@@ -34,35 +37,11 @@ class ImgLayerManager {
       const fullUrl = imgData.url.startsWith('http') ? imgData.url : `http://localhost:5173${imgData.url}`;
       const img = await fabric.FabricImage.fromURL(fullUrl);
 
-      if(imgData.scaleX === 1 && 
-        imgData.scaleY === 1 && 
-        imgData.left == 0 && 
-        imgData.top == 0
-      ){ // 처음 추가한 이미지 일때 초기상태 세팅
-        // 캔버스 크기
-        const canvasWidth = this.canvas.getWidth();
-        const canvasHeight = this.canvas.getHeight();
-  
-        // 이미지 원본 크기
-        const imgWidth = img.width;
-        const imgHeight = img.height;
-  
-        // 캔버스에 맞는 최대 스케일 계산
-        const scaleX = Math.min(1, canvasWidth / imgWidth);
-        const scaleY = Math.min(1, canvasHeight / imgHeight);
-        // 비율 유지해서 최대한 맞춤
-        const scale = Math.min(scaleX, scaleY);
-        imgData.scaleX = scale
-        imgData.scaleY = scale
-        imgData.left = (canvasWidth - imgWidth * scale) / 2
-        imgData.top = (canvasHeight - imgHeight * scale) / 2
-      }
-
       img.set({
-        left: imgData.left,
-        top: imgData.top,
-        scaleX: imgData.scaleX,
-        scaleY: imgData.scaleY,
+        left: imgData.left * this.scaleX,
+        top: imgData.top * this.scaleY,
+        scaleX: imgData.scaleX * this.scaleX,
+        scaleY: imgData.scaleY * this.scaleY,
         angle: imgData.angle,
         selectable: active,
         evented: active,
@@ -85,12 +64,16 @@ class ImgLayerManager {
       this.imgMap.set(id, img);
       this.canvas.renderAll();
     } catch (e) {
-      console.log('실패', imgData.url);
+      console.log('실패', imgData.url, e);
     }
   }
 
-  private updateImg(img: fabric.FabricImage, active: boolean, visible: boolean, zIndex:number): void {
+  private updateImg(img: fabric.FabricImage, imgData: ImgDataItem, active: boolean, visible: boolean, zIndex:number): void {
     img.set({
+      left: imgData.left * this.scaleX,
+      top: imgData.top * this.scaleY,
+      scaleX: imgData.scaleX * this.scaleX,
+      scaleY: imgData.scaleY * this.scaleY,
       selectable: active,
       evented: active,
       visible: visible,
@@ -110,7 +93,7 @@ class ImgLayerManager {
 
   // 모든 이미지를 제거하는 메서드
   private removeAllImgs(): void {
-    for (const [id, img] of this.imgMap.entries()) {
+    for (const img of this.imgMap.values()) {
       this.canvas.remove(img);
     }
     this.imgMap.clear();
@@ -123,11 +106,11 @@ class ImgLayerManager {
     visible: boolean,
     zIndex: number
   ): Promise<void> {
-    let img = this.imgMap.get(imgData.id);
+    const img = this.imgMap.get(imgData.id);
     if (!img) {
-      await this.createImg(imgData.id, imgData, active, visible, zIndex, onImgTransform);
+      await this.createImg(imgData.id, imgData, active, visible, onImgTransform);
     } else {
-      this.updateImg(img, active, visible, zIndex);
+      this.updateImg(img, imgData, active, visible, zIndex);
     }
   }
 
@@ -149,9 +132,10 @@ export async function syncImgLayers(
   onImgTransform: (top: number, left:number, width:number, height:number, angle: number) => void,
   active: boolean,
   visible: boolean,
-  zIndex: number
+  zIndex: number,
+  scale: { scaleX: number, scaleY: number }
 ) {
-  const manager = new ImgLayerManager(canvas);
+  const manager = new ImgLayerManager(canvas, scale);
   await manager.syncImgs(imgData, onImgTransform, active, visible, zIndex);
 }
 
