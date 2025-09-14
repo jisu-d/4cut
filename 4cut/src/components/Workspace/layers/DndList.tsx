@@ -48,13 +48,17 @@ const DndList = () => {
 
   const [overlayScale, setOverlayScale] = useState(1);
 
+  const resetDragState = useCallback(() => {
+    setDraggingId(null);
+    setOverlayPos(null);
+    setOffset(null);
+    setOriginalIndex(null);
+  }, []);
+
   // 드래그/터치 종료 (공통 로직)
   const commonDragEndLogic = useCallback(() => {
     if (draggingId) {
-      setDraggingId(null);
-      setOverlayPos(null);
-      setOffset(null);
-      setOriginalIndex(null);
+      resetDragState()
 
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
@@ -67,7 +71,7 @@ const DndList = () => {
         }
       });
     }
-  }, [draggingId, userLayerDataType]);
+  }, [draggingId, userLayerDataType, resetDragState]);
 
   const onDelete = useCallback((id: string, LayerType:  "Drawing" | "Img") => {
     setUserLayerDataType(prevItems => prevItems.filter(item => item.id !== id));
@@ -108,10 +112,7 @@ const DndList = () => {
 
       // 삭제 후 드래그 상태 초기화 (기존 로직)
       if (draggingId === id) {
-        setDraggingId(null);
-        setOverlayPos(null);
-        setOffset(null);
-        setOriginalIndex(null);
+        resetDragState()
         document.body.style.userSelect = '';
         document.body.style.cursor = '';
         document.body.style.overflow = '';
@@ -121,7 +122,7 @@ const DndList = () => {
         setEditingId(null);
       }
     }, TRANSITION_DURATION); // CSS transition 시간과 일치시킵니다.
-  }, [setUserLayerDataType, draggingId, editingId, canvas, setDrawingData, setImgData]);
+  }, [setUserLayerDataType, draggingId, editingId, canvas, setDrawingData, setImgData, resetDragState]);
 
 
   // 드래그/터치 시작 시 공통 로직
@@ -134,7 +135,7 @@ const DndList = () => {
     }
 
     let currentTarget: HTMLElement | null = target;
-    while (currentTarget && currentTarget !== null && currentTarget.classList[0] !== 'list-item') {
+    while (currentTarget && currentTarget.classList[0] !== 'list-item') {
       if (currentTarget.tagName === 'INPUT' || currentTarget.tagName === 'IMG' || currentTarget.classList.contains('list-item-controls')) {
         return; // 컨트롤 요소 클릭 시 DND 방지 (체크박스, 삭제 버튼, 텍스트 인풋 등)
       }
@@ -217,7 +218,7 @@ const DndList = () => {
     if (e.button !== 0) return;
     handlePointerDown(e.clientX, e.clientY, id, e.target);
   }, [handlePointerDown]);
-  const handleMouseUp = useCallback((e: MouseEvent, id?: string) => {
+  const handleMouseUp = useCallback((id?: string) => {
     if (!id) return;
     handlePointerUp(id);
     if (draggingId) commonDragEndLogic();
@@ -228,7 +229,7 @@ const DndList = () => {
     if (e.touches.length !== 1) return;
     handlePointerDown(e.touches[0].clientX, e.touches[0].clientY, id, e.target);
   }, [handlePointerDown]);
-  const handleTouchEnd = useCallback((e: TouchEvent, id?: string) => {
+  const handleTouchEnd = useCallback((id?: string) => {
     if (!id) return;
     handlePointerUp(id);
     if (draggingId) commonDragEndLogic();
@@ -337,14 +338,14 @@ const DndList = () => {
   useEffect(() => {
     if (draggingId) {
       window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', (e) => handleMouseUp(e, draggingId ?? undefined));
+      window.addEventListener('mouseup', () => handleMouseUp(draggingId ?? undefined));
     } else {
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', (e) => handleMouseUp(e, draggingId ?? undefined));
+      window.removeEventListener('mouseup', () => handleMouseUp(draggingId ?? undefined));
     }
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', (e) => handleMouseUp(e, draggingId ?? undefined));
+      window.removeEventListener('mouseup', () => handleMouseUp(draggingId ?? undefined));
     };
   }, [draggingId, handleMouseMove, handleMouseUp]);
 
@@ -352,14 +353,14 @@ const DndList = () => {
   useEffect(() => {
     if (draggingId) {
       window.addEventListener('touchmove', handleTouchMove, { passive: false });
-      window.addEventListener('touchend', (e) => handleTouchEnd(e, draggingId ?? undefined), { passive: false });
+      window.addEventListener('touchend', () => handleTouchEnd(draggingId ?? undefined), { passive: false });
     } else {
       window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', (e) => handleTouchEnd(e, draggingId ?? undefined));
+      window.removeEventListener('touchend', () => handleTouchEnd(draggingId ?? undefined));
     }
     return () => {
       window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', (e) => handleTouchEnd(e, draggingId ?? undefined));
+      window.removeEventListener('touchend', () => handleTouchEnd(draggingId ?? undefined));
     };
   }, [draggingId, handleTouchMove, handleTouchEnd]);
 
@@ -389,9 +390,9 @@ const DndList = () => {
             }}
             className={`list-item${isCurrentlyDragging ? ' is-dragging' : ''}${isDeleting ? ' is-deleting' : ''}${isSelected ? ' selected' : ''}`}
             onMouseDown={(e) => handleMouseDown(e, item.id)}
-            onMouseUp={(e) => handleMouseUp(e.nativeEvent, item.id)}
+            onMouseUp={() => handleMouseUp(item.id)}
             onTouchStart={(e) => handleTouchStart(e, item.id)}
-            onTouchEnd={(e) => handleTouchEnd(e.nativeEvent, item.id)}
+            onTouchEnd={() => handleTouchEnd(item.id)}
             onTransitionEnd={(e) => {
               if (e.propertyName === 'opacity' && isDeleting) {
                 console.log(`Item ${item.id} animation ended, ready for removal`);
