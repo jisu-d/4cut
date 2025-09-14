@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import * as fabric from 'fabric';
 ///import { eraseAtLayer } from './eraser';
-import type { UserLayerDataType, BrushData, ListDrawingItem, DrawingItem } from '../../../../types/types';
+import type { BrushData, ListDrawingItem, DrawingItem } from '../../../../types/types';
 
 interface UseEraserManagerProps {
   brushData: BrushData;
@@ -10,6 +10,7 @@ interface UseEraserManagerProps {
   pointerRef: React.RefObject<{x:number, y:number}>;
   selectedLayerData: React.RefObject<{id: string, drawingData: DrawingItem[]} | null>;
   contextsetDrawingData: React.Dispatch<React.SetStateAction<ListDrawingItem>>;
+  scale: number;
 }
 
 export function useEraserManager({
@@ -42,34 +43,40 @@ export function useEraserManager({
             if (obj.visible) {
                 // 드로잉 데이터의 각 좌표점들을 확인
                 if (obj instanceof fabric.Path) {
-                    const path = obj.get('path');
+                    const path = obj.get('path')
                     if (Array.isArray(path)) {
                         let hasPointInRange = false;
                         
-                        // 각 경로 세그먼트의 좌표 확인
+                        // 각 경로 세그먼트의 모든 좌표 확인 (M, L, Q, C 등)
                         for (const segment of path) {
-                            if (segment[0] === 'M' || segment[0] === 'L') {
-                                const pointX = segment[1];
-                                const pointY = segment[2];
-                                
-                                // 지우개 중심과 좌표점 사이의 거리
-                                const distance = Math.sqrt(
-                                    Math.pow(eraserX - pointX, 2) + 
-                                    Math.pow(eraserY - pointY, 2)
-                                );
-                                
-                                // 그림의 브러시 크기 (strokeWidth)를 고려한 범위
-                                const brushSize = obj.strokeWidth || 1;
-                                const brushRadius = brushSize / 2;
-                                
-                                // 지우개 반지름 + 브러시 반지름 보다 작으면 겹침
-                                if (distance <= (eraserRadius + brushRadius)) {
-                                    hasPointInRange = true;
-                                    break; // 하나라도 겹치면 해당 오브젝트는 지우기 대상
+                            // segment의 첫 요소는 명령어, 나머지는 좌표
+                            for (let i = 1; i < segment.length; i += 2) {
+                                if (i + 1 < segment.length) {
+                                    const pointX = segment[i];
+                                    const pointY = segment[i + 1];
+                                    
+                                    // 지우개 중심과 좌표점 사이의 거리
+                                    const distance = Math.sqrt(
+                                        (eraserX - pointX) ** 2 +
+                                        (eraserY - pointY) ** 2
+                                    );
+                                    
+                                    // 그림의 브러시 크기 (strokeWidth)를 고려한 범위
+                                    const brushSize = obj.strokeWidth || 1;
+                                    const brushRadius = brushSize / 2;
+                                    
+                                    // 지우개 반지름 + 브러시 반지름 보다 작으면 겹침
+                                    if (distance <= (eraserRadius + brushRadius)) {
+                                        hasPointInRange = true;
+                                        break; // 하나라도 겹치면 해당 오브젝트는 지우기 대상
+                                    }
                                 }
                             }
+                            if (hasPointInRange) {
+                                break;
+                            }
                         }
-                        
+
                         if (hasPointInRange) {
                             objectsInRange.push({ id, obj });
                         }
@@ -115,12 +122,10 @@ export function useEraserManager({
         }
 
         return objectsInRange;
-    }, []);
+    }, [pointerRef]);
 
     // Group 내부의 FabricImage들을 개별적으로 지우개 범위와 겹치는지 확인하고 처리하는 함수
     const processGroupObjects = useCallback((
-        canvas: fabric.Canvas,
-        layerId: string,
         group: fabric.Group,
         eraserX: number,
         eraserY: number,
@@ -175,11 +180,7 @@ export function useEraserManager({
         group.setCoords();
 
         // 그룹 내부에 남은 이미지가 2개 미만이면 그룹 전체 제거
-        if (remainingObjects.length < 2) {
-            return true; // 그룹 전체 제거 필요
-        }
-
-        return false; // 그룹 유지
+        return remainingObjects.length < 2
     }, []);
 
     // 지우개 범위의 오브젝트들을 처리하는 함수
@@ -191,17 +192,17 @@ export function useEraserManager({
         eraserSize: number
     ) => {
         const objectsToErase = findObjectsInEraserRange(canvas, layerId, eraserX, eraserY, eraserSize);
-        
+
         if (objectsToErase.length === 0) return;
 
-        let fullyRemovedCount = 0;
+        const fullyRemovedIds: string[] = [];
         let partiallyProcessedCount = 0;
 
         for (const { id, obj } of objectsToErase) {
             if (obj instanceof fabric.Path) {
                 // Path 객체는 완전히 삭제
                 canvas.remove(obj);
-                fullyRemovedCount++;
+                fullyRemovedIds.push(id);
                 
                 // _drawingLayerObjects에서 제거
                 if (canvas._drawingLayerObjects && canvas._drawingLayerObjects.has(layerId)) {
@@ -210,12 +211,12 @@ export function useEraserManager({
                 }
             } else if (obj instanceof fabric.Group) {
                 // Group 객체는 내부 이미지들을 개별적으로 처리
-                const shouldRemoveGroup = processGroupObjects(canvas, layerId, obj, eraserX, eraserY, eraserSize);
+                const shouldRemoveGroup = processGroupObjects(obj, eraserX, eraserY, eraserSize);
                 
                 if (shouldRemoveGroup) {
                     // 그룹 전체 제거
                     canvas.remove(obj);
-                    fullyRemovedCount++;
+                    fullyRemovedIds.push(id);
                     
                     // _drawingLayerObjects에서도 제거
                     if (canvas._drawingLayerObjects && canvas._drawingLayerObjects.has(layerId)) {
@@ -230,19 +231,13 @@ export function useEraserManager({
         }
 
         // 완전히 제거된 객체들만 상태 데이터에서 제거
-        if (fullyRemovedCount > 0) {
+        if (fullyRemovedIds.length > 0) {
             contextsetDrawingData(prevData => {
                 const newData = { ...prevData };
                 if (newData[layerId]) {
-                    const updatedLayerData = newData[layerId].filter(
-                        drawing => !objectsToErase.some(obj => 
-                            obj.id === drawing.id && 
-                            (obj.obj instanceof fabric.Path || 
-                             (obj.obj instanceof fabric.Group && 
-                              processGroupObjects(canvas, layerId, obj.obj, eraserX, eraserY, eraserSize)))
-                        )
+                    newData[layerId] = newData[layerId].filter(
+                        drawing => !fullyRemovedIds.includes(drawing.id)
                     );
-                    newData[layerId] = updatedLayerData;
                 }
                 return newData;
             });
@@ -251,31 +246,27 @@ export function useEraserManager({
         // 캔버스 렌더링
         canvas.renderAll();
         
-        console.log(`지우개 결과: ${fullyRemovedCount}개 완전 삭제, ${partiallyProcessedCount}개 부분 처리`);
+        console.log(`지우개 결과: ${fullyRemovedIds.length}개 완전 삭제, ${partiallyProcessedCount}개 부분 처리`);
     }, [findObjectsInEraserRange, processGroupObjects, contextsetDrawingData]);
 
-    const handleEraserMove = useCallback((
-        contextUserLayerDataType:  UserLayerDataType[],
-        drawingData: ListDrawingItem,
-        setDrawingData: React.Dispatch<React.SetStateAction<ListDrawingItem>>
-    ) => {
+    const handleEraserMove = useCallback(() => {
         if (!customCursorRef.current || !contextfabricCanvasRef.current) return;
-        
+
         // 1. 지우개 커서 위치/가시성 설정
         customCursorRef.current.set({
             left: pointerRef.current.x,
             top: pointerRef.current.y,
             visible: true,
         })
-        
+
         contextfabricCanvasRef.current.bringObjectToFront(customCursorRef.current)
         contextfabricCanvasRef.current.renderAll()
-        
+
         // 2. 선택된 레이어가 있으면 지우개 기능 실행
         if (selectedLayerData.current && selectedLayerData.current.id) {
             const layerId = selectedLayerData.current.id;
             const eraserSize = brushData.eraserSize || 20;
-            
+
             // 3. 범위 내 오브젝트 탐지 및 완전 삭제
             eraseObjectsInRange(
                 contextfabricCanvasRef.current,
@@ -285,7 +276,7 @@ export function useEraserManager({
                 eraserSize
             );
         }
-    }, [customCursorRef, pointerRef, selectedLayerData, brushData, eraseObjectsInRange]);
+    }, [brushData.eraserSize, contextfabricCanvasRef, customCursorRef, eraseObjectsInRange, pointerRef, selectedLayerData]);
 
     const handleEraserUp = useCallback(() => {
         if (!customCursorRef.current) return;
@@ -297,7 +288,7 @@ export function useEraserManager({
         
         contextfabricCanvasRef.current?.bringObjectToFront(customCursorRef.current)
         contextfabricCanvasRef.current?.renderAll()
-    }, [customCursorRef, pointerRef]);
+    }, [contextfabricCanvasRef, customCursorRef, pointerRef]);
     
     const handleEraserDown = useCallback(() => {
         if (!customCursorRef.current) return;

@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useRef, useState, useMemo} from 'react';
 import '../../../styles/Workspace/DrawingCanvas/DrawingCanvas.css';
 import {useCanvasResize} from './useCanvasResize';
 import {useCanvasZoom} from './useCanvasZoom';
@@ -24,14 +24,20 @@ function DrawingCanvas() {
     const currentBackgroundColor = appContext.canvas?.backgroundColor || '#f0f0f0';
 
     const contextUserLayerDataType = appContext.layer?.userLayerDataType.userLayerDataType;
-    
-    const drawingData = appContext.layer?.DrawingData.drawingData || {};
+
+    const drawingData = useMemo(() => {
+        return appContext.layer?.DrawingData.drawingData || {};
+    }, [appContext.layer?.DrawingData.drawingData]);
     const setDrawingData = appContext.layer?.DrawingData.setDrawingData;
 
-    const cutImageData = appContext.layer?.cutImageData.cutImageData || [];
+    const cutImageData = useMemo(() => {
+        return appContext.layer?.cutImageData.cutImageData || []
+    }, [appContext.layer?.cutImageData]);
     const setCutImageData = appContext.layer?.cutImageData.setCutImageData;
 
-    const imgData = appContext.layer?.imgData.imgData || {}
+    const imgData = useMemo(() => {
+        return appContext.layer?.imgData.imgData || {}
+    }, [appContext.layer?.imgData.imgData]);
     const setImgData = appContext.layer?.imgData.setImgData
 
     const contextfabricCanvasRef  = appContext.canvas.fabricCanvasRef
@@ -78,7 +84,9 @@ function DrawingCanvas() {
 
     const scaleX = canvasSize.width / currentCanvasSize.width;
     const scaleY = canvasSize.height / currentCanvasSize.height;
-    const canvasScale  = { scaleX: scaleX, scaleY: scaleY };
+    const canvasScale = useMemo(() => {
+        return { scaleX: scaleX, scaleY: scaleY };
+    }, [scaleX, scaleY]);
 
     // useDrawingManager 훅 사용
     const {
@@ -125,6 +133,7 @@ function DrawingCanvas() {
         pointerRef,
         selectedLayerData,
         contextsetDrawingData: setDrawingData,
+        scale
     })
 
 
@@ -170,7 +179,7 @@ function DrawingCanvas() {
         contextfabricCanvasRef.current.freeDrawingCursor = cursortext
         contextfabricCanvasRef.current.requestRenderAll()
 
-    }, [activeTool, brushData.eraserSize]);
+    }, [activeTool, brushData.eraserSize, contextfabricCanvasRef]);
 
     // Fabric.js 캔버스 생성, 지우개 생성
     useEffect(() => {
@@ -205,7 +214,7 @@ function DrawingCanvas() {
                 contextfabricCanvasRef.current = null;
             };
         }
-    }, [canvasRef, canvasSize, currentBackgroundColor]);
+    }, [canvasRef, canvasSize, currentBackgroundColor, brushData?.eraserSize, contextfabricCanvasRef]);
 
 
 
@@ -339,13 +348,7 @@ function DrawingCanvas() {
             });
         }
 
-    }, [
-        cutImageData,
-        drawingData,
-        imgData,
-        contextUserLayerDataType,
-        contextfabricCanvasRef.current,
-    ]);
+    }, [cutImageData, drawingData, imgData, contextUserLayerDataType, brushData, contextfabricCanvasRef, canvasScale, setCutImageData, setDrawingData, setImgData]);
 
 
     // drawing-canvas 영역 클릭 시 모두 해제 (캔버스 내부, rect 선택 시 제외)
@@ -400,7 +403,7 @@ function DrawingCanvas() {
         return () => {
             document.body.removeEventListener('mousedown', handleBodyClick);
         };
-    }, [appContext.layer?.cutImageData, canvasSize]);
+    }, [appContext.layer?.cutImageData, canvasSize, contextfabricCanvasRef]);
 
     
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -410,7 +413,7 @@ function DrawingCanvas() {
         if(activeTool == 'eraser'){
             handleEraserDown();
         }
-    }, [handleCanvasPointerDown, handleZoomTouchStart]);
+    }, [activeTool, handleCanvasPointerDown, handleEraserDown, handleZoomTouchStart, setPointerRef]);
 
     const handleTouchMove = useCallback((e: React.TouchEvent) => {
         setPointerRef(e)
@@ -418,9 +421,9 @@ function DrawingCanvas() {
         handleZoomTouchMove(e);
         
         if(activeTool == 'eraser'){
-            handleEraserMove(contextUserLayerDataType, drawingData, setDrawingData);
+            handleEraserMove();
         }
-    }, [handleCanvasPointerMove, handleZoomTouchMove]);
+    }, [activeTool, handleCanvasPointerMove, handleEraserMove, handleZoomTouchMove, setPointerRef]);
     
     const handleTouchEnd = useCallback((e: React.TouchEvent) => {
         setPointerRef(e);
@@ -429,22 +432,22 @@ function DrawingCanvas() {
         if(activeTool == 'eraser'){
             handleEraserUp();
         }
-    }, [handleCanvasPointerUp, handleZoomTouchEnd]);
+    }, [activeTool, handleCanvasPointerUp, handleEraserUp, handleZoomTouchEnd, setPointerRef]);
 
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
         setPointerRef(e);
         handleCanvasPointerDown();
         handleZoomMouseDown(e);
-    }, [handleCanvasPointerDown, handleZoomMouseDown]);
+    }, [handleCanvasPointerDown, handleZoomMouseDown, setPointerRef]);
 
     const handleMouseMove = useCallback((e: React.MouseEvent) => {
         setPointerRef(e);
         handleCanvasPointerMove();
         handleZoomMouseMove(e);
         if(activeTool == 'eraser'){
-            handleEraserMove(contextUserLayerDataType, drawingData, setDrawingData);
+            handleEraserMove();
         }
-    }, [handleCanvasPointerMove, handleZoomMouseMove, customCursorRef, contextfabricCanvasRef, activeTool]);
+    }, [setPointerRef, handleCanvasPointerMove, handleZoomMouseMove, activeTool, handleEraserMove]);
 
     const handleMouseUp = useCallback((e: React.MouseEvent) => {
         setPointerRef(e);

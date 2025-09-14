@@ -117,14 +117,14 @@ class DrawingLayerManager {
       ...drawingData,
       jsonData: {
         ...drawingData.jsonData,
-        points: drawingData.brushType == 'pen' ? drawingData.jsonData.points : drawingData.jsonData.points.map(p => ({x: p.x * this.scaleX, y: p.y * this.scaleY})),
+        points: drawingData.jsonData.points.map(p => ({x: p.x * this.scaleX, y: p.y * this.scaleY})),
         options: {
           ...drawingData.jsonData.options,
           left: (drawingData.jsonData.options.left ?? 0) * this.scaleX,
           top: (drawingData.jsonData.options.top ?? 0) * this.scaleY,
-          strokeWidth: drawingData.brushType == 'pen' ? (drawingData.jsonData.options.strokeWidth ?? 1) : (drawingData.jsonData.options.strokeWidth ?? 1) * this.scaleX,
-          scaleX: (drawingData.jsonData.options.scaleX ?? 1) * this.scaleX,
-          scaleY: (drawingData.jsonData.options.scaleY ?? 1) * this.scaleY,
+          strokeWidth: (drawingData.jsonData.options.strokeWidth ?? 1) * this.scaleX,
+          scaleX: (drawingData.jsonData.options.scaleX ?? 1),
+          scaleY: (drawingData.jsonData.options.scaleY ?? 1),
         }
       }
     };

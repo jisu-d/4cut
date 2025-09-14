@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 import type {DrawingItem, ListDrawingItem, UserLayerDataType, BrushData, HSL} from '../../../../types/types';
 import * as fabric from 'fabric';
@@ -72,7 +72,7 @@ export function useDrawingManager({
   const [isErasing, setIsErasing] = useState(false); // isErasing 상태 추가
   const [drawingPoints, setDrawingPoints] = useState<{ x: number; y: number }[]>([]);
   const [drawingLayerName, setDrawingLayerName] = useState<string | null>(null);
-  const [tempPathObj, setTempPathObj] = useState<fabric.Path | fabric.Group | null>(null);
+  const tempPathObj = useRef<fabric.Path | fabric.Group | null>(null);
 
   // 드로잉 시작
   const handleCanvasPointerDown = useCallback(() => {
@@ -164,7 +164,7 @@ export function useDrawingManager({
       setIsErasing(false);
       setDrawingLayerName(null);
     }
-  }, [isDrawing, isErasing, drawingLayerName, drawingPoints, setDrawingData, brushData, hsl, alpha]);
+  }, [isDrawing, isErasing, drawingLayerName, drawingPoints, setDrawingData, brushData, hsl, alpha, canvasScale.scaleX, canvasScale.scaleY]);
 
   // 드로잉 중일 때 임시 path를 그리고, 업데이트하는 Hook
   useEffect(() => {
@@ -179,7 +179,7 @@ export function useDrawingManager({
       if (drawingPoints.length === 0) return;
 
       if (brushData.brushType === 'pen') {
-        if (tempPathObj) fabricCanvas.remove(tempPathObj);
+        if (tempPathObj.current) fabricCanvas.remove(tempPathObj.current);
         
         const pathData = pointsToPathData(drawingPoints);
         const newPathObj = new fabric.Path(pathData, {
@@ -195,9 +195,9 @@ export function useDrawingManager({
 
         if (isCancelled) return;
         fabricCanvas.add(newPathObj);
-        setTempPathObj(newPathObj);
+        tempPathObj.current = newPathObj;
       } else if (brushData) {
-        if (!tempPathObj) {
+        if (!tempPathObj.current) {
           const group = await createImageStampGroup(
             drawingPoints[0],
               brushData,
@@ -205,9 +205,9 @@ export function useDrawingManager({
           );
           if (isCancelled) return;
           fabricCanvas.add(group);
-          setTempPathObj(group);
+          tempPathObj.current = group;
         } else {
-          const group = tempPathObj as fabric.Group;
+          const group = tempPathObj.current as fabric.Group;
           const lastPoint = drawingPoints[drawingPoints.length - 2];
           const newPoint = drawingPoints[drawingPoints.length - 1];
 
@@ -236,12 +236,12 @@ export function useDrawingManager({
 
   // 드로잉이 끝났을 때 임시 path를 정리하는 Hook
   useEffect(() => {
-    if (!isDrawing && tempPathObj && contextfabricCanvasRef?.current) {
-      contextfabricCanvasRef.current.remove(tempPathObj);
+    if (!isDrawing && tempPathObj.current && contextfabricCanvasRef?.current) {
+      contextfabricCanvasRef.current.remove(tempPathObj.current);
       contextfabricCanvasRef.current.requestRenderAll();
-      setTempPathObj(null);
+      tempPathObj.current = null;
     }
-  }, [isDrawing, contextfabricCanvasRef, tempPathObj]);
+  }, [isDrawing, contextfabricCanvasRef]);
 
   return {
     handleCanvasPointerDown,

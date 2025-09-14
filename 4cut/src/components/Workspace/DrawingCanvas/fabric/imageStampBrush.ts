@@ -131,14 +131,12 @@ export async function imageStampBrush(
     images.push(fabricImage);
   }
 
-  const group = new fabric.Group(images, {
+  return new fabric.Group(images, {
     hasControls: true,
     hasBorders: true,
     selectable: true,
     evented: true,
   });
-
-  return group;
 }
 
 // 드로잉 전용 - 그룹 생성 (마우스 다운)
@@ -166,14 +164,12 @@ export async function createImageStampGroup(
     opacity: options.opacity,
   });
 
-  const group = new fabric.Group([fabricImage], {
+  return new fabric.Group([fabricImage], {
     hasControls: true,
     hasBorders: true,
     selectable: true,
     evented: true,
   });
-
-  return group;
 }
 
 // 그룹에 이미지 추가 (마우스 무브)
