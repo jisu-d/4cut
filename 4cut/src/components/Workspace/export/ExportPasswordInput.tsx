@@ -13,6 +13,7 @@ interface ExportPasswordInputProps {
   disabled?: boolean;
   maxLength?: number;
   name?: string;
+  autoComplete?: string;
 }
 
 const ExportPasswordInput: React.FC<ExportPasswordInputProps> = ({
@@ -23,7 +24,8 @@ const ExportPasswordInput: React.FC<ExportPasswordInputProps> = ({
   readOnly,
   disabled,
   maxLength,
-  name
+  name,
+  autoComplete,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -36,15 +38,16 @@ const ExportPasswordInput: React.FC<ExportPasswordInputProps> = ({
         </label>
       )}
       <input
-        className="export-password-input"
-        type={showPassword ? 'text' : 'password'}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        readOnly={readOnly}
-        disabled={disabled}
-        maxLength={maxLength}
-        name={name}
+          className="export-password-input"
+          autoComplete={autoComplete}
+          type={showPassword ? 'text' : 'password'}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          readOnly={readOnly}
+          disabled={disabled}
+          maxLength={maxLength}
+          name={name}
       />
       <button
         type="button"
