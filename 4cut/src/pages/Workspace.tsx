@@ -271,7 +271,8 @@ function Workspace() {
     // 레이어 관련
     cutImages, 
     userLayerDataType, 
-    drawingData, 
+    drawingData,
+    imgData,
     // 색상 관련
     hsl, 
     alpha, 
