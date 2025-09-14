@@ -38,8 +38,8 @@ async function addDrawingLayer(fabricCanvas: fabric.StaticCanvas, drawingItems: 
                     const brushData = {
                         brushType: item.brushType,
                         brushPath: brushPath,
-                        brushSize: (item.jsonData.options.strokeWidth || 20) / canvasScale.x, // Use scaled strokeWidth as brushSize
-                        eraserSize: 0, // Not applicable for image stamp brush
+                        brushSize: (item.jsonData.options.strokeWidth || 20) / canvasScale.x,
+                        eraserSize: 0,
                     };
 
 
@@ -63,7 +63,7 @@ async function addDrawingLayer(fabricCanvas: fabric.StaticCanvas, drawingItems: 
 const ExportCanvas = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
-    const [scale, setScale] = useState(0.1);
+    const [scale, setScale] = useState(0.13);
 
     const { canvas, layer } = useContext(AppContext);
     const { canvasSize, backgroundColor } = canvas;
@@ -71,17 +71,21 @@ const ExportCanvas = () => {
 
     useLayoutEffect(() => {
         const calculateScale = () => {
-            if (wrapperRef.current && canvasSize.width > 0) {
+            if (wrapperRef.current && canvasSize.width > 0 && canvasSize.height > 0) {
                 const parentWidth = wrapperRef.current.offsetWidth;
-                // 부모 요소의 padding 값(좌우 16px * 2)을 제외하여 스케일 계산
-                const newScale = (parentWidth - 32) / canvasSize.width;
+                const parentHeight = wrapperRef.current.offsetHeight;
+                // 너비와 높이를 모두 고려하여 스케일 계산 (좌우, 상하 16px 공백 가정)
+                const scaleX = (parentWidth - 32) / canvasSize.width;
+                const scaleY = (parentHeight - 32) / canvasSize.height;
+
+                const newScale = Math.min(scaleX, scaleY);
                 setScale(newScale);
             }
         };
         calculateScale();
         window.addEventListener('resize', calculateScale);
         return () => window.removeEventListener('resize', calculateScale);
-    }, [canvasSize.width]);
+    }, [canvasSize.width, canvasSize.height]);
 
     useEffect(() => {
         const canvasEl = canvasRef.current;
@@ -133,7 +137,9 @@ const ExportCanvas = () => {
 
     return (
         <div ref={wrapperRef} className="export-canvas-wrapper">
-            <canvas ref={canvasRef} id="export-preview" className="export-canvas-preview" style={{ transform: `scale(${scale})` }}/>
+            <div style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
+                <canvas ref={canvasRef} id="export-preview" />
+            </div>
         </div>
     );
 };
