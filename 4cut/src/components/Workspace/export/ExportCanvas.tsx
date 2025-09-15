@@ -42,8 +42,6 @@ async function addDrawingLayer(fabricCanvas: fabric.StaticCanvas, drawingItems: 
                         eraserSize: 0,
                     };
 
-                    // console.log(item.jsonData.points)
-
 
                     const group = await imageStampBrush(item, brushData);
                     fabricCanvas.add(group);
@@ -65,6 +63,9 @@ const ExportCanvas = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(0.13);
+    const [isLoading, setIsLoading] = useState(true); // 로딩 상태 추가
+
+    const fabricCanvasRef = useRef<fabric.StaticCanvas | null>(null);
 
     const { canvas, layer } = useContext(AppContext);
     const { canvasSize, backgroundColor } = canvas;
@@ -92,53 +93,71 @@ const ExportCanvas = () => {
         const canvasEl = canvasRef.current;
         if (!canvasEl) return;
 
-        const fabricCanvas = new fabric.StaticCanvas(canvasEl, {
-            width: canvasSize.width,
-            height: canvasSize.height,
-            backgroundColor: 'transparent',
-        });
+        setIsLoading(true); // 로딩 시작
 
-        const renderAll = async () => {
-            // 1. 배경 그리기
-            fabricCanvas.add(new fabric.Rect({
-                width: canvasSize.width, height: canvasSize.height, fill: backgroundColor,
-            }));
+        // let fabricCanvas: fabric.StaticCanvas | null = null;
 
-            // 2. 'Cut' 레이어 영역을 투명하게 처리 (구멍 뚫기)
-            cutImageData.cutImageData.forEach(cut => {
+        const initAndRenderCanvas = async () => {
+            try {
+                fabricCanvasRef.current = new fabric.StaticCanvas(canvasEl, {
+                    width: canvasSize.width,
+                    height: canvasSize.height,
+                    backgroundColor: 'transparent',
+                });
+
+                const fabricCanvas = fabricCanvasRef.current;
+
+                // 1. 배경 그리기
                 fabricCanvas.add(new fabric.Rect({
-                    ...cut.jsonData, globalCompositeOperation: 'destination-out', fill: '#000'
+                    width: canvasSize.width, height: canvasSize.height, fill: backgroundColor,
                 }));
-            });
 
-            // 3. 나머지 모든 레이어 그리기
-            for (const layerData of userLayerDataType.userLayerDataType) {
-                if (!layerData.visible || layerData.LayerType === 'Cut') continue;
+                // 2. 'Cut' 레이어 영역을 투명하게 처리 (구멍 뚫기)
+                cutImageData.cutImageData.forEach(cut => {
+                    fabricCanvas.add(new fabric.Rect({
+                        ...cut.jsonData, globalCompositeOperation: 'destination-out', fill: '#000'
+                    }));
+                });
 
-                switch (layerData.LayerType) {
-                    case 'Img':
-                        await addImageLayer(fabricCanvas, imgData.imgData[layerData.id]);
-                        break;
-                    case 'Drawing':
-                        await addDrawingLayer(fabricCanvas, DrawingData.drawingData[layerData.id], { x: scale, y: scale });
-                        break;
+                // 3. 나머지 모든 레이어 그리기
+                for (const layerData of userLayerDataType.userLayerDataType) {
+                    if (!layerData.visible || layerData.LayerType === 'Cut') continue;
+
+                    switch (layerData.LayerType) {
+                        case 'Img':
+                            await addImageLayer(fabricCanvas, imgData.imgData[layerData.id]);
+                            break;
+                        case 'Drawing':
+                            await addDrawingLayer(fabricCanvas, DrawingData.drawingData[layerData.id], { x: scale, y: scale });
+                            break;
+                    }
                 }
-            }
 
-            // 4. 모든 내용을 한번에 캔버스에 렌더링
-            fabricCanvas.renderAll();
+                // 4. 모든 내용을 한번에 캔버스에 렌더링
+                fabricCanvas.renderAll();
+            } catch (error) {
+                console.error("캔버스 렌더링 중 오류 발생:", error);
+            } finally {
+                setIsLoading(false);
+            }
         };
 
-        renderAll();
+        initAndRenderCanvas();
 
         return () => {
-            fabricCanvas.dispose();
+            if (fabricCanvasRef.current) {
+                fabricCanvasRef.current.dispose();
+                fabricCanvasRef.current = null; // 참조를 깨끗하게 정리
+            }
         };
     }, [canvasSize, backgroundColor, userLayerDataType, DrawingData, cutImageData, imgData, scale]);
 
     return (
         <div ref={wrapperRef} className="export-canvas-wrapper">
-            <div style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
+            <div className="export-canvas-placeholder" style={{ width: canvasSize.width * scale, height: canvasSize.height * scale, border: '1px dashed #ccc', display: isLoading ? 'flex' : 'none', justifyContent: 'center', alignItems: 'center', color: '#888' }}>
+                로딩 중...
+            </div>
+            <div style={{ display: isLoading ? 'none' : 'flex', transform: `scale(${scale})`, transformOrigin: 'center center', backgroundColor: '#ffff' }}>
                 <canvas ref={canvasRef} id="export-preview" />
             </div>
         </div>
