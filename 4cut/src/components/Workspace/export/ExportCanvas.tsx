@@ -42,11 +42,12 @@ async function addDrawingLayer(fabricCanvas: fabric.StaticCanvas, drawingItems: 
                         eraserSize: 0,
                     };
 
+                    // console.log(item.jsonData.points)
+
 
                     const group = await imageStampBrush(item, brushData);
                     fabricCanvas.add(group);
                 } else {
-                    // Regular path brush (including 'pen' and any other non-image-stamp types)
                     const path = new fabric.Path(
                         item.jsonData.points.map((p: { x: number; y: number }) => `L ${p.x} ${p.y}`).join(' ').replace('L', 'M'),
                         { ...item.jsonData.options, fill: undefined }
