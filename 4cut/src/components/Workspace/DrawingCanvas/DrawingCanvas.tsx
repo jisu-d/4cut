@@ -301,7 +301,7 @@ function DrawingCanvas() {
                         layerDrawingData,
                         brushData,
                         handleDrawingTransform,
-                        item.active,
+                        item.active && activeTool !== 'eraser',
                         item.visible,
                         idx,
                         canvasScale
