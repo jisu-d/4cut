@@ -47,35 +47,52 @@ function pointsToPathData(points: {x: number, y: number}[]): string {
 }
 
 // 변형 이벤트 핸들러 함수 분리
-function handleModifiedEvent(obj: fabric.Path | fabric.Group, drawingData: DrawingItem, onDrawingTransform: (id: string, newProps: any) => void, scaleX: number, scaleY: number) {
+function handleModifiedEvent(obj: fabric.Path | fabric.Group, drawingData: DrawingItem, onDrawingTransform: (
+    id: string,
+    points: { x: number, y: number }[],
+    options: {
+      left: number,
+      top: number,
+      width: number,
+      height: number,
+      angle: number,
+      scaleX: number,
+      scaleY: number,
+    }
+) => void) {
   const points: {x: number, y: number}[] = [];
+
   if (obj instanceof fabric.Path) {
     const pathArr = obj.get('path');
     if (Array.isArray(pathArr)) {
-      pathArr.forEach((seg: any) => {
+      pathArr.forEach((seg: [string, number, number]) => {
         if (seg[0] === 'M' || seg[0] === 'L') {
           points.push({ x: seg[1], y: seg[2] });
         }
       });
     }
+  } else {
+    const transform = obj.calcTransformMatrix();
+    obj._objects.forEach((o) => {
+        const p = new fabric.Point(o.left, o.top).transform(transform);
+        points.push(p);
+    });
   }
+
+  const options = {
+    left: obj.left,
+    top: obj.top,
+    width: obj.getScaledWidth(),
+    height: obj.getScaledHeight(),
+    angle: obj.angle,
+    scaleX: obj.scaleX,
+    scaleY: obj.scaleY,
+  }
+
   onDrawingTransform(
-    drawingData.id,
-    {
-      jsonData: {
-        points: points.map(p => ({ x: p.x / scaleX, y: p.y / scaleY })),
-        options: {
-          ...((obj as any).toObject()),
-          left: obj.left / scaleX,
-          top: obj.top / scaleY,
-          width: obj.width / scaleX,
-          height: obj.height / scaleY,
-          angle: obj.angle,
-          scaleX: obj.scaleX / scaleX,
-          scaleY: obj.scaleY / scaleY,
-        }
-      }
-    }
+      drawingData.id,
+      points,
+      options,
   );
 }
 
@@ -110,7 +127,19 @@ class DrawingLayerManager {
   }
 
   // 드로잉 객체 생성
-  private async createDrawing(drawingData: DrawingItem, brushData:BrushData , active: boolean, visible: boolean, onDrawingTransform?: (id: string, newProps: any) => void): Promise<fabric.Path | fabric.Group> {
+  private async createDrawing(drawingData: DrawingItem, brushData:BrushData , active: boolean, visible: boolean, onDrawingTransform?: (
+      id: string,
+      points: { x: number, y: number }[],
+      options: {
+        left: number,
+        top: number,
+        width: number,
+        height: number,
+        angle: number,
+        scaleX: number,
+        scaleY: number,
+      }
+  ) => void): Promise<fabric.Path | fabric.Group> {
     let obj: fabric.Path | fabric.Group
 
     const scaledDrawingData = {
@@ -145,9 +174,9 @@ class DrawingLayerManager {
     // TODO -> 이거 오류때문에 임시로 이렇게 처리했는데 이유를 잘 모르겠음
     if (onDrawingTransform) {
       if(obj instanceof fabric.Path){
-        obj.on('modified', () => handleModifiedEvent(obj, drawingData, onDrawingTransform, this.scaleX, this.scaleY));
-      }else if(obj instanceof fabric.Group){
-        obj.on('modified', () => handleModifiedEvent(obj, drawingData, onDrawingTransform, this.scaleX, this.scaleY));
+        obj.on('modified', () => handleModifiedEvent(obj, drawingData, onDrawingTransform));
+      }else{
+        obj.on('modified', () => handleModifiedEvent(obj, drawingData, onDrawingTransform));
       }
     }
     return obj;
@@ -167,7 +196,19 @@ class DrawingLayerManager {
   // 메인 동기화 메서드
   syncDrawings(
     drawings: DrawingItem[],
-    onDrawingTransform: (id: string) => void,
+    onDrawingTransform: (
+        id: string,
+        points: { x: number, y: number }[],
+        options: {
+          left: number,
+          top: number,
+          width: number,
+          height: number,
+          angle: number,
+          scaleX: number,
+          scaleY: number,
+        }
+    ) => void,
     active: boolean,
     visible: boolean,
     zIndex: number,
@@ -198,7 +239,19 @@ export function syncDrawingLayer(
   layerId: string,
   drawingItems: DrawingItem[],
   brushData: BrushData,
-  onDrawingTransform: (id: string) => void,
+  onDrawingTransform: (
+      id: string,
+      points: { x: number, y: number }[],
+      options: {
+        left: number,
+        top: number,
+        width: number,
+        height: number,
+        angle: number,
+        scaleX: number,
+        scaleY: number,
+      }
+  ) => void,
   active: boolean,
   visible: boolean,
   zIndex: number,

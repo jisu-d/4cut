@@ -282,15 +282,45 @@ function DrawingCanvas() {
                 } else if (item.LayerType === 'Drawing') {
                     const layerDrawingData = drawingData[item.id];
 
-                    const handleDrawingTransform = (id: string) => {
+                    const handleDrawingTransform = (
+                        id: string,
+                        points: { x: number, y: number }[],
+                        options: {
+                            left: number,
+                            top: number,
+                            width: number,
+                            height: number,
+                            angle: number,
+                            scaleX: number,
+                            scaleY: number,
+                        }
+                    ) => {
                         if (setDrawingData) {
                             setDrawingData(prev => ({
                                 ...prev,
-                                [item.id]: prev[item.id].map(drawing =>
-                                    drawing.id === id
-                                        ? { ...drawing }
-                                        : drawing
-                                )
+                                [item.id]: prev[item.id].map(drawing => {
+                                    if (drawing.id !== id) {
+                                        return drawing;
+                                    }
+
+                                    return {
+                                        ...drawing,
+                                        jsonData: {
+                                            ...drawing.jsonData,
+                                            points: points.map(p => ({ x: p.x / canvasScale.scaleX, y: p.y / canvasScale.scaleY })),
+                                            options: {
+                                                ...drawing.jsonData.options,
+                                                left: options.left / canvasScale.scaleX,
+                                                top: options.top / canvasScale.scaleY,
+                                                width: options.width / canvasScale.scaleX,
+                                                height: options.height / canvasScale.scaleY,
+                                                angle: options.angle,
+                                                scaleX: options.scaleX,
+                                                scaleY: options.scaleY,
+                                            }
+                                        }
+                                    };
+                                })
                             }));
                         }
                     };
@@ -301,7 +331,7 @@ function DrawingCanvas() {
                         layerDrawingData,
                         brushData,
                         handleDrawingTransform,
-                        item.active && activeTool !== 'eraser',
+                        item.active && activeTool === 'select',
                         item.visible,
                         idx,
                         canvasScale

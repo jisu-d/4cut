@@ -7,26 +7,27 @@ const imageCache = new Map<string, HTMLImageElement>();
 const tintedImageCache = new Map<string, HTMLImageElement>();
 
 // 두 점 사이를 일정 간격으로 보간하는 함수
-function interpolatePoints(points: { x: number, y: number }[], minDist: number = 5): { x: number, y: number }[] {
-  if (points.length < 2) return points;
-  const result: { x: number, y: number }[] = [points[0]];
-  for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const curr = points[i];
-    const dx = curr.x - prev.x;
-    const dy = curr.y - prev.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const steps = Math.floor(dist / minDist);
-    for (let s = 1; s <= steps; s++) {
-      result.push({
-        x: prev.x + (dx * s) / (steps + 1),
-        y: prev.y + (dy * s) / (steps + 1),
-      });
-    }
-    result.push(curr);
-  }
-  return result;
-}
+// TODO 마우스 무브 이벤트가 너무 적어서 드로잉간의 간격을 줄일려고 만들었는데 오히려 오류를 발생함. 더 촘촘하게 할 수 있는 다른 방법을 찾아봅시다 ..!
+// function interpolatePoints(points: { x: number, y: number }[], minDist: number = 5): { x: number, y: number }[] {
+//   if (points.length < 2) return points;
+//   const result: { x: number, y: number }[] = [points[0]];
+//   for (let i = 1; i < points.length; i++) {
+//     const prev = points[i - 1];
+//     const curr = points[i];
+//     const dx = curr.x - prev.x;
+//     const dy = curr.y - prev.y;
+//     const dist = Math.sqrt(dx * dx + dy * dy);
+//     const steps = Math.floor(dist / minDist);
+//     for (let s = 1; s <= steps; s++) {
+//       result.push({
+//         x: prev.x + (dx * s) / (steps + 1),
+//         y: prev.y + (dy * s) / (steps + 1),
+//       });
+//     }
+//     result.push(curr);
+//   }
+//   return result;
+// }
 
 // loadedImage의 검정색 부분을 원하는 색상으로 바꿔주는 함수
 function tintImage(
@@ -99,14 +100,14 @@ export async function imageStampBrush(
   brushtype: BrushData,
 ): Promise<fabric.Group> {
   const strokeWidth = drawingData.jsonData.options.strokeWidth ?? 20;
-  const minDist: number = strokeWidth * 0.7;
+  //const minDist: number = strokeWidth * 0.7;
 
   const images: fabric.FabricImage[] = [];
   // 이미지 로딩 (비동기 처리)
   const loadedImage = await loadImage(brushtype);
 
   // 보간된 좌표 사용
-  const densePoints = interpolatePoints(drawingData.jsonData.points, minDist);
+  //const densePoints = interpolatePoints(drawingData.jsonData.points, minDist);
 
   const stroke = drawingData.jsonData.options.stroke as string;
   const tintedImage = tintImage(loadedImage, stroke);
@@ -114,9 +115,12 @@ export async function imageStampBrush(
   const maxOriginalSize = Math.max(tintedImage.width, tintedImage.height);
   const penSize = strokeWidth;
   const alpha = drawingData.jsonData.options.opacity;
-  const scaleFactor = penSize / maxOriginalSize;
+  //const scaleFactor = penSize / maxOriginalSize;
 
-  for (const coord of densePoints) {
+  const scaleFactorX = (penSize / maxOriginalSize) * (drawingData.jsonData.options.scaleX ?? 1);
+  const scaleFactorY = (penSize / maxOriginalSize) * (drawingData.jsonData.options.scaleY ?? 1);
+
+  for (const coord of drawingData.jsonData.points) {
     const fabricImage = new fabric.FabricImage(tintedImage, {
       left: coord.x,
       top: coord.y ,
@@ -124,8 +128,8 @@ export async function imageStampBrush(
       originY: 'center',
       selectable: false,
       evented: false,
-      scaleX: scaleFactor,
-      scaleY: scaleFactor,
+      scaleX: scaleFactorX,
+      scaleY: scaleFactorY,
       opacity: alpha,
     });
     images.push(fabricImage);
@@ -155,14 +159,13 @@ export async function createImageStampGroup(
   const fabricImage = new fabric.FabricImage(tintedImage, {
     left: startPoint.x,
     top: startPoint.y,
-    originX: 'center',
-    originY: 'center',
     selectable: false,
     evented: false,
     scaleX: scaleFactor,
     scaleY: scaleFactor,
     opacity: options.opacity,
   });
+  fabricImage.set({ originX: 'center', originY: 'center' });
 
   return new fabric.Group([fabricImage], {
     hasControls: true,
@@ -186,14 +189,14 @@ export async function addImageStampToGroup(
   const maxOriginalSize = Math.max(tintedImage.width, tintedImage.height);
   const penSize = options.strokeWidth;
   const scaleFactor = penSize / maxOriginalSize;
-  const minDist = penSize * 0.7;
+  //const minDist = penSize * 0.7;
 
   // 이전 점과 현재 점 사이를 보간
-  const pointsToDraw = interpolatePoints([lastPoint, newPoint], minDist);
+  //const pointsToDraw = interpolatePoints([lastPoint, newPoint], minDist);
 
   // 보간된 각 점에 이미지 추가 (첫 번째 점은 이미 그려졌으므로 건너뜀)
-  for (let i = 1; i < pointsToDraw.length; i++) {
-    const point = pointsToDraw[i];
+  for (let i = 1; i < [lastPoint, newPoint].length; i++) {
+    const point = [lastPoint, newPoint][i];
     const fabricImage = new fabric.FabricImage(tintedImage, {
       left: point.x,
       top: point.y,
