@@ -25,8 +25,8 @@ function calculateSizeByAspectRatio(width: number, height: number, aspectRatio: 
         return { width: height * (3/4), height };
       }
     case '1:1': 
-      const size = Math.min(width, height);
-      return { width: size, height: size };
+      { const size = Math.min(width, height);
+      return { width: size, height: size }; }
     case '16:9': 
       if (width < height) {
         return { width, height: width * (9/16) };
@@ -76,7 +76,8 @@ class CutLayerManager {
     width: number;
     height: number;
     angle: number;
-  }, active: boolean, visible: boolean, zIndex:number, onRectClick?: (id: string) => void, onRectTransform?: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void) {
+  }, active: boolean, 
+                     visible: boolean, onRectClick?: (id: string) => void, onRectTransform?: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void) {
     const rect = new fabric.Rect({
       ...rectData,
       fill: 'rgb(255, 255, 255)',
@@ -167,7 +168,7 @@ class CutLayerManager {
   }
 
   // rect 데이터를 계산하는 메서드 
-  private calculateRectData(cut: ListCutImage, idx: number): {
+  private calculateRectData(cut: ListCutImage): {
     left: number;
     top: number;
     width: number;
@@ -217,15 +218,15 @@ class CutLayerManager {
 
     // cuts 처리
     cuts.forEach((cut, idx) => {
-      let rect = this.rectMap.get(cut.id);
-      const rectData = this.calculateRectData(cut, idx);
+      const rect = this.rectMap.get(cut.id);
+      const rectData = this.calculateRectData(cut);
 
       // TODO 겹칠때 각 요소의 zindex를 겹치지 않도록 하기 위해서 만들어 놨지만 안된다ㄷㄷ
       const tempZIndex = zIndex + (idx / 100)
 
       if (!rect) {
         // 새로운 rect 생성
-        this.createRect(cut, rectData, active, visible, tempZIndex, onRectClick, onRectTransform);
+        this.createRect(cut, rectData, active, visible, onRectClick, onRectTransform);
 
       } else {
         // 기존 rect 업데이트
@@ -242,7 +243,11 @@ export function syncAspectRatioRects(
   canvas: fabric.Canvas,
   cuts: ListCutImage[],
   onRectClick: (id: string) => void,
-  onRectTransform: (id: string, position: {x:number, y:number}, size: {width:number, height:number}, angle: number) => void,
+  onRectTransform: (
+      id: string, 
+      position: {x:number, y:number}, 
+      size: {width:number, height:number}, 
+      angle: number) => void,
   active: boolean,
   visible: boolean,
   zindx: number,
