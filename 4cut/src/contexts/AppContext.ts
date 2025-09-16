@@ -8,7 +8,34 @@ const AppContext = React.createContext<AppContextType>({
     imagesData: [],
     setImageData: () => {}
   },
-  export: null,
+  export: {
+    Image: {
+      processedImage: null,
+      setProcessedImage: () => {}
+    },
+    frameInfo: {
+      isPublic: { // 공개 비공개 여부
+        isPublic: false,
+        setIsPublic: () => {}
+      },
+      author: { // 제작자 -> 로그인 되어있으면 자동 입력 id등 으로
+        author: '',
+        setAuthor: () => {}
+      },
+      frameName: { // 프레임 이름
+        frameName: '',
+        setFrameName: () => {}
+      },
+      authorPw: { // 제작자 구분 비밀번호
+        authorPw: '',
+        setAuthorPw: () => {}
+      },
+      desc: { // 프레임 설명
+        desc: '',
+        setDesc: () => {}
+      },
+    }
+  },
   brush: {
     brushData: {
       brushType: 'pen',

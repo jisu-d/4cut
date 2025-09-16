@@ -1,4 +1,4 @@
-import { useRef, useEffect, useContext, useLayoutEffect, useState } from 'react';
+import React, { useRef, useEffect, useContext, useLayoutEffect, useState } from 'react';
 import AppContext from '../../../contexts/AppContext';
 import * as fabric from 'fabric';
 import '../../../styles/Workspace/export/ExportCanvas.css';
@@ -59,7 +59,12 @@ async function addDrawingLayer(fabricCanvas: fabric.StaticCanvas, drawingItems: 
     }
 }
 
-const ExportCanvas = () => {
+interface ExportCanvasProps {
+  processedImage: React.RefObject<Blob | null> | null;
+  setProcessedImage: (blob: Blob | null) => void;
+}
+
+const ExportCanvas = ({ processedImage, setProcessedImage }: ExportCanvasProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(0.13);
@@ -91,11 +96,12 @@ const ExportCanvas = () => {
 
     useEffect(() => {
         const canvasEl = canvasRef.current;
-        if (!canvasEl) return;
+        if (!canvasEl) {
+            console.log("ExportCanvas: canvasRef.current is null, returning.");
+            return;
+        }
 
         setIsLoading(true); // 로딩 시작
-
-        // let fabricCanvas: fabric.StaticCanvas | null = null;
 
         const initAndRenderCanvas = async () => {
             try {
@@ -135,6 +141,16 @@ const ExportCanvas = () => {
 
                 // 4. 모든 내용을 한번에 캔버스에 렌더링
                 fabricCanvas.renderAll();
+
+                canvasEl.toBlob((blob) => {
+                    if (blob && processedImage) {
+                        setProcessedImage(blob);
+                        processedImage.current = blob
+                    } else {
+                        console.error("ExportCanvas: Failed to convert canvas to Blob. Blob is null.");
+                    }
+                }, 'image/png'); // 필요에 따라 'image/jpeg' 또는 다른 형식 선택
+
             } catch (error) {
                 console.error("캔버스 렌더링 중 오류 발생:", error);
             } finally {
@@ -150,7 +166,7 @@ const ExportCanvas = () => {
                 fabricCanvasRef.current = null; // 참조를 깨끗하게 정리
             }
         };
-    }, [canvasSize, backgroundColor, userLayerDataType, DrawingData, cutImageData, imgData, scale]);
+    }, [canvasSize, backgroundColor, userLayerDataType, DrawingData, cutImageData, imgData, scale, setProcessedImage]);
 
     return (
         <div ref={wrapperRef} className="export-canvas-wrapper">

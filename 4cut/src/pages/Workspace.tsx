@@ -23,6 +23,14 @@ function Workspace() {
     { src: '/src/assets/Icon/brush.svg', alt: '파일 미리보기 작은 캘린더' },
   ])
 
+  const [isPublic, setIsPublic] = useState(true); // 공개 비공개 여부
+  const [author, setAuthor] = useState(''); // 제작자 -> 로그인 되어있으면 자동 입력 id등 으로
+  const [frameName, setFrameName] = useState(''); // 프레임 이름
+  const [authorPw, setAuthorPw] = useState(''); // 제작자 구분 비밀번호
+  const [desc, setDesc] = useState(''); // 프레임 설명
+
+  const processedImageRef = useRef<Blob | null>(null)
+
 
   const [brushData, setBrushData] = useState<BrushData>({
     brushType: 'pen',
@@ -216,7 +224,36 @@ function Workspace() {
       imagesData: imagesData,
       setImageData: setImagesData
     },
-    export: null,
+    export: {
+      Image: {
+        processedImage: processedImageRef,
+        setProcessedImage: (blob: Blob | null) => {
+          processedImageRef.current = blob;
+        }
+      },
+      frameInfo: {
+        isPublic: { // 공개 비공개 여부
+          isPublic: isPublic,
+          setIsPublic: setIsPublic
+        },
+        author: { // 제작자 -> 로그인 되어있으면 자동 입력 id등 으로
+          author: author,
+          setAuthor: setAuthor
+        },
+        frameName: { // 프레임 이름
+          frameName: frameName,
+          setFrameName: setFrameName
+        },
+        authorPw: { // 제작자 구분 비밀번호
+          authorPw: authorPw,
+          setAuthorPw: setAuthorPw
+        },
+        desc: { // 프레임 설명
+          desc: desc,
+          setDesc: setDesc
+        },
+      }
+    },
     brush: {
       brushData: brushData,
       setBrushData: setBrushData,
@@ -281,6 +318,7 @@ function Workspace() {
     canvasSize, 
     backgroundColor,
     fabricCanvasRef,
+    processedImageRef,
   ]);
 
   const openExportPopup = () => setIsExportPopupOpen(true);
@@ -298,7 +336,7 @@ function Workspace() {
         {isExportPopupOpen && (
           <div className="popup-overlay" onClick={closeExportPopup}>
             <div className="popup-content" onClick={e => e.stopPropagation()}>
-              <ExportContent />
+              <ExportContent closeExportPopup={closeExportPopup}/>
             </div>
           </div>
         )}

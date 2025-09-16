@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import ExportInput from './ExportInput';
 import ExportTextarea from './ExportTextarea';
 import ExportSwitch from './ExportSwitch';
@@ -7,7 +7,10 @@ import ExportPasswordInput from './ExportPasswordInput';
 import AgreementSection from './AgreementSection';
 import ExportCanvas from './ExportCanvas';
 
+import { createFrameData } from './frame.api.ts'
+
 import '../../../styles/Workspace/export/ExportContent.css';
+import AppContext from "../../../contexts/AppContext.ts";
 
 const useMediaQuery = (query: string) => {
   const [matches, setMatches] = useState(window.matchMedia(query).matches);
@@ -23,12 +26,23 @@ const useMediaQuery = (query: string) => {
   return matches;
 };
 
-function ExportContent() {
-  const [isPublic, setIsPublic] = useState(true);
-  const [author, setAuthor] = useState('');
-  const [frameName, setFrameName] = useState('');
-  const [authorPw, setAuthorPw] = useState('');
-  const [desc, setDesc] = useState('');
+function ExportContent({closeExportPopup}: {closeExportPopup: () => void}) {
+  const { frameInfo,  Image } = useContext(AppContext).export;
+
+  const { isPublic, setIsPublic } = frameInfo.isPublic
+  const { author, setAuthor } = frameInfo.author
+  const { frameName, setFrameName } = frameInfo.frameName
+  const { authorPw, setAuthorPw } = frameInfo.authorPw
+  const { desc, setDesc } = frameInfo.desc
+
+  const { processedImage, setProcessedImage } = Image
+
+  // useEffect(() => {
+  //   if(processedImage.current){
+  //     console.log(processedImage.current)
+  //   }
+  // }, [processedImage, setProcessedImage]);
+
   const [isAgreementValid, setIsAgreementValid] = useState(false);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
 
@@ -54,14 +68,17 @@ function ExportContent() {
       alert('필수 항목에 동의해주세요.');
       return;
     }
-    alert('저장되었습니다!');
-    console.log({
-      isPublic,
-      author,
-      frameName,
-      authorPw,
-      desc,
-    });
+    if (processedImage){
+      const FrameData = createFrameData(
+          processedImage,
+          isPublic,
+          author,
+          frameName,
+          authorPw,
+          desc,
+      )
+      closeExportPopup()
+    }
   };
 
   return (
@@ -118,7 +135,7 @@ function ExportContent() {
               </div>
             </form>
             <div className='export-preview'>
-              <ExportCanvas />
+              <ExportCanvas processedImage={processedImage} setProcessedImage={setProcessedImage} />
             </div>
           </div>
         </div>
@@ -126,7 +143,7 @@ function ExportContent() {
         <div className={`preview-view ${showPreviewOnly ? 'active' : ''}`}>
           <div className="export-preview-container">
             <div className="export-preview visible">
-              <ExportCanvas />
+              <ExportCanvas processedImage={processedImage} setProcessedImage={setProcessedImage} />
             </div>
             <div className="export-content-button">
               <ExportButton onClick={handleConfirmSave} disabled={!isAgreementValid}>
