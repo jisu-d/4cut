@@ -1,3 +1,5 @@
+import React from "react";
+
 export type AspectRatio = '4:3' | '3:4' | '1:1' | '16:9';
 import type { PathProps, TOptions } from 'fabric';
 import * as fabric from 'fabric';
@@ -104,13 +106,41 @@ export interface AppContextType {
     imagesData: ImagesData[];
     setImageData: React.Dispatch<React.SetStateAction<ImagesData[]>>
   },
-  export: null,
+  export: {
+    // 이미지 데이터
+    Image: {
+      processedImage: React.RefObject<Blob | null> | null;
+      setProcessedImage: (blob: Blob | null) => void;
+    }
+    frameInfo: {
+      isPublic: { // 공개 비공개 여부
+        isPublic: boolean;
+        setIsPublic: React.Dispatch<React.SetStateAction<boolean>>
+      },
+      author: { // 제작자 -> 로그인 되어있으면 자동 입력 id등 으로
+        author: string;
+        setAuthor: React.Dispatch<React.SetStateAction<string>>
+      },
+      frameName: { // 프레임 이름
+        frameName: string;
+        setFrameName: React.Dispatch<React.SetStateAction<string>>
+      },
+      authorPw: { // 제작자 구분 비밀번호
+        authorPw: string;
+        setAuthorPw: React.Dispatch<React.SetStateAction<string>>
+      },
+      desc: { // 프레임 설명
+        desc: string;
+        setDesc: React.Dispatch<React.SetStateAction<string>>
+      },
+    }
+  },
   brush: {
     brushData: BrushData;
     setBrushData: React.Dispatch<React.SetStateAction<BrushData>>;
   },
   layer: {
-    userLayerDataType: { // 화면 직접 적으로 표시할 데이터 
+    userLayerDataType: { // 화면 직접 적으로 표시할 데이터
       userLayerDataType: UserLayerDataType[];
       setUserLayerDataType: React.Dispatch<React.SetStateAction<UserLayerDataType[]>>;
     }
