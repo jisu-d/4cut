@@ -1,4 +1,3 @@
-// import { Eye } from "lucide-react";
 import "../../styles/Mypage/ArtworkCard.css";
 
 import eye_icon from '../../assets/Icon/Mypage/eye.svg'
