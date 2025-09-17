@@ -6,6 +6,8 @@ import {useEffect, useMemo, useState, useRef} from 'react';
 import ExportContent from '../components/Workspace/export/ExportContent';
 import DrawingCanvas from '../components/Workspace/DrawingCanvas/DrawingCanvas';
 
+import WorkspaceSetup from '../components/Workspace/WorkspaceSetup/WorkspaceSetup.tsx'
+
 import type {AppContextType, CanvasSize, HSL, ListCutImage, ListDrawingItem, UserLayerDataType, ImgData, BrushData, ImagesData} from '../types/types'
 import * as fabric from 'fabric';
 
@@ -327,19 +329,20 @@ function Workspace() {
   return (
     <div className='main-layout'>
       <AppContext.Provider value={appProvidedValue}>
-        <div className='tools-panel'>
-          <Dashboard openExportPopup={openExportPopup} isExportPopupOpen={isExportPopupOpen} />
-        </div>
-        <div className='canvas-area'>
-          <DrawingCanvas />
-        </div>
-        {isExportPopupOpen && (
-          <div className="popup-overlay" onClick={closeExportPopup}>
-            <div className="popup-content" onClick={e => e.stopPropagation()}>
-              <ExportContent closeExportPopup={closeExportPopup}/>
-            </div>
-          </div>
-        )}
+        {/*<div className='tools-panel'>*/}
+        {/*  <Dashboard openExportPopup={openExportPopup} isExportPopupOpen={isExportPopupOpen} />*/}
+        {/*</div>*/}
+        {/*<div className='canvas-area'>*/}
+        {/*  <DrawingCanvas />*/}
+        {/*</div>*/}
+        {/*{isExportPopupOpen && (*/}
+        {/*  <div className="popup-overlay" onClick={closeExportPopup}>*/}
+        {/*    <div className="popup-content" onClick={e => e.stopPropagation()}>*/}
+        {/*      <ExportContent closeExportPopup={closeExportPopup}/>*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*)}*/}
+        <WorkspaceSetup />
       </AppContext.Provider>
     </div>
   );

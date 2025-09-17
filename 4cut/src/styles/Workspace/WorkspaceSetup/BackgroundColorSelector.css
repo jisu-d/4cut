@@ -1,0 +1,32 @@
+.setup-section-background-color{
+    display: flex;
+    justify-content: space-between;
+}
+
+.setup-section-background-color > label {
+    font-family: 'Pretendard-Bold', sans-serif;
+    font-size: 20px;
+}
+
+.color-picker-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.color-picker-swatch {
+    width: 25px;
+    height: 25px;
+    border-radius: 6px;
+    border: 1px solid #D1D5DB;
+    cursor: pointer;
+    position: relative;
+}
+
+.color-picker-swatch input[type="color"] {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}

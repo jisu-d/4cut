@@ -1,0 +1,57 @@
+.frame-type-group {
+  display: flex;
+  gap: 12px;
+}
+
+.frame-type-option {
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid #E5E7EB;
+  background-color: #FFFFFF;
+  text-align: center;
+  flex-grow: 1;
+  transition: border-color 0.2s;
+}
+
+.frame-type-option input[type="radio"] {
+  display: none; 
+}
+
+.frame-type-option.selected {
+  border-color: #4F46E5;
+}
+
+.frame-preview {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.frame-preview-inner {
+  background-color: #D1D5DB;
+  border-radius: 2px;
+}
+
+.preview-portrait {
+  width: 36px;
+  height: 54px;
+}
+
+.preview-skinny-portrait {
+  width: 18px;
+  height: 54px;
+}
+
+.preview-landscape {
+  width: 54px;
+  height: 18px;
+}
+
+.frame-dimension-label {
+  font-size: 12px;
+  color: #4B5563;
+  font-weight: 500;
+}

@@ -1,0 +1,35 @@
+.cut-ratio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+  gap: 15px;
+  align-items: center;
+  justify-items: center;
+  min-height: 175px;
+}
+
+.cut-ratio-item {
+  cursor: pointer;
+  border: 2px solid #E5E7EB;
+  background-color: #FFFFFF;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.cut-ratio-item:hover {
+    border-color: #4F46E5;
+}
+
+.ratio-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4B5563;
+}
+
+/* Ratio visual styles */
+.cut-ratio-item.ratio-16-9 { width: 80px; height: 45px; }
+.cut-ratio-item.ratio-4-3 { width: 80px; height: 60px; }
+.cut-ratio-item.ratio-3-4 { width: 60px; height: 80px; }
+.cut-ratio-item.ratio-1-1 { width: 80px; height: 80px; }
