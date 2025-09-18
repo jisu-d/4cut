@@ -1,10 +1,18 @@
 .cut-ratio-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+  display: flex;
+  justify-content: space-between;
   gap: 15px;
   align-items: center;
   justify-items: center;
-  min-height: 175px;
+  min-height: 80px;
+}
+
+@media (max-width: 870px) {
+  .cut-ratio-grid {
+    min-height: 175px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+  }
 }
 
 .cut-ratio-item {
