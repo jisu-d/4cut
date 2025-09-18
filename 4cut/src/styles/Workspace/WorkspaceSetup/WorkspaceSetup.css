@@ -11,7 +11,7 @@
     padding: 28px 18px;
     border-radius: 10px;
     width: 80%;
-    height: 65%;
+    /*height: 65%;*/
     display: flex;
     justify-content: space-between;
     flex-direction: column;
@@ -29,7 +29,7 @@
     flex-grow: 8;
     flex-direction: column;
     justify-content: space-between;
-    /*gap: 3%;*/
+    gap: 35px;
 }
 
 .setup-title {
@@ -39,7 +39,7 @@
 }
 
 .setup-section {
-    margin-bottom: 20px;
+    /*margin-bottom: 20px;*/
 }
 
 .setup-section > label {
@@ -53,6 +53,7 @@
 
 .create-button-wrapper {
     flex: 1;
+    margin-top: 20px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -79,7 +80,7 @@
 @media (min-aspect-ratio: 1/1) {
     .setup-container {
         width: 50%;
-        height: 90%;
+        /*height: 50%;*/
     }
 }
 
