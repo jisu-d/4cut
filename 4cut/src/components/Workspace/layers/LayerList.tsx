@@ -1,10 +1,10 @@
 import '../../../styles/Workspace/layers/LayerList.css'
 
 import addIcon from '../../../assets/Icon/add.svg'
-import type {UserLayerDataType, ListDrawingItem, DrawingItem} from '../../../types/types'
+import type {UserLayerDataType, ListDrawingItem} from '../../../types/types'
 
 import DndList from './DndList'
-import React, {useContext} from 'react';
+import {useContext} from 'react';
 
 import AppContext from '../../../contexts/AppContext';
 
@@ -15,7 +15,7 @@ const LayerList = () => {
     return <div>레이어 데이터를 불러오는 중...</div>;
   }
   const { userLayerDataType, setUserLayerDataType } = context.layer.userLayerDataType;
-  const { drawingData, setDrawingData } = context.layer.DrawingData;
+  const { setDrawingData } = context.layer.DrawingData;
 
   const handleAddLayer = () => {
     const layerId = `drawing-${Date.now()}`

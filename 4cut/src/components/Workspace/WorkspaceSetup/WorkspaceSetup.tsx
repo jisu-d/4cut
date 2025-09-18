@@ -1,18 +1,30 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect, useContext} from 'react';
 import '../../../styles/Workspace/WorkspaceSetup/WorkspaceSetup.css';
 import FrameShapeSelector from './FrameShapeSelector';
 import CutCountSelector from './CutCountSelector';
 import CutRatioSelector from './CutRatioSelector';
 import BackgroundColorSelector from './BackgroundColorSelector';
 
-// 타입 정의
+import AppContext from '../../../contexts/AppContext.ts'
+
+import { generateLayouts } from './layoutGenerator.ts'
+
+
+// 타입 정의?
 type FrameType = '3305x4920' | '1652x4920' | '4920x1652';
 type Ratio = '16:9' | '4:3' | '3:4' | '1:1';
 
 const RATIO_CYCLE: Ratio[] = ['4:3', '16:9', '3:4', '1:1'];
 
-const WorkspaceSetup = () => {
-  // --- STATE --- //
+interface WorkspaceSetupProps {
+  onSetupComplete: () => void;
+}
+
+const WorkspaceSetup = ({ onSetupComplete }: WorkspaceSetupProps) => {
+  const { canvas, layer } = useContext(AppContext);
+  const { setCanvasSize, setBackgroundColor } = canvas
+  const { setCutImageData } = layer.cutImageData
+
   const [frameType, setFrameType] = useState<FrameType>('3305x4920');
   const [cutCount, setCutCount] = useState<number>(4);
   const [cutRatios, setCutRatios] = useState<Ratio[]>(Array(4).fill('4:3'));
@@ -54,16 +66,18 @@ const WorkspaceSetup = () => {
   };
 
   const handleCreate = () => {
-    const settings = {
-      frameType,
-      cutCount,
-      cutRatios,
-      bgColor,
-    };
-    console.log('생성하기 클릭', settings);
-  };
+      const dicCanvasSize = frameType.split('x')
+      setCanvasSize({ width: Number(dicCanvasSize[0]), height: Number(dicCanvasSize[1])})
+      setBackgroundColor(bgColor)
 
-  // --- RENDER --- //
+      const cutLayouts = generateLayouts(frameType, cutRatios)
+      setCutImageData(cutLayouts)
+      console.log(cutLayouts)
+
+      onSetupComplete();
+
+
+  };
 
   return (
       <div className='workspace-setup-panel'>

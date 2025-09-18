@@ -12,6 +12,12 @@ import type {AppContextType, CanvasSize, HSL, ListCutImage, ListDrawingItem, Use
 import * as fabric from 'fabric';
 
 function Workspace() {
+  const [showWorkspaceSetup, setShowWorkspaceSetup] = useState(true);
+
+  const handleSetupComplete = () => {
+    setShowWorkspaceSetup(false);
+  };
+
   const [imagesData, setImagesData] = useState<ImagesData[]>([
     { src: '/src/assets/Icon/test.jpg', alt: '캠퍼스 맵' },
     { src: '/Wsrc/assets/Icon/AlertCrcle.svg', alt: '파일 미리보기 큰 캘린더' },
@@ -302,26 +308,7 @@ function Workspace() {
       setBackgroundColor: setBackgroundColor,
       fabricCanvasRef: fabricCanvasRef,
     }
-  }), [
-    // 이미지 관련
-    imagesData,
-    //브러쉬 관련
-    brushData,
-    // 레이어 관련
-    cutImages, 
-    userLayerDataType, 
-    drawingData,
-    imgData,
-    // 색상 관련
-    hsl, 
-    alpha, 
-    historyColor, 
-    // 캔버스 관련
-    canvasSize, 
-    backgroundColor,
-    fabricCanvasRef,
-    processedImageRef,
-  ]);
+  }), [processedImageRef, imagesData, isPublic, author, frameName, authorPw, desc, brushData, cutImages, userLayerDataType, drawingData, imgData, hsl, alpha, historyColor, canvasSize, backgroundColor, fabricCanvasRef]);
 
   const openExportPopup = () => setIsExportPopupOpen(true);
   const closeExportPopup = () => setIsExportPopupOpen(false);
@@ -329,20 +316,25 @@ function Workspace() {
   return (
     <div className='main-layout'>
       <AppContext.Provider value={appProvidedValue}>
-        {/*<div className='tools-panel'>*/}
-        {/*  <Dashboard openExportPopup={openExportPopup} isExportPopupOpen={isExportPopupOpen} />*/}
-        {/*</div>*/}
-        {/*<div className='canvas-area'>*/}
-        {/*  <DrawingCanvas />*/}
-        {/*</div>*/}
-        {/*{isExportPopupOpen && (*/}
-        {/*  <div className="popup-overlay" onClick={closeExportPopup}>*/}
-        {/*    <div className="popup-content" onClick={e => e.stopPropagation()}>*/}
-        {/*      <ExportContent closeExportPopup={closeExportPopup}/>*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*)}*/}
-        <WorkspaceSetup />
+        {showWorkspaceSetup ? (
+          <WorkspaceSetup onSetupComplete={handleSetupComplete} />
+        ) : (
+          <>
+            <div className='tools-panel'>
+              <Dashboard openExportPopup={openExportPopup} isExportPopupOpen={isExportPopupOpen} />
+            </div>
+            <div className='canvas-area'>
+              <DrawingCanvas />
+            </div>
+            {isExportPopupOpen && (
+              <div className="popup-overlay" onClick={closeExportPopup}>
+                <div className="popup-content" onClick={e => e.stopPropagation()}>
+                  <ExportContent closeExportPopup={closeExportPopup}/>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </AppContext.Provider>
     </div>
   );
