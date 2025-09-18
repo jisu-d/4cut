@@ -42,6 +42,8 @@ function DrawingCanvas() {
 
     const contextfabricCanvasRef  = appContext.canvas.fabricCanvasRef
 
+    const [fabricCanvasInstance, setFabricCanvasInstance] = useState<fabric.Canvas | null>(null);
+
     const brushData = appContext.brush?.brushData
 
     // 색상 데이터 가져오기
@@ -191,6 +193,7 @@ function DrawingCanvas() {
                 canvasSize.height,
                 currentBackgroundColor
             );
+            setFabricCanvasInstance(fabricCanvas);
             contextfabricCanvasRef.current = fabricCanvas;
 
             const customCursor = new fabric.Circle({
@@ -211,6 +214,7 @@ function DrawingCanvas() {
 
             return () => {
                 fabricCanvas.dispose();
+                setFabricCanvasInstance(null);
                 contextfabricCanvasRef.current = null;
             };
         }
@@ -224,7 +228,7 @@ function DrawingCanvas() {
 
 
     useEffect(() => {
-        if (contextfabricCanvasRef.current && contextUserLayerDataType) {
+        if (fabricCanvasInstance && contextUserLayerDataType) {
             contextUserLayerDataType.forEach((item, index) => {
                 const idx = contextUserLayerDataType.length - index
 
@@ -270,7 +274,7 @@ function DrawingCanvas() {
                     };
 
                     syncAspectRatioRects(
-                        contextfabricCanvasRef.current!,
+                        fabricCanvasInstance!,
                         cutImageData ?? [],
                         handleRectClick,
                         handleRectTransform,
@@ -326,7 +330,7 @@ function DrawingCanvas() {
                     };
 
                     syncDrawingLayer(
-                        contextfabricCanvasRef.current!,
+                        fabricCanvasInstance!,
                         item.id,
                         layerDrawingData,
                         brushData,
@@ -365,7 +369,7 @@ function DrawingCanvas() {
                         };
 
                         syncImgLayers(
-                            contextfabricCanvasRef.current!,
+                            fabricCanvasInstance!,
                             layerImgData,
                             handleImgTransform,
                             item.active,
@@ -378,7 +382,7 @@ function DrawingCanvas() {
             });
         }
 
-    }, [cutImageData, drawingData, imgData, contextUserLayerDataType, brushData, contextfabricCanvasRef, canvasScale, setCutImageData, setDrawingData, setImgData]);
+    }, [cutImageData, drawingData, imgData, contextUserLayerDataType, brushData, fabricCanvasInstance, canvasScale, setCutImageData, setDrawingData, setImgData, activeTool]);
 
 
     // drawing-canvas 영역 클릭 시 모두 해제 (캔버스 내부, rect 선택 시 제외)
