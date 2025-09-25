@@ -1,6 +1,9 @@
+import { useState } from "react";
 import img202505041205234 from "../assets/Icon/Mypage/test_img.png";
 import appIcon from "../assets/Icon/Mypage/app_icon.png";
 import { ArtworkCard } from "../components/Mypage/ArtworkCard";
+import { UserInfoViewer } from "../components/Mypage/UserInfoEditor";
+import { FrameDetailModal } from "../components/Mypage/FrameDetailModal";
 
 import "../styles/Mypage/MyPage.css";
 
@@ -17,6 +20,9 @@ const artworks = [
     viewCount: "1.7K",
     likeCount: "234",
     createdDate: "2024.12.15",
+    description: '미니멀리즘과 현대적인 감각을 결합한 브랜딩 디자인입니다. 깔끔한 라인과 절제된 색상 사용이 특징입니다.',
+    creator: { name: '박명수', avatarUrl: appIcon },
+    isOwner: true,
   },
   {
     id: "2",
@@ -25,6 +31,9 @@ const artworks = [
     viewCount: "2.2K",
     likeCount: "445",
     createdDate: "2024.12.10",
+    description: '다양한 주제를 미니멀리즘 스타일로 표현한 포스터 컬렉션입니다.',
+    creator: { name: '박명수', avatarUrl: appIcon },
+    isOwner: true,
   },
   {
     id: "3",
@@ -33,6 +42,9 @@ const artworks = [
     viewCount: "1.0K",
     likeCount: "189",
     createdDate: "2024.12.08",
+    description: '따뜻한 색감과 감성적인 스토리텔링이 돋보이는 일러스트레이션입니다.',
+    creator: { name: '박명수', avatarUrl: appIcon },
+    isOwner: true,
   },
   {
     id: "4",
@@ -41,6 +53,9 @@ const artworks = [
     viewCount: "1.7K",
     likeCount: "267",
     createdDate: "2024.12.05",
+    description: '글자의 형태와 구조를 탐구하여 메시지를 시각적으로 전달하는 타이포그래피 프로젝트입니다.',
+    creator: { name: '박명수', avatarUrl: appIcon },
+    isOwner: true,
   },
   {
     id: "5",
@@ -49,6 +64,9 @@ const artworks = [
     viewCount: "1.7K",
     likeCount: "312",
     createdDate: "2024.12.01",
+    description: '일관성 있고 효율적인 웹 개발을 위한 디자인 시스템을 구축했습니다.',
+    creator: { name: '박명수', avatarUrl: appIcon },
+    isOwner: true,
   },
   {
     id: "6",
@@ -57,6 +75,9 @@ const artworks = [
     viewCount: "1.7K",
     likeCount: "198",
     createdDate: "2024.11.28",
+    description: '직관적이고 사용하기 쉬운 아이콘 세트를 디자인하여 사용자 경험을 개선했습니다.',
+    creator: { name: '박명수', avatarUrl: appIcon },
+    isOwner: true,
   },
   {
     id: "7",
@@ -65,6 +86,9 @@ const artworks = [
     viewCount: "2.5K",
     likeCount: "456",
     createdDate: "2024.11.25",
+    description: '사용자 중심의 리서치를 통해 UI/UX를 개선한 프로젝트입니다.',
+    creator: { name: '박명수', avatarUrl: appIcon },
+    isOwner: true,
   },
   {
     id: "8",
@@ -73,6 +97,9 @@ const artworks = [
     viewCount: "1.9K",
     likeCount: "378",
     createdDate: "2024.11.22",
+    description: '다양한 브랜드의 정체성을 담은 로고 디자인 컬렉션입니다.',
+    creator: { name: '박명수', avatarUrl: appIcon },
+    isOwner: true,
   },
   {
     id: "9",
@@ -81,6 +108,9 @@ const artworks = [
     viewCount: "1.4K",
     likeCount: "234",
     createdDate: "2024.11.20",
+    description: '제품의 가치를 높이고 소비자의 시선을 사로잡는 패키지 디자인입니다.',
+    creator: { name: '박명수', avatarUrl: appIcon },
+    isOwner: true,
   },
   {
     id: "10",
@@ -89,6 +119,9 @@ const artworks = [
     viewCount: "3.1K",
     likeCount: "567",
     createdDate: "2024.11.18",
+    description: '사용자 피드백을 바탕으로 기존 웹사이트를 새롭게 리디자인했습니다.',
+    creator: { name: '박명수', avatarUrl: appIcon },
+    isOwner: true,
   },
   {
     id: "11",
@@ -97,6 +130,9 @@ const artworks = [
     viewCount: "2.8K",
     likeCount: "423",
     createdDate: "2024.11.15",
+    description: '편리한 사용성과 아름다운 디자인을 겸비한 모바일 앱을 디자인했습니다.',
+    creator: { name: '박명수', avatarUrl: appIcon },
+    isOwner: true,
   },
   {
     id: "12",
@@ -105,6 +141,9 @@ const artworks = [
     viewCount: "1.6K",
     likeCount: "298",
     createdDate: "2024.11.12",
+    description: '복잡한 정보를 시각적으로 명확하게 전달하는 인포그래픽 디자인입니다.',
+    creator: { name: '박명수', avatarUrl: appIcon },
+    isOwner: true,
   },
 ];
 
@@ -112,35 +151,14 @@ function Header() {
   return (
     <header className="header">
       <div className="header-content">
-        {/* 로고 */}
         <div className="header-left">
-          <div
-            className="logo"
-            style={{
-              backgroundImage: `url('${appIcon}')`,
-            }}
-          />
-
-          {/* 네비게이션 */}
+          <div className="logo" style={{ backgroundImage: `url('${appIcon}')` }} />
           <nav className="nav">
-            <button className="nav-button">
-              {/* <AddIcon width={16} height={16} /> */}
-              <AddIcon />
-              <span>만들기</span>
-            </button>
-            <button className="nav-button">
-              {/* <img src={upload_icon}  style={{
-                width: '13px',
-              }} alt="" /> */}
-              <UploadIcon />
-              <span style={{width: '60px'}}>공유하기</span>
-            </button>
+            <button className="nav-button"><AddIcon /><span>만들기</span></button>
+            <button className="nav-button"><UploadIcon /><span style={{width: '60px'}}>공유하기</span></button>
           </nav>
         </div>
-
-        {/* 우측 메뉴 */}
         <div className="header-right">
-          {/* <span className="mypage-label">마이페이지</span> */}
           <span className="logout-lable">로그아웃</span>
         </div>
       </div>
@@ -148,45 +166,48 @@ function Header() {
   );
 }
 
-function UserProfile() {
+type UserProfileProps = {
+  activeView: string;
+  setActiveView: (view: string) => void;
+};
+
+function UserProfile({ activeView, setActiveView }: UserProfileProps) {
   return (
     <div className="user-profile">
       <div className="user-info">
-        <div className="user-avatar">
-          <span className="user-avatar-text">박</span>
-        </div>
-        <div>
-          <h2 className="user-name">박명수</h2>
-        </div>
+        <div className="user-avatar"><span className="user-avatar-text">박</span></div>
+        <div><h2 className="user-name">박명수</h2></div>
       </div>
-
       <div className="menu-list">
-        <button className="menu-item active">
-          <div className="menu-indicator"></div>내 작품
+        <button
+          className={`menu-item ${activeView === 'artworks' ? 'active' : 'inactive'}`}
+          onClick={() => setActiveView('artworks')}
+        >
+          {activeView === 'artworks' && <div className="menu-indicator"></div>}내 작품
         </button>
-        <button className="menu-item inactive">
-          {/* <img src={settings_icon}  style={{ width: '16px' }} alt="" /> */}
+        <button
+          className={`menu-item ${activeView === 'userInfo' ? 'active' : 'inactive'}`}
+          onClick={() => setActiveView('userInfo')}
+        >
+          {activeView === 'userInfo' && <div className="menu-indicator"></div>}
           <SettingsIcon />
-          회원정보 수정
+          회원정보
         </button>
       </div>
     </div>
   );
 }
 
-function ArtworkGrid() {
+function ArtworkGrid({ onArtworkClick }) {
   return (
     <div className="artwork-section">
       <div className="artwork-header">
         <h1 className="artwork-title">내 작품</h1>
-        <p className="artwork-count">
-          총 {artworks.length}개의 작품
-        </p>
+        <p className="artwork-count">총 {artworks.length}개의 작품</p>
       </div>
-
       <div className="artwork-grid">
         {artworks.map((artwork) => (
-          <ArtworkCard key={artwork.id} {...artwork} />
+          <ArtworkCard key={artwork.id} {...artwork} onClick={() => onArtworkClick(artwork)} />
         ))}
       </div>
     </div>
@@ -194,21 +215,33 @@ function ArtworkGrid() {
 }
 
 export default function MyPage() {
+  const [activeView, setActiveView] = useState('artworks');
+  const [selectedArtwork, setSelectedArtwork] = useState(null);
+
+  const openModal = (artwork) => {
+    setSelectedArtwork(artwork);
+  };
+
+  const closeModal = () => {
+    setSelectedArtwork(null);
+  };
+
   return (
     <div className="mypage-container">
       <Header />
-
       <main className="main-content">
         <div className="content-layout">
-          {/* 사이드바 */}
           <aside className="sidebar">
-            <UserProfile />
+            <UserProfile activeView={activeView} setActiveView={setActiveView} />
           </aside>
-
-          {/* 메인 콘텐츠 */}
-          <ArtworkGrid />
+          <div className="main-section">
+            {activeView === 'artworks' ? 
+              <ArtworkGrid onArtworkClick={openModal} /> : 
+              <UserInfoViewer />}
+          </div>
         </div>
       </main>
+      {selectedArtwork && <FrameDetailModal artwork={selectedArtwork} onClose={closeModal} />}
     </div>
   );
 }

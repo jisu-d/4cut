@@ -9,11 +9,12 @@ interface ArtworkCardProps {
   viewCount: string;
   likeCount?: string;
   createdDate?: string;
+  onClick?: () => void;
 }
 
-export function ArtworkCard({ title, imageUrl, viewCount, createdDate }: ArtworkCardProps) {
+export function ArtworkCard({ title, imageUrl, viewCount, createdDate, onClick }: ArtworkCardProps) {
   return (
-    <div className="artwork-card">
+    <div className="artwork-card" onClick={onClick}>
       <div className="artwork-card-container">
         {/* 이미지 */}
         <div className="artwork-image-container">

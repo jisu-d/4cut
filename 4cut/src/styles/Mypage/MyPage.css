@@ -117,14 +117,14 @@ body::-webkit-scrollbar {
 
 /* Main content */
 .main-content {
-  max-width: 90%;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 32px 24px;
   height: calc(100vh - 80px); /* 헤더 높이 제외 */
 }
 
 .content-layout {
-  width: 90%;
+  width: 100%;
   display: flex;
   gap: 32px;
   height: 100%;
@@ -209,6 +209,10 @@ body::-webkit-scrollbar {
   font-family: 'Pretendard-Medium', sans-serif;
 }
 
+.menu-item.active svg {
+  color: #4F46E5;
+}
+
 .menu-indicator {
   width: 4px;
   height: 16px;
@@ -220,12 +224,24 @@ body::-webkit-scrollbar {
   color: #6b7280;
 }
 
+.menu-item.active svg {
+  color: #4F46E5;
+}
+
+.menu-item.inactive svg {
+  color: #6b7280;
+}
+
 .menu-item svg {
   width: 16px;
   height: 16px;
 }
 
 /* Artwork grid */
+.main-section {
+  flex: 1;
+}
+
 .artwork-section {
   flex: 1;
   display: flex;
