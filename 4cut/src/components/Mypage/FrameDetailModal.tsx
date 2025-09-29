@@ -22,7 +22,7 @@ const mockArtwork = {
 
 const mockRelatedArtworks = Array(6).fill(mockArtwork);
 
-export function FrameDetailModal({ artwork = mockArtwork, onClose }) {
+export function FrameDetailModal({ artwork = mockArtwork, onClose = () => {} }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
