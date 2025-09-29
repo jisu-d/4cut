@@ -17,7 +17,7 @@ const mockArtwork = {
     name: '박명수',
     avatarUrl: avatarPlaceholder,
   },
-  isOwner: true, // Assume the current user is the owner for dev
+  isOwner: true,
 };
 
 const mockRelatedArtworks = Array(6).fill(mockArtwork);
