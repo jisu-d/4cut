@@ -462,7 +462,7 @@ function DrawingCanvas() {
     const handleTouchEnd = useCallback((e: React.TouchEvent) => {
         setPointerRef(e);
         handleCanvasPointerUp();
-        handleZoomTouchEnd();
+        handleZoomTouchEnd(e);
         if(activeTool == 'eraser'){
             handleEraserUp();
         }
@@ -511,7 +511,7 @@ function DrawingCanvas() {
                 className="canvas-content"
                 style={{
                     transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-                    transformOrigin: 'center center'
+                    transformOrigin: '0 0',
                 }}
             >
                 <canvas
