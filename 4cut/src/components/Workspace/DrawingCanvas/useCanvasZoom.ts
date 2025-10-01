@@ -50,7 +50,7 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
   };
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
+    // e.preventDefault();
     if (e.touches.length === 2) {
       setIsDragging(false);
       lastTouchDistanceRef.current = getTouchDistance(e.touches);
@@ -59,7 +59,7 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
+    // e.preventDefault();
     if (e.touches.length !== 2) return;
 
     const currentDistance = getTouchDistance(e.touches);
@@ -97,15 +97,15 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
     }
   }, [minScale, maxScale]);
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
+  const handleTouchEnd = useCallback(() => {
+    // e.preventDefault();
     setIsDragging(false);
     lastTouchDistanceRef.current = 0;
   }, []);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button === 1) { // Middle mouse button
-      e.preventDefault();
+      // e.preventDefault();
       setIsDragging(true);
       dragStartRef.current = {
         x: e.clientX - positionRef.current.x,
@@ -130,7 +130,7 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
   }, []);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault();
+    // e.preventDefault();
 
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
 
@@ -163,7 +163,7 @@ export const useCanvasZoom = (options: UseCanvasZoomOptions = {}) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === '0' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
+        // e.preventDefault();
         resetView();
       }
     };
