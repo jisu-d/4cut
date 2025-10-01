@@ -27,21 +27,17 @@ const useMediaQuery = (query: string) => {
 };
 
 function ExportContent({closeExportPopup}: {closeExportPopup: () => void}) {
-  const { frameInfo,  Image } = useContext(AppContext).export;
+  const { export: exportContext } = useContext(AppContext);
+  const { frameInfo, Image } = exportContext;
+  const { processedImage, setProcessedImage } = Image;
 
-  const { isPublic, setIsPublic } = frameInfo.isPublic
-  const { author, setAuthor } = frameInfo.author
-  const { frameName, setFrameName } = frameInfo.frameName
-  const { authorPw, setAuthorPw } = frameInfo.authorPw
-  const { desc, setDesc } = frameInfo.desc
+  // Local state for form inputs
+  const [localIsPublic, setLocalIsPublic] = useState(frameInfo.isPublic.isPublic);
+  const [localAuthor, setLocalAuthor] = useState(frameInfo.author.author);
+  const [localFrameName, setLocalFrameName] = useState(frameInfo.frameName.frameName);
+  const [localAuthorPw, setLocalAuthorPw] = useState(frameInfo.authorPw.authorPw);
+  const [localDesc, setLocalDesc] = useState(frameInfo.desc.desc);
 
-  const { processedImage, setProcessedImage } = Image
-
-  // useEffect(() => {
-  //   if(processedImage.current){
-  //     console.log(processedImage.current)
-  //   }
-  // }, [processedImage, setProcessedImage]);
 
   const [isAgreementValid, setIsAgreementValid] = useState(false);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
@@ -68,14 +64,21 @@ function ExportContent({closeExportPopup}: {closeExportPopup: () => void}) {
       alert('필수 항목에 동의해주세요.');
       return;
     }
+
+    frameInfo.isPublic.setIsPublic(localIsPublic);
+    frameInfo.author.setAuthor(localAuthor);
+    frameInfo.frameName.setFrameName(localFrameName);
+    frameInfo.authorPw.setAuthorPw(localAuthorPw);
+    frameInfo.desc.setDesc(localDesc);
+
     if (processedImage){
       const FrameData = createFrameData(
           processedImage,
-          isPublic,
-          author,
-          frameName,
-          authorPw,
-          desc,
+          localIsPublic,
+          localAuthor,
+          localFrameName,
+          localAuthorPw,
+          localDesc,
       )
       closeExportPopup()
     }
@@ -89,7 +92,7 @@ function ExportContent({closeExportPopup}: {closeExportPopup: () => void}) {
               <div className='export-content-header'>
                 <div>프레임 내보내기</div>
                 <div>
-                  <ExportSwitch checked={isPublic} onChange={setIsPublic} onLabel="공개" offLabel="비공개" />
+                  <ExportSwitch checked={localIsPublic} onChange={setLocalIsPublic} onLabel="공개" offLabel="비공개" />
                 </div>
               </div>
               <div className='export-content-inputs'>
@@ -97,16 +100,16 @@ function ExportContent({closeExportPopup}: {closeExportPopup: () => void}) {
                   <ExportInput
                       label="제작자"
                       placeholder={'제작자'}
-                      value={author}
-                      onChange={e => setAuthor(e.target.value)}
+                      value={localAuthor}
+                      onChange={e => setLocalAuthor(e.target.value)}
                       name="author"
                       autoComplete="username"
                   />
                   <ExportInput
                       label="프레임 이름"
                       placeholder={'프레임 이름'}
-                      value={frameName}
-                      onChange={e => setFrameName(e.target.value)}
+                      value={localFrameName}
+                      onChange={e => setLocalFrameName(e.target.value)}
                       name="frameName"
                       autoComplete="off"
                   />
@@ -114,8 +117,8 @@ function ExportContent({closeExportPopup}: {closeExportPopup: () => void}) {
                 <div style={{ width: '50%', paddingRight: '8px' }}>
                   <ExportPasswordInput
                       label="제작자 구분 비밀번호"
-                      value={authorPw}
-                      onChange={e => setAuthorPw(e.target.value)}
+                      value={localAuthorPw}
+                      onChange={e => setLocalAuthorPw(e.target.value)}
                       placeholder="비밀번호를 입력하세요"
                       name="authorPassword"
                       autoComplete="new-password"
@@ -124,8 +127,8 @@ function ExportContent({closeExportPopup}: {closeExportPopup: () => void}) {
                 <ExportTextarea
                     label="프레임의 설명"
                     placeholder={'프레임 설명을 입력하세요.'}
-                    value={desc}
-                    onChange={e => setDesc(e.target.value)}
+                    value={localDesc}
+                    onChange={e => setLocalDesc(e.target.value)}
                 />
 
                 <AgreementSection onValidityChange={setIsAgreementValid} />
