@@ -37,7 +37,7 @@ const CanvasToolBar: React.FC<CanvasToolBarProps> = ({
     if (isCutLayerSelected) {
       onToolChange("select");
     }
-  }, [isCutLayerSelected]);
+  }, [isCutLayerSelected, onToolChange]);
 
   // brushData 변경 시 로컬 상태 동기화
   useEffect(() => {
@@ -108,6 +108,7 @@ const CanvasToolBar: React.FC<CanvasToolBarProps> = ({
       <div className="tool-buttons">
         <button
           onClick={handleSelectTool}
+          onTouchStart={handleSelectTool}
           className={activeTool === "select" ? "active" : ""}
           title="선택 도구"
         >
@@ -119,6 +120,7 @@ const CanvasToolBar: React.FC<CanvasToolBarProps> = ({
         
         <button
           onClick={handlePenTool}
+          onTouchStart={handlePenTool}
           className={activeTool === "pen" ? "active" : ""}
           disabled={isCutLayerSelected}
           title={isCutLayerSelected ? "Cut 레이어에서는 펜 도구를 사용할 수 없습니다" : "펜 도구"}
@@ -131,6 +133,7 @@ const CanvasToolBar: React.FC<CanvasToolBarProps> = ({
         
         <button
           onClick={handleEraserTool}
+          onTouchStart={handleEraserTool}
           className={activeTool === "eraser" ? "active" : ""}
           disabled={isCutLayerSelected}
           title={isCutLayerSelected ? "Cut 레이어에서는 지우개 도구를 사용할 수 없습니다" : "지우개 도구"}
