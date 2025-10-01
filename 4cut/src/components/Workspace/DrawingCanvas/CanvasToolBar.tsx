@@ -70,15 +70,21 @@ const CanvasToolBar: React.FC<CanvasToolBarProps> = ({
   }, []);
 
   const handleSelectTool = () => {
-    onToolChange('select');
+    if(!isCutLayerSelected){
+      onToolChange('select');
+    }
   };
 
   const handlePenTool = () => {
-    onToolChange('pen');
+    if(!isCutLayerSelected){
+      onToolChange('pen');
+    }
   };
 
   const handleEraserTool = () => {
-    onToolChange('eraser');
+    if(!isCutLayerSelected){
+      onToolChange('eraser');
+    }
   };
 
   const handleSizeChange = (value: number) => {
