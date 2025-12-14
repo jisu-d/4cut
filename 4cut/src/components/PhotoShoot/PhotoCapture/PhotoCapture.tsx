@@ -42,7 +42,7 @@ function PhotoCapture() {
     return (
         <div className="photo-capture-layout">
             <div className="photo-capture-child-1">
-                <span>{`${currentPhotoIndex + 1}/${captureImageData.length}`}</span>
+                <span className="photo-count-badge">{`${currentPhotoIndex + 1}/${captureImageData.length}`}</span>
             </div>
             <div className="photo-capture-child-2">
                 {!isComplete && currentRatio ? (

@@ -183,6 +183,7 @@ export interface PhotoCaptureContextType {
   };
   FrameData: {
     url: string;
+    seturl: React.Dispatch<React.SetStateAction<string>>;
     ImgPlaceData: {
       imgPlaceData: ImgPlaceData[];
       setimageData:React.Dispatch<React.SetStateAction<ImgPlaceData[]>>;

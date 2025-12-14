@@ -4,16 +4,16 @@ import '../../../styles/PhotoShoot/FrameSelection/FrameCard.css';
 import eye_icon from '../../../assets/Icon/Mypage/eye.svg'
 
 interface ArtworkCardProps {
-    id: string;
+    id: number;
     isSelected: boolean;
     onClick: () => void;
     title: string;
-    imageUrl: string;
+    previewUrl: string;
     viewCount: string;
     createdDate: string;
 }
 
-export function ArtworkCard({ title, imageUrl, viewCount, createdDate, isSelected, onClick }: ArtworkCardProps) {
+export function ArtworkCard({ title, previewUrl, viewCount, createdDate, isSelected, onClick }: ArtworkCardProps) {
     return (
         <div className="artwork-card" onClick={onClick}>
             <div className="artwork-card-container">
@@ -21,7 +21,7 @@ export function ArtworkCard({ title, imageUrl, viewCount, createdDate, isSelecte
                 <div className="artwork-image-container">
                     <div
                         className="artwork-image"
-                        style={{ backgroundImage: `url('${imageUrl}')` }}
+                        style={{ backgroundImage: `url('${previewUrl}')` }}
                     />
                 </div>
 

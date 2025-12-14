@@ -10,11 +10,16 @@ const PhotoCaptureContext = React.createContext<PhotoCaptureContextType>({
     },
     FrameData: {
         url: '',
+        seturl: () => {},
         ImgPlaceData: {
             imgPlaceData: [],
             setimageData: () => {}
         },
         updateSlotImage: () => {},
+    },
+    Mode: {
+        mode: 'frame',
+        setmode: () => {}
     }
 });
 

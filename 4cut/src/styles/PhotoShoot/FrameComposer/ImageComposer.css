@@ -1,5 +1,5 @@
 .frame-composer-container .image-composer-container {
-    flex: 4;
+    /*flex: 8;*/
     background-color: white;
     border-radius: 10px;
     border: 1px solid #E5E7EB;
