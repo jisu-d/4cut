@@ -24,7 +24,6 @@ const ImageDownloadPage: React.FC = () => {
     useEffect(() => {
         if (data1 && data2) {
             setIsInitialLoading(true);
-            // TODO png인지 jpg인지 파악하기
             const url = `https://i.ibb.co/${data1}/${data2}.png`;
             // Check validity before showing
             checkImage(url).then((isValid) => {
@@ -41,27 +40,46 @@ const ImageDownloadPage: React.FC = () => {
         }
     }, [data1, data2]);
 
-    const downloadImage = () => {
+    const downloadImage = async () => {
         if (!imageUrl || isDownloading) return;
 
         setIsDownloading(true);
-        fetch(imageUrl)
-            .then(response => response.blob())
-            .then(blob => {
+
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const fileName = `4cut_${Date.now()}.png`;
+            
+            const file = new File([blob], fileName, { type: blob.type });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: '네컷 사진 다운로드',
+                    });
+                } catch (error) {
+                    if (error instanceof Error && error.name !== 'AbortError') {
+                        console.error('공유 실패:', error);
+                    }
+                }
+            } else {
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.style.display = 'none';
                 a.href = url;
-                a.download = 'image.jpg';
+                a.download = fileName;
                 document.body.appendChild(a);
                 a.click();
                 
-                // Cleanup
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
-            })
-            .catch(error => console.error('이미지 다운로드 실패', error))
-            .finally(() => setIsDownloading(false));
+            }
+        } catch (error) {
+            console.error('이미지 다운로드 실패', error);
+        } finally {
+            setIsDownloading(false);
+        }
     };
 
     if (isInitialLoading) {
