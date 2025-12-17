@@ -16,7 +16,7 @@ export interface PrintResponse {
  */
 export const printImage = async (printCount: number, base64Data: string): Promise<string> => {
   try {
-    const response = await fetch('http://jisu.local:8000/printImgs', {
+    const response = await fetch('http://10.42.0.1:8000/printImgs', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
