@@ -12,12 +12,16 @@ function PhotoCapture() {
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
 
-    const handleCapture = (base64Img: string, capturedIndex: number) => {
-        setCaptureImgData(prevList => // 이전 상태를 명시적으로 prevList 등으로 표현하면 가독성이 좋아집니다.
+    const handleCapture = (base64Img: string | null, capturedIndex: number, gifBlob: Blob | null) => {
+        setCaptureImgData(prevList =>
             prevList.map((item, index) =>
                 index === capturedIndex
-                    ? { ...item, base64Img: base64Img } // 해당 인덱스의 아이템만 base64Img를 교체
-                    : item // 다른 아이템들은 그대로 반환
+                    ? { 
+                        ...item, 
+                        base64Img: base64Img !== null ? base64Img : item.base64Img, 
+                        gifBlob: gifBlob !== null ? gifBlob : item.gifBlob 
+                      }
+                    : item
             )
         );
     };

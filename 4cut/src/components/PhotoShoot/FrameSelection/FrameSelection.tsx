@@ -40,12 +40,14 @@ function FrameSelection() {
                 {
                     id: (index * 2) + 1,
                     ratio: item.ratio,
-                    base64Img: ""
+                    base64Img: "",
+                    gifBlob: null
                 },
                 {
                     id: (index * 2) + 2,
                     ratio: item.ratio,
-                    base64Img: ""
+                    base64Img: "",
+                    gifBlob: null
                 }
             ]);
             setCaptureImgData(newCaptureData);

@@ -4,10 +4,10 @@ import test_img from "../../../assets/test/all_test.png"
 
 export const frameData: Record<string, ImgPlaceData[]> = {
     '1':[
-        {ratio: '16:9', left: 113, top: 120, width: 1908, height: 1073, angle: 0, imgSrc: null},
-        {ratio: '4:3', left: 1652, top: 1354, width: 1543, height: 1158, angle: 0, imgSrc: null},
-        {ratio: '3:4', left: 151, top: 2447, width: 1391, height: 1619, angle: 0, imgSrc: null},
-        {ratio: '1:1', left: 1771, top: 3299, width: 1322, height: 1322, angle: 0, imgSrc: null},
+        {ratio: '16:9', left: 113, top: 120, width: 1908, height: 1073, angle: 0, imgSrc: null, gifBlob: null},
+        {ratio: '4:3', left: 1652, top: 1354, width: 1543, height: 1158, angle: 0, imgSrc: null, gifBlob: null},
+        {ratio: '3:4', left: 151, top: 2447, width: 1391, height: 1619, angle: 0, imgSrc: null, gifBlob: null},
+        {ratio: '1:1', left: 1771, top: 3299, width: 1322, height: 1322, angle: 0, imgSrc: null, gifBlob: null},
     ]
 }
 

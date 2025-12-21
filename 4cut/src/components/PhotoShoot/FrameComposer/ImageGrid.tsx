@@ -27,7 +27,7 @@ const ImageGrid = () => {
 
         if (existingSlotIndex !== -1) {
             // 이미 슬롯에 있다면, 해당 이미지를 슬롯에서 제거합니다 (imgSrc를 null로 설정).
-            updateSlotImage(existingSlotIndex, null);
+            updateSlotImage(existingSlotIndex, null, null);
             return;
         }
 
@@ -38,7 +38,7 @@ const ImageGrid = () => {
 
         if (targetSlotIndex !== -1) {
             // 적합한 슬롯을 찾으면, 새 이미지로 업데이트합니다.
-            updateSlotImage(targetSlotIndex, clickedImage.base64Img);
+            updateSlotImage(targetSlotIndex, clickedImage.base64Img, clickedImage.gifBlob);
         } else {
             console.log('비율이 맞는 빈 슬롯이 없습니다.')
         }

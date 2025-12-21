@@ -8,23 +8,22 @@ export interface PrintResponse {
 
 /**
  * 이미지 프린트 요청을 서버로 전송하는 비동기 함수
- * Base64 인코딩된 이미지 데이터와 프린트 수량을 받아 서버에 application/json 형식으로 전송합니다.
+ * Blob 형태의 정적 이미지와 GIF 이미지를 받아 FormData로 전송합니다.
  * @param printCount - 인쇄할 이미지의 수량
- * @param base64Data - 캔버스에서 추출한 Base64 인코딩된 이미지 데이터 (data:image/jpeg;base64,...)
+ * @param staticBlob - 정적 이미지 Blob (image/jpeg)
+ * @param gifBlob - GIF 이미지 Blob (image/gif)
  * @returns Promise<string> - 성공 시 서버에서 반환된 QR 코드 이미지 URL
- * @throws Error - 네트워크 문제, 서버 응답 에러 또는 데이터 형식 오류 시 예외 발생
  */
-export const printImage = async (printCount: number, base64Data: string): Promise<string> => {
+export const printImage = async (printCount: number, staticBlob: Blob, gifBlob: Blob): Promise<string> => {
   try {
+    const formData = new FormData();
+    formData.append('print_count', printCount.toString());
+    formData.append('static_file', staticBlob, 'photo.jpg');
+    formData.append('gif_file', gifBlob, 'photo.gif');
+
     const response = await fetch('https://10.42.0.1:8000/printImgs', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        printoutNum: printCount,
-        base64_data: base64Data
-      }),
+      body: formData, // FormData 사용 시 Content-Type 헤더는 자동 설정됨
     });
 
     if (!response.ok) {

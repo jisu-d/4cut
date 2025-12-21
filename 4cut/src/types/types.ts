@@ -157,7 +157,8 @@ export interface AppContextType {
 export interface CaptureImageData {
   id: number;
   ratio: '16:9' | '4:3' | '3:4' | '1:1',
-  base64Img: string
+  base64Img: string;
+  gifBlob: Blob | null;
 }
 
 export interface ImgPlaceData {
@@ -168,6 +169,7 @@ export interface ImgPlaceData {
   height: number;
   angle: number;
   imgSrc: string | null;
+  gifBlob: Blob | null;
 }
 
 export type ModeType = 'frame' | 'capture' | 'compose' | 'generator';
@@ -188,6 +190,6 @@ export interface PhotoCaptureContextType {
       imgPlaceData: ImgPlaceData[];
       setimageData:React.Dispatch<React.SetStateAction<ImgPlaceData[]>>;
     }
-    updateSlotImage: (slotIndex: number, newImageSrc: string | null) => void;
+    updateSlotImage: (slotIndex: number, newImageSrc: string | null, newGifBlob?: Blob | null) => void;
   }
 }
