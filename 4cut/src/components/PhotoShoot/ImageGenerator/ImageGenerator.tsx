@@ -202,7 +202,6 @@ const ImageGenerator = () => {
             qrCodeUrl ? (
                 <QrResult 
                     qrUrl={qrCodeUrl} 
-                    printCount={printCount} 
                     onReset={resetPrint}
                     onHome={handleGoHome}
                 />

@@ -1,20 +1,28 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import '../../../styles/PhotoShoot/ImageGenerator/ImageGenerator.css'
 
 interface QrResultProps {
     qrUrl: string;
-    printCount: number;
     onReset: () => void;
     onHome: () => void;
 }
 
-export const QrResult = ({ qrUrl, printCount, onReset, onHome }: QrResultProps) => {
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            onHome();
-        }, 30000);
+export const QrResult = ({ qrUrl, onReset, onHome }: QrResultProps) => {
+    const [timeLeft, setTimeLeft] = useState(60); // 30초 카운트다운
 
-        return () => clearTimeout(timer);
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setTimeLeft((prev) => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    onHome();
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
     }, [onHome]);
 
     return (
@@ -25,7 +33,9 @@ export const QrResult = ({ qrUrl, printCount, onReset, onHome }: QrResultProps) 
             </div>
             <div className='qr-description'>
                 모바일로 사진을 다운로드하세요<br />
-                (총 {printCount}장 인쇄됨)
+                <span style={{ color: '#ff4d4f', fontWeight: 'bold' }}>
+                    {timeLeft}초 후 홈으로 이동합니다
+                </span>
             </div>
             <div className='qr-btn-wrapper'>
                 <button className='reset-btn' onClick={onReset}>처음으로</button>
