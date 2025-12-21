@@ -11,6 +11,7 @@ const ImageDownloadPage: React.FC = () => {
 
     const data1 = searchParams.get('data1');
     const data2 = searchParams.get('data2');
+    const format = searchParams.get('format');
 
     const checkImage = (url: string): Promise<boolean> => {
         return new Promise((resolve) => {
@@ -24,7 +25,7 @@ const ImageDownloadPage: React.FC = () => {
     useEffect(() => {
         if (data1 && data2) {
             setIsInitialLoading(true);
-            const url = `https://i.ibb.co/${data1}/${data2}.png`;
+            const url = `https://i.ibb.co/${data1}/${data2}.${format}`;
             // Check validity before showing
             checkImage(url).then((isValid) => {
                 if (isValid) {
