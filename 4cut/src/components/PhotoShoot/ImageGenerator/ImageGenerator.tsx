@@ -1,6 +1,6 @@
 import '../../../styles/PhotoShoot/ImageGenerator/ImageGenerator.css'
 
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useRef } from 'react';
 import PhotoCaptureContext from "../../../contexts/PhotoCaptureContextType.ts"
 import LoadingSpinner from '../../LoadingSpinner.tsx';
 import { useCanvasDrawer } from './useCanvasDrawer.ts';
@@ -31,7 +31,7 @@ const ImageGenerator = () => {
   const { canvasRef: previewCanvasRef, generateGifBlob, isReady } = useGifComposer(frameImg, slotImages, imgPlaceData);
 
   // 2. 인쇄용 정적 캔버스 (숨김 처리) & 정적 이미지 Blob 생성 함수
-  const { canvasRef: printCanvasRef, generateStaticBlob } = useCanvasDrawer(frameImg, slotImages, imgPlaceData);
+  const { generateStaticBlob } = useCanvasDrawer(frameImg, slotImages, imgPlaceData);
 
   const isLoading = imagesLoading; // 프레임 로드만 완료되면 즉시 표시 (GIF는 점진적으로 로딩)
 
@@ -45,23 +45,24 @@ const ImageGenerator = () => {
   const [preGeneratedStaticBlob, setPreGeneratedStaticBlob] = useState<Blob | null>(null);
 
   // 백그라운드에서 Blob 미리 생성 (GIF 디코딩 완료 후 시작)
+  const hasStartedGenerationRef = useRef(false);
+
   useEffect(() => {
     let isCancelled = false;
 
-    // GIF 디코딩이 완료(isReady)되고, 아직 Blob을 안 만들었으면 시작
-    if (isReady && !isLoading) {
+    // GIF 디코딩이 완료(isReady)되고, 아직 Blob을 안 만들었으며, 작업을 시작하지 않았으면 시작
+    if (isReady && !isLoading && !hasStartedGenerationRef.current) {
         
+        hasStartedGenerationRef.current = true; // 작업 시작 플래그 설정
+
         // 1. GIF 생성 (독립 실행)
         const runGifGen = async () => {
-            // 이미 생성된 상태면 스킵 (리렌더링 시 중복 실행 방지)
             if (preGeneratedGifBlob) return; 
             
             try {
-                // console.log("Starting background GIF generation...");
                 const gifBlob = await generateGifBlob();
                 if (!isCancelled && gifBlob) {
                     setPreGeneratedGifBlob(gifBlob);
-                    // console.log("GIF Blob pre-generated successfully");
                 }
             } catch (e) {
                 console.warn("Background GIF generation failed", e);
@@ -70,15 +71,12 @@ const ImageGenerator = () => {
 
         // 2. 정적 이미지 생성 (독립 실행)
         const runStaticGen = async () => {
-            // 이미 생성된 상태면 스킵
             if (preGeneratedStaticBlob) return; 
 
             try {
-                // console.log("Starting background Static Image generation...");
                 const staticBlob = await generateStaticBlob();
                 if (!isCancelled && staticBlob) {
                     setPreGeneratedStaticBlob(staticBlob);
-                    // console.log("Static Blob pre-generated successfully");
                 }
             } catch (e) {
                 console.warn("Background Static generation failed", e);
@@ -88,18 +86,18 @@ const ImageGenerator = () => {
         // 메인 스레드 안정을 위해 아주 약간만 대기 후 동시 시작
         const timer = setTimeout(() => {
             if (isCancelled) return;
-            
-            // 상태가 없을 때만 실행하도록 한 번 더 체크
-            if (!preGeneratedGifBlob) runGifGen();
-            if (!preGeneratedStaticBlob) runStaticGen();
-        }, 100);
+            runGifGen();
+            runStaticGen();
+        }, 20);
 
         return () => {
             isCancelled = true;
             clearTimeout(timer);
+            // 언마운트 시에는 플래그를 리셋하지 않음 (한 번만 실행되어야 하므로)
         };
     }
-  }, [isReady, isLoading, preGeneratedGifBlob, preGeneratedStaticBlob, generateGifBlob, generateStaticBlob]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReady, isLoading, generateGifBlob, generateStaticBlob]);
 
   /**
    * 인쇄 버튼 클릭 시 호출되는 함수입니다.
@@ -114,7 +112,6 @@ const ImageGenerator = () => {
         // 1. GIF Blob 준비 (미리 생성된 것 우선 사용)
         let gifBlob = preGeneratedGifBlob;
         if (!gifBlob) {
-            console.log("Generating GIF on demand...");
             gifBlob = await generateGifBlob();
         }
         if (!gifBlob) throw new Error("GIF 생성을 실패했습니다.");
@@ -122,7 +119,6 @@ const ImageGenerator = () => {
         // 2. 정적 이미지 Blob 준비 (미리 생성된 것 우선 사용)
         let staticBlob = preGeneratedStaticBlob;
         if (!staticBlob) {
-             console.log("Generating Static Image on demand...");
              staticBlob = await generateStaticBlob();
         }
 
@@ -189,12 +185,6 @@ const ImageGenerator = () => {
                 maxHeight: '100%',
                 objectFit: 'contain'
             }} 
-        />
-        
-        {/* 인쇄용: 정적 고화질 캔버스 (숨김) */}
-        <canvas 
-            ref={printCanvasRef} 
-            style={{ display: 'none' }} 
         />
       </div>
       <div className='generator-wrapper'>

@@ -36,7 +36,7 @@ async function generateGif(
 ): Promise<Blob | null> {
     
     // 1. 캔버스 설정 (OffscreenCanvas)
-    const MAX_WIDTH = 400; // GIF 용량 최적화를 위한 리사이징
+    const MAX_WIDTH = 720; // 최적화: 1000px -> 720px (HD급 유지하되 용량 대폭 감소)
     let scale = 1;
     if (frameBitmap.width > MAX_WIDTH) {
         scale = MAX_WIDTH / frameBitmap.width;
@@ -49,16 +49,20 @@ async function generateGif(
 
     if (!ctx) throw new Error("Failed to get OffscreenCanvas context");
 
-    // 2. 총 프레임 수 계산
+    // 2. 총 프레임 수 계산 및 최적화 (프레임 스키핑)
     const maxDurationFrames = Math.max(
         ...gifFrames.map(d => d && d.bitmaps ? d.bitmaps.length : 0),
         10 // 최소 프레임
     );
 
+    // 최적화: 출력 GIF의 최대 프레임 수를 제한하여 용량과 생성 속도 개선
+    const MAX_OUTPUT_FRAMES = 25; 
+    const step = Math.ceil(maxDurationFrames / MAX_OUTPUT_FRAMES);
+
     const composedFrames: ImageData[] = [];
 
-    // 3. 프레임별 그리기 (드로잉 로직)
-    for (let i = 0; i < maxDurationFrames; i++) {
+    // 3. 프레임별 그리기 (드로잉 로직) - step만큼 건너뛰며 샘플링
+    for (let i = 0; i < maxDurationFrames; i += step) {
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
         imgPlaceData.forEach((slot, idx) => {
