@@ -154,3 +154,42 @@ export interface AppContextType {
 }
 
 
+export interface CaptureImageData {
+  id: number;
+  ratio: '16:9' | '4:3' | '3:4' | '1:1',
+  base64Img: string;
+  gifBlob: Blob | null;
+}
+
+export interface ImgPlaceData {
+  ratio: '16:9' | '4:3' | '3:4' | '1:1';
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  angle: number;
+  imgSrc: string | null;
+  gifBlob: Blob | null;
+}
+
+export type ModeType = 'frame' | 'capture' | 'compose' | 'generator';
+
+export interface PhotoCaptureContextType {
+  Mode: {
+    mode: ModeType;
+    setmode: React.Dispatch<React.SetStateAction<ModeType>>;
+  }
+  CaptureImgData: { // 촬영할 이미지
+    captureImageData: CaptureImageData[];
+    setCaptureImgData: React.Dispatch<React.SetStateAction<CaptureImageData[]>>;
+  };
+  FrameData: {
+    url: string;
+    seturl: React.Dispatch<React.SetStateAction<string>>;
+    ImgPlaceData: {
+      imgPlaceData: ImgPlaceData[];
+      setimageData:React.Dispatch<React.SetStateAction<ImgPlaceData[]>>;
+    }
+    updateSlotImage: (slotIndex: number, newImageSrc: string | null, newGifBlob?: Blob | null) => void;
+  }
+}

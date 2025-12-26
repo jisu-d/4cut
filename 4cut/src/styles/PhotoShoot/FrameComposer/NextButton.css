@@ -1,0 +1,16 @@
+.selection-panel .nextButton {
+    background-color: #4F46E5;
+    padding: 13px;
+    border-radius: 10px;
+    font-family: 'Pretendard-SemiBold', sans-serif;
+    font-size: 17px;
+    border: none;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+.selection-panel .nextButton:disabled {
+    background-color: #E5E7EB;
+    cursor: not-allowed;
+    color: #9CA3AF;
+}

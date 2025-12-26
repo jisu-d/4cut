@@ -1,0 +1,212 @@
+.image-Generator-container {
+    width: 100vw;
+    height: 100vh;
+    padding: 25px;
+    display: flex;
+    flex-direction: row;
+    gap: 25px;
+    background-color: #F9FAFB;
+}
+
+.generator-canvas-wrapper {
+    flex: 4;
+    padding: 20px;
+    border: 1px solid #E5E7EB;
+    background-color: white;
+    border-radius: 10px;
+    position: relative;
+    min-height: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.generator-canvas-wrapper canvas {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.generator-wrapper {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #E5E7EB;
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+/* Print Control Section */
+.print-control-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    width: 100%;
+}
+
+.print-title {
+    font-size: 1.8rem;
+    font-family: 'Pretendard-Bold', sans-serif;
+    color: #111827;
+}
+
+.count-control-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background-color: #F3F4F6;
+    padding: 10px 20px;
+    border-radius: 50px;
+}
+
+.count-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background-color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    color: #4B5563;
+    transition: all 0.2s;
+}
+
+.count-btn:hover {
+    background-color: #E5E7EB;
+    transform: translateY(-1px);
+}
+
+.count-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.print-count {
+    font-size: 2rem;
+    font-family: 'Pretendard-Bold', sans-serif;
+    width: 40px;
+    text-align: center;
+    color: #111827;
+}
+
+.print-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 40px;
+    background-color: #111827;
+    border-radius: 20px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    width: 80%;
+}
+
+.print-btn:hover {
+    background-color: #374151;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.print-btn:disabled {
+    background-color: #9CA3AF;
+    cursor: wait;
+    transform: none;
+}
+
+.print-btn span {
+    color: white;
+    font-size: 1.5rem;
+    font-family: 'Pretendard-Bold', sans-serif;
+}
+
+.print-btn svg {
+    width: 40px;
+    height: 40px;
+    fill: white;
+}
+
+.print-btn svg path {
+    stroke: white;
+}
+
+/* QR Result Section */
+.qr-result-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.qr-title {
+    font-size: 1.5rem;
+    font-family: 'Pretendard-Bold', sans-serif;
+    color: #111827;
+}
+
+.qr-image-wrapper {
+    padding: 20px;
+    background: white;
+    border: 2px solid #E5E7EB;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.qr-image-wrapper img {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+}
+
+.qr-description {
+    font-size: 1.1rem;
+    color: #6B7280;
+    text-align: center;
+    font-family: 'Pretendard-Medium', sans-serif;
+}
+
+.qr-btn-wrapper {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.reset-btn {
+    padding: 12px 24px;
+    border: 1px solid #E5E7EB;
+    background-color: white;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'Pretendard-Medium', sans-serif;
+    color: #4B5563;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.reset-btn:hover {
+    background-color: #F3F4F6;
+    color: #111827;
+}
+
+/*가로모드 일떄*/
+@media (min-aspect-ratio: 1/1) {
+    .generator-canvas-wrapper, .generator-wrapper {
+        min-width: 0;
+    }
+}

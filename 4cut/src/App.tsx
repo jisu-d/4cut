@@ -4,7 +4,6 @@ import Workspace from './pages/Workspace';
 import SignUp from './pages/SignUp';
 import Mypage from './pages/Mypage';
 import PhotoShootPage from './pages/PhotoShootPage.tsx';
-import ImageDownloadPage from './pages/ImageDownloadPage.tsx';
 import Test from './pages/Test';
 
 function App() {
@@ -16,7 +15,6 @@ function App() {
         <Route path="/SignUp" element={<SignUp />} />
         <Route path="/Mypage" element={<Mypage />} />
         <Route path="/PhotoShoot" element={<PhotoShootPage />} />
-        <Route path="/ImageDownloadPage" element={<ImageDownloadPage />} />
         <Route path="/Test" element={<Test />} />
       </Routes>
     </BrowserRouter>
