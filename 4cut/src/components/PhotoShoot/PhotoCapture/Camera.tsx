@@ -234,7 +234,19 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
         };
     }, [isStreamReady, getCaptureParams, photoIndex]);
 
-    // Effect 3: Photo Capture Trigger
+    // Effect 3: Force Safari to re-apply transform on each photo index change
+    useEffect(() => {
+        if (videoRef.current) {
+            // 일시적으로 transform 제거
+            videoRef.current.style.transform = 'none';
+            // 강제 리플로우 (Reflow) 유발 - 브라우저가 변경사항을 즉시 계산하도록 함
+            void videoRef.current.offsetHeight;
+            // 올바른 transform 다시 적용
+            videoRef.current.style.transform = 'rotateY(180deg)';
+        }
+    }, [photoIndex]);
+
+    // Effect 4: Photo Capture Trigger (Renamed from Effect 3)
     useEffect(() => {
         if (countdown === 0) {
             if (intervalRef.current) {
