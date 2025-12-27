@@ -51,7 +51,8 @@ function PhotoCapture() {
             <div className="photo-capture-child-2">
                 {!isComplete && currentRatio ? (
                     <Camera
-                        key={currentPhotoIndex}
+
+                        // key={currentPhotoIndex}
                         photoIndex={currentPhotoIndex}
                         ratio={currentRatio}
                         onCapture={handleCapture}

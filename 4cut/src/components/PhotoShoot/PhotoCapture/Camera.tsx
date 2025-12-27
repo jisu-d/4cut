@@ -166,8 +166,19 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
     useEffect(() => {
         if (!isStreamReady) return;
 
+        // Clear any existing intervals before starting new ones for the new photoIndex
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+        if (gifIntervalRef.current) {
+            clearInterval(gifIntervalRef.current);
+            gifIntervalRef.current = null;
+        }
+
         setCountdown(6);
         gifFramesRef.current = []; // 초기화
+        setShowCanvas(false); // 새로운 photoIndex 시작 시 캔버스 숨김
 
         // 카운트다운 타이머
         intervalRef.current = window.setInterval(() => {
@@ -221,7 +232,7 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
                 clearInterval(gifIntervalRef.current);
             }
         };
-    }, [isStreamReady, getCaptureParams]);
+    }, [isStreamReady, getCaptureParams, photoIndex]);
 
     // Effect 3: Photo Capture Trigger
     useEffect(() => {
