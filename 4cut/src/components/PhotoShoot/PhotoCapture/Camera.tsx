@@ -302,7 +302,7 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
                     playsInline 
                     muted 
                     className="camera-video" 
-                    style={{ transform: 'rotateY(180deg)' }}
+                    // style={{ transform: 'rotateY(180deg)' }}
                 ></video>
             </div>            <div style={videoStyle} className={`canvas-container ${classNameForRatio}`}>
                 <canvas ref={canvasRef} className="captured-image"></canvas>
