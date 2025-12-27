@@ -24,15 +24,29 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
     const [showCanvas, setShowCanvas] = useState(false);
     const [isStreamReady, setIsStreamReady] = useState(false);
 
+    const orientation = useOrientation();
+
     // 캡처 파라미터 계산 (비디오 -> 캔버스 크롭 좌표 및 크기)
     const getCaptureParams = useCallback(() => {
         if (!videoRef.current) return null;
         const video = videoRef.current;
         const [width, height] = ratio.split(':').map(Number);
 
-        const videoWidth = video.videoWidth;
-        const videoHeight = video.videoHeight;
+        let videoWidth = video.videoWidth;
+        let videoHeight = video.videoHeight;
         if (!videoWidth || !videoHeight) return null;
+
+        // [중요] 사파리 버그 수정: 현재 화면 방향과 비디오 치수의 방향이 다르면 강제로 Swap
+        // 사파리는 가끔 세로 모드에서도 videoWidth > videoHeight로 보고하는 경우가 있음
+        if (orientation === 'portrait' && videoWidth > videoHeight) {
+             const temp = videoWidth;
+             videoWidth = videoHeight;
+             videoHeight = temp;
+        } else if (orientation === 'landscape' && videoWidth < videoHeight) {
+             const temp = videoWidth;
+             videoWidth = videoHeight;
+             videoHeight = temp;
+        }
 
         const videoRatio = videoWidth / videoHeight;
         const targetRatio = width / height;
@@ -52,7 +66,7 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
         }
 
         return { sx, sy, sWidth, sHeight, canvasWidth: sWidth, canvasHeight: sHeight };
-    }, [ratio]);
+    }, [ratio, orientation]);
 
 
     const capturePhoto = useCallback(async () => {
@@ -263,8 +277,6 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
     const videoStyle = {
         aspectRatio: ratio.replace(':', ' / '),
     };
-
-    const orientation = useOrientation();
 
     const classNameForRatio = useMemo(() => {
         const [width, height] = ratio.split(':').map(Number);
