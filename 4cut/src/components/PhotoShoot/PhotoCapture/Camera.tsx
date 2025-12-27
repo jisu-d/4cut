@@ -268,7 +268,7 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
                     className="camera-video" 
                     // style={{ transform: 'scaleX(-1)' }} // Moved to parent container
                 ></video>
-            </div>            <div className='canvas-container'>
+            </div>            <div style={videoStyle} className={`canvas-container ${classNameForRatio}`}>
                 <canvas ref={canvasRef} className="captured-image"></canvas>
             </div>
             {countdown !== null && countdown > 0 && !showCanvas && (
