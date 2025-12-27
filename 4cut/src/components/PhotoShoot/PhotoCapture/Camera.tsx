@@ -269,15 +269,16 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
     return (
         <div className={`camera-container ${showCanvas ? 'canvas-visible' : ''}`}>
             <div 
-                style={{ ...videoStyle, transform: 'scaleX(-1)' }} 
+                style={videoStyle} 
                 className={`video-container ${classNameForRatio}`}
             >
                 <video 
                     ref={videoRef} 
                     autoPlay 
                     playsInline 
+                    muted 
                     className="camera-video" 
-                    // style={{ transform: 'scaleX(-1)' }} // Moved to parent container
+                    style={{ transform: 'rotateY(180deg)' }}
                 ></video>
             </div>            <div style={videoStyle} className={`canvas-container ${classNameForRatio}`}>
                 <canvas ref={canvasRef} className="captured-image"></canvas>
