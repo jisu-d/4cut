@@ -36,17 +36,9 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
         let videoHeight = video.videoHeight;
         if (!videoWidth || !videoHeight) return null;
 
-        // [중요] 사파리 버그 수정: 현재 화면 방향과 비디오 치수의 방향이 다르면 강제로 Swap
-        // 사파리는 가끔 세로 모드에서도 videoWidth > videoHeight로 보고하는 경우가 있음
-        if (orientation === 'portrait' && videoWidth > videoHeight) {
-             const temp = videoWidth;
-             videoWidth = videoHeight;
-             videoHeight = temp;
-        } else if (orientation === 'landscape' && videoWidth < videoHeight) {
-             const temp = videoWidth;
-             videoWidth = videoHeight;
-             videoHeight = temp;
-        }
+        // [수정] 복잡한 보정 로직 제거: Safari와 Chrome 모두에서 
+        // videoWidth/videoHeight의 방향성보다는 비율(Ratio)에 의존하는 것이 가장 안전함.
+        // 중앙 크롭 로직(videoRatio vs targetRatio)이 모든 방향 변수를 흡수하여 처리하도록 함.
 
         const videoRatio = videoWidth / videoHeight;
         const targetRatio = width / height;
@@ -248,18 +240,6 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
         };
     }, [isStreamReady, getCaptureParams, photoIndex]);
 
-    // Effect 3: Force Safari to re-apply transform on each photo index change
-    useEffect(() => {
-        if (videoRef.current) {
-            // 일시적으로 transform 제거
-            videoRef.current.style.transform = 'none';
-            // 강제 리플로우 (Reflow) 유발 - 브라우저가 변경사항을 즉시 계산하도록 함
-            void videoRef.current.offsetHeight;
-            // 올바른 transform 다시 적용
-            videoRef.current.style.transform = 'rotateY(180deg)';
-        }
-    }, [photoIndex]);
-
     // Effect 4: Photo Capture Trigger (Renamed from Effect 3)
     useEffect(() => {
         if (countdown === 0) {
@@ -302,7 +282,7 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
                     playsInline 
                     muted 
                     className="camera-video" 
-                    // style={{ transform: 'rotateY(180deg)' }}
+                    style={{ transform: 'scaleX(-1)' }}
                 ></video>
             </div>            <div style={videoStyle} className={`canvas-container ${classNameForRatio}`}>
                 <canvas ref={canvasRef} className="captured-image"></canvas>
