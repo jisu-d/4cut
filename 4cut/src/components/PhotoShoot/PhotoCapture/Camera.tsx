@@ -139,7 +139,14 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
         async function setupCamera() {
             if (!video) return;
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                // [수정] 해상도 제약 조건 추가: iPad 등에서 가로 모드 스트림 유도
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'user',
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    } 
+                });
                 video.srcObject = stream;
                 video.addEventListener('loadedmetadata', handleMetadataLoaded);
             } catch (err) {
@@ -273,7 +280,7 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
     return (
         <div className={`camera-container ${showCanvas ? 'canvas-visible' : ''}`}>
             <div 
-                style={videoStyle} 
+                style={{ ...videoStyle, transform: 'scaleX(-1)' }} 
                 className={`video-container ${classNameForRatio}`}
             >
                 <video 
@@ -281,8 +288,8 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
                     autoPlay 
                     playsInline 
                     muted 
-                    className="camera-video" 
-                    style={{ transform: 'scaleX(-1)' }}
+                    className="camera-video"
+                    // transform removed from video element
                 ></video>
             </div>            <div style={videoStyle} className={`canvas-container ${classNameForRatio}`}>
                 <canvas ref={canvasRef} className="captured-image"></canvas>
