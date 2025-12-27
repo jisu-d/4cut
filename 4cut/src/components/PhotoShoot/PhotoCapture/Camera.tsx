@@ -257,10 +257,18 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
 
     return (
         <div className={`camera-container ${showCanvas ? 'canvas-visible' : ''}`}>
-            <div style={videoStyle} className={`video-container ${classNameForRatio}`}>
-                <video ref={videoRef} autoPlay playsInline className="camera-video" style={{ transform: 'scaleX(-1)' }}></video>
-            </div>
-            <div className='canvas-container'>
+            <div 
+                style={{ ...videoStyle, transform: 'scaleX(-1)' }} 
+                className={`video-container ${classNameForRatio}`}
+            >
+                <video 
+                    ref={videoRef} 
+                    autoPlay 
+                    playsInline 
+                    className="camera-video" 
+                    // style={{ transform: 'scaleX(-1)' }} // Moved to parent container
+                ></video>
+            </div>            <div className='canvas-container'>
                 <canvas ref={canvasRef} className="captured-image"></canvas>
             </div>
             {countdown !== null && countdown > 0 && !showCanvas && (
