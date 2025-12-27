@@ -1,16 +1,22 @@
-
 .camera-container {
     position: relative;
     width: 100%;
     height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    /* Use Grid to stack children (video & canvas) on top of each other */
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    place-items: center; /* Center content */
     overflow: hidden;
     /*background-color: #000;*/
 }
 
-.camera-container .video-container {
+.camera-container .video-container,
+.camera-container .canvas-container {
+    /* Both occupy the same cell */
+    grid-area: 1 / 1 / 2 / 2;
+    
+    /* Layout properties */
     max-width: 100%;
     max-height: 100%;
     overflow: hidden;
@@ -19,6 +25,9 @@
     align-items: center;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    
+    /* Smooth transition for visibility */
+    transition: visibility 0.2s, opacity 0.2s;
 }
 
 .fit-to-width{
@@ -35,35 +44,38 @@
     object-fit: cover;
 }
 
-.camera-container .canvas-container{
-    max-width: 100%;
-    max-height: 100%;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+/* Default State: Canvas is hidden */
+.camera-container .canvas-container {
+    visibility: hidden;
+    opacity: 0;
+    z-index: 2; /* Canvas sits on top when visible */
+}
+
+/* Captured State: Canvas visible, Video hidden (but rendered) */
+.camera-container.canvas-visible .canvas-container {
+    visibility: visible;
+    opacity: 1;
+}
+
+.camera-container.canvas-visible .video-container {
+    /* Do NOT use display: none. Just hide visually. */
+    visibility: hidden;
+    opacity: 0;
 }
 
 .captured-image {
     width: 100%;
     height: 100%;
-    border-radius: 12px;
+    /* border-radius removed as container handles it */
     object-fit: contain;
-    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-}
-
-.camera-container.canvas-visible .video-container {
-    display: none;
-}
-
-.camera-container.canvas-visible .canvas-container {
-    display: flex;
 }
 
 .countdown {
     position: absolute;
+    /* Ensure countdown is above everything */
+    z-index: 10;
+    grid-area: 1 / 1 / 2 / 2;
+    
     font-size: 120px;
     color: white;
     font-weight: 700;
