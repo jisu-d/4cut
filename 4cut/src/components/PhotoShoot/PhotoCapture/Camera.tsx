@@ -179,6 +179,20 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
     useEffect(() => {
         if (!isStreamReady) return;
 
+        // [Safari 4번째 컷 회전 버그 수정]
+        // 비디오 디코더 동기화(Desync) 방지를 위한 소프트 리셋
+        // 촬영 회차(photoIndex)가 바뀔 때 비디오를 잠깐 멈췄다 다시 재생하여
+        // 렌더링 파이프라인의 방향 정보가 꼬이는 것을 방지함.
+        if (videoRef.current && !videoRef.current.paused) {
+            videoRef.current.pause();
+            requestAnimationFrame(() => {
+                videoRef.current?.play().catch(() => {
+                    // 사용자가 상호작용하지 않았을 때 play()가 막힐 수 있으나, 
+                    // 이미 stream이 활성화된 상태라 대부분 문제없음.
+                });
+            });
+        }
+
         // Clear any existing intervals before starting new ones for the new photoIndex
         if (intervalRef.current) {
             clearInterval(intervalRef.current);
