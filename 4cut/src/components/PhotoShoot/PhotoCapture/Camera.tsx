@@ -13,6 +13,8 @@ interface CameraProps {
 function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+    const tempCanvasRef = useRef<HTMLCanvasElement | null>(null); // [최적화] 임시 캔버스 재사용
     const timeoutRef = useRef<number | null>(null);
     const intervalRef = useRef<number | null>(null);
 
@@ -24,41 +26,124 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
     const [showCanvas, setShowCanvas] = useState(false);
     const [isStreamReady, setIsStreamReady] = useState(false);
 
+    // [DEBUG]
+    const [debugInfo, setDebugInfo] = useState({ 
+        width: 0, height: 0, currentWidth: 0, currentHeight: 0, loadCount: 0 
+    });
+    
+    // 회전 여부 판단 헬퍼 함수
+    const checkIsRotated = useCallback((vW: number, vH: number) => {
+        const initW = debugInfo.width;
+        const initH = debugInfo.height;
+        return (initW > 0 && initH > 0) && ((initW > initH) !== (vW > vH));
+    }, [debugInfo.width, debugInfo.height]);
+
+    // [DEBUG] Monitor resolution changes
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (videoRef.current) {
+                const v = videoRef.current;
+                // 값 변화가 있을 때만 상태 업데이트
+                if (debugInfo.currentWidth !== v.videoWidth || debugInfo.currentHeight !== v.videoHeight) {
+                    setDebugInfo(prev => ({ 
+                        ...prev, 
+                        currentWidth: v.videoWidth, 
+                        currentHeight: v.videoHeight 
+                    }));
+                }
+            }
+        }, 500);
+        return () => clearInterval(interval);
+    }, [debugInfo.currentWidth, debugInfo.currentHeight]);
+
     const orientation = useOrientation();
 
-    // 캡처 파라미터 계산 (비디오 -> 캔버스 크롭 좌표 및 크기)
+    // 프리뷰 렌더링 (Canvas에 직접 그리기)
+    useEffect(() => {
+        let animationFrameId: number;
+
+        const render = () => {
+            if (!videoRef.current || !previewCanvasRef.current) return;
+            const video = videoRef.current;
+            const canvas = previewCanvasRef.current;
+            const ctx = canvas.getContext('2d');
+
+            const vW = video.videoWidth;
+            const vH = video.videoHeight;
+            const isRotated = checkIsRotated(vW, vH);
+
+            // PC 등 회전이 필요 없을 때는 캔버스에 그리지 않음 (성능 최적화)
+            // 비디오 태그가 직접 보이기 때문
+            if (!isRotated) {
+                animationFrameId = requestAnimationFrame(render);
+                return;
+            }
+
+            if (video.readyState >= 2 && ctx) {
+                // 캔버스 크기는 회전된 해상도에 맞춤
+                const targetW = vH; // 회전 시 w <-> h
+                const targetH = vW;
+
+                if (canvas.width !== targetW || canvas.height !== targetH) {
+                    canvas.width = targetW;
+                    canvas.height = targetH;
+                }
+
+                ctx.save();
+                
+                // 1. 좌우 반전 (Mirroring)
+                ctx.translate(targetW, 0);
+                ctx.scale(-1, 1);
+
+                // 2. 그리기 (회전 없이 원본 그대로)
+                ctx.drawImage(video, 0, 0, vW, vH);
+
+                ctx.restore();
+            }
+            animationFrameId = requestAnimationFrame(render);
+        };
+
+        render();
+
+        return () => {
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        };
+    }, [checkIsRotated]);
+
+    // 캡처 파라미터 계산
     const getCaptureParams = useCallback(() => {
         if (!videoRef.current) return null;
         const video = videoRef.current;
         const [width, height] = ratio.split(':').map(Number);
 
-        const videoWidth = video.videoWidth;
-        const videoHeight = video.videoHeight;
-        if (!videoWidth || !videoHeight) return null;
+        const vW = video.videoWidth;
+        const vH = video.videoHeight;
+        const isRotated = checkIsRotated(vW, vH);
 
-        // [수정] 복잡한 보정 로직 제거: Safari와 Chrome 모두에서 
-        // videoWidth/videoHeight의 방향성보다는 비율(Ratio)에 의존하는 것이 가장 안전함.
-        // 중앙 크롭 로직(videoRatio vs targetRatio)이 모든 방향 변수를 흡수하여 처리하도록 함.
+        const sourceWidth = isRotated ? vH : vW;
+        const sourceHeight = isRotated ? vW : vH;
 
-        const videoRatio = videoWidth / videoHeight;
+        if (!sourceWidth || !sourceHeight) return null;
+
+        const videoRatio = sourceWidth / sourceHeight;
         const targetRatio = width / height;
 
         let sWidth, sHeight, sx, sy;
 
         if (videoRatio > targetRatio) {
-            sHeight = videoHeight;
+            sHeight = sourceHeight;
             sWidth = sHeight * targetRatio;
-            sx = (videoWidth - sWidth) / 2;
+            sx = (sourceWidth - sWidth) / 2;
             sy = 0;
         } else {
-            sWidth = videoWidth;
+            sWidth = sourceWidth;
             sHeight = sWidth / targetRatio;
             sx = 0;
-            sy = (videoHeight - sHeight) / 2;
+            sy = (sourceHeight - sHeight) / 2;
         }
 
         return { sx, sy, sWidth, sHeight, canvasWidth: sWidth, canvasHeight: sHeight };
-    }, [ratio]);
+    }, [ratio, checkIsRotated]);
 
 
     const capturePhoto = useCallback(async () => {
@@ -72,38 +157,61 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
 
         const { sx, sy, sWidth, sHeight, canvasWidth, canvasHeight } = params;
 
+        // 1. 임시 캔버스 준비 (재사용)
+        if (!tempCanvasRef.current) {
+            tempCanvasRef.current = document.createElement('canvas');
+        }
+        const tempCanvas = tempCanvasRef.current;
+        
+        const vW = video.videoWidth;
+        const vH = video.videoHeight;
+        const isRotated = checkIsRotated(vW, vH);
+        
+        const fullW = isRotated ? vH : vW;
+        const fullH = isRotated ? vW : vH;
+
+        if (tempCanvas.width !== fullW || tempCanvas.height !== fullH) {
+            tempCanvas.width = fullW;
+            tempCanvas.height = fullH;
+        }
+        
+        const tempCtx = tempCanvas.getContext('2d');
+        
+        if (tempCtx) {
+            tempCtx.save();
+            tempCtx.translate(fullW, 0);
+            tempCtx.scale(-1, 1);
+            
+            // 회전 없이 그리기
+            tempCtx.drawImage(video, 0, 0, vW, vH);
+            
+            tempCtx.restore();
+        }
+
+        // 2. 최종 캔버스에 크롭하여 그리기
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
 
         const context = canvas.getContext('2d');
         if (context) {
-            context.translate(canvasWidth, 0);
-            context.scale(-1, 1);
-            context.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, canvasWidth, canvasHeight);
+            context.drawImage(tempCanvas, sx, sy, sWidth, sHeight, 0, 0, canvasWidth, canvasHeight);
             
             const base64Img = canvas.toDataURL('image/jpeg');
-            
-            // 1. 정적 이미지만 먼저 저장하고 즉시 다음 단계(onComplete)로 진행
             onCapture(base64Img, photoIndex, null);
+            
             setShowCanvas(true);
-
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
             timeoutRef.current = window.setTimeout(() => {
                 setShowCanvas(false);
                 onComplete();
             }, 500);
 
-
-            // 2. GIF 인코딩은 Web Worker를 사용하여 백그라운드에서 처리 (메인 스레드 차단 방지)
+            // GIF 생성 로직
             if (gifFramesRef.current.length > 0) {
                 const framesToEncode = [...gifFramesRef.current];
                 const firstFrame = framesToEncode[0];
                 const width = firstFrame.width;
                 const height = firstFrame.height;
-
-                // Web Worker 생성
                 const worker = new Worker(new URL('./gif.worker.ts', import.meta.url), { type: 'module' });
 
                 worker.onmessage = (e) => {
@@ -114,18 +222,23 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
                     } else {
                         console.error("Worker GIF encoding failed:", error);
                     }
-                    worker.terminate(); // 작업 완료 후 워커 종료
+                    worker.terminate();
+                };
+
+                worker.onerror = (err) => {
+                    console.error("Worker error:", err);
+                    worker.terminate();
                 };
 
                 worker.postMessage({
                     width,
-                    height,
+                    height, // firstFrame에서 가져온 width, height 사용
                     frames: framesToEncode,
                     delay: 100
                 });
             }
         }
-    }, [photoIndex, onCapture, onComplete, getCaptureParams]);
+    }, [photoIndex, onCapture, onComplete, getCaptureParams, checkIsRotated]);
 
     // Effect 1: Setup camera stream
     useEffect(() => {
@@ -134,12 +247,19 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
 
         const handleMetadataLoaded = () => {
             setIsStreamReady(true);
+            if (video) {
+                setDebugInfo(prev => ({
+                    ...prev,
+                    width: video.videoWidth,
+                    height: video.videoHeight,
+                    loadCount: prev.loadCount + 1
+                }));
+            }
         };
 
         async function setupCamera() {
             if (!video) return;
             try {
-                // [수정] 해상도 제약 조건 추가: iPad 등에서 가로 모드 스트림 유도
                 stream = await navigator.mediaDevices.getUserMedia({ 
                     video: { 
                         facingMode: 'user',
@@ -157,21 +277,11 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
         setupCamera();
 
         return () => {
-            if (video) {
-                video.removeEventListener('loadedmetadata', handleMetadataLoaded);
-            }
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-            }
-            if (gifIntervalRef.current) {
-                clearInterval(gifIntervalRef.current);
-            }
+            if (video) video.removeEventListener('loadedmetadata', handleMetadataLoaded);
+            if (stream) stream.getTracks().forEach(track => track.stop());
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            if (gifIntervalRef.current) clearInterval(gifIntervalRef.current);
         };
     }, []);
 
@@ -179,60 +289,69 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
     useEffect(() => {
         if (!isStreamReady) return;
 
-        // Clear any existing intervals before starting new ones for the new photoIndex
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
-        if (gifIntervalRef.current) {
-            clearInterval(gifIntervalRef.current);
-            gifIntervalRef.current = null;
-        }
+        if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+        if (gifIntervalRef.current) { clearInterval(gifIntervalRef.current); gifIntervalRef.current = null; }
 
         setCountdown(6);
-        gifFramesRef.current = []; // 초기화
-        setShowCanvas(false); // 새로운 photoIndex 시작 시 캔버스 숨김
+        gifFramesRef.current = [];
+        setShowCanvas(false);
 
-        // 카운트다운 타이머
         intervalRef.current = window.setInterval(() => {
             setCountdown(prev => (prev !== null && prev > 0 ? prev - 1 : 0));
         }, 1000);
 
-        // [최적화] 반복문 내 중복 계산 제거: params 계산을 루프 밖으로 이동
         const params = getCaptureParams();
         
         if (params) {
-            // GIF 최적화를 위한 리사이징 변수 미리 계산
             const MAX_GIF_WIDTH = 400;
             const scale = params.canvasWidth > MAX_GIF_WIDTH ? MAX_GIF_WIDTH / params.canvasWidth : 1;
             const gifWidth = Math.floor(params.canvasWidth * scale);
             const gifHeight = Math.floor(params.canvasHeight * scale);
 
-            // GIF 프레임 캡처 (100ms마다)
             gifIntervalRef.current = window.setInterval(() => {
                 if (!videoRef.current) return;
+                
+                const vW = videoRef.current.videoWidth;
+                const vH = videoRef.current.videoHeight;
+                const isRotated = checkIsRotated(vW, vH);
+                const fullW = isRotated ? vH : vW;
+                const fullH = isRotated ? vW : vH;
 
-                // 오프스크린 캔버스 초기화 (한 번만 생성하거나 크기 변경 시 재생성)
+                // [최적화] 오프스크린 캔버스 초기화 및 재사용
                 if (!offscreenCanvasRef.current) {
                     offscreenCanvasRef.current = document.createElement('canvas');
                 }
                 const offCanvas = offscreenCanvasRef.current;
+                
+                // [최적화] 임시 캔버스 재사용
+                if (!tempCanvasRef.current) {
+                    tempCanvasRef.current = document.createElement('canvas');
+                }
+                const tempC = tempCanvasRef.current;
+
+                if (tempC.width !== fullW || tempC.height !== fullH) {
+                    tempC.width = fullW;
+                    tempC.height = fullH;
+                }
+
+                const tempCtx = tempC.getContext('2d', { willReadFrequently: true });
+                if (tempCtx) {
+                    tempCtx.save();
+                    tempCtx.translate(fullW, 0);
+                    tempCtx.scale(-1, 1);
+                    // 회전 없이 그리기
+                    tempCtx.drawImage(videoRef.current, 0, 0, vW, vH);
+                    tempCtx.restore();
+                }
+
                 if (offCanvas.width !== gifWidth || offCanvas.height !== gifHeight) {
                     offCanvas.width = gifWidth;
                     offCanvas.height = gifHeight;
                 }
 
-                // willReadFrequently 옵션으로 getImageData 성능 최적화
                 const ctx = offCanvas.getContext('2d', { willReadFrequently: true });
                 if (ctx) {
-                    // 좌우 반전 처리
-                    ctx.save();
-                    ctx.translate(gifWidth, 0);
-                    ctx.scale(-1, 1);
-                    // 리사이징하여 그리기
-                    ctx.drawImage(videoRef.current, params.sx, params.sy, params.sWidth, params.sHeight, 0, 0, gifWidth, gifHeight);
-                    ctx.restore();
-
+                    ctx.drawImage(tempC, params.sx, params.sy, params.sWidth, params.sHeight, 0, 0, gifWidth, gifHeight);
                     const imageData = ctx.getImageData(0, 0, gifWidth, gifHeight);
                     gifFramesRef.current.push(imageData);
                 }
@@ -240,24 +359,16 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
         }
 
         return () => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-            }
-            if (gifIntervalRef.current) {
-                clearInterval(gifIntervalRef.current);
-            }
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            if (gifIntervalRef.current) clearInterval(gifIntervalRef.current);
         };
-    }, [isStreamReady, getCaptureParams, photoIndex]);
+    }, [isStreamReady, getCaptureParams, photoIndex, checkIsRotated]);
 
-    // Effect 4: Photo Capture Trigger (Renamed from Effect 3)
+    // Effect 4: Photo Capture Trigger
     useEffect(() => {
         if (countdown === 0) {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-            }
-            if (gifIntervalRef.current) {
-                clearInterval(gifIntervalRef.current);
-            }
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            if (gifIntervalRef.current) clearInterval(gifIntervalRef.current);
             capturePhoto();
             setCountdown(null);
         }
@@ -279,21 +390,65 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
 
     }, [ratio, orientation]);
 
+    // 회전 여부 판단 (렌더링 시 사용)
+    const initW = debugInfo.width;
+    const initH = debugInfo.height;
+    const curW = debugInfo.currentWidth;
+    const curH = debugInfo.currentHeight;
+    
+    // 이부분도 checkIsRotated 활용 가능하지만, 렌더링 중이라 직접 호출하거나 변수 사용
+    // 여기서는 debugInfo 상태값을 직접 참조하여 계산
+    const isRotated = (initW > 0 && initH > 0) && 
+                      ((initW > initH) !== (curW > curH));
+
     return (
         <div className={`camera-container ${showCanvas ? 'canvas-visible' : ''}`}>
+             {/* DEBUG UI */}
+             {/*
+             <div style={{
+                position: 'absolute', top: '70px', right: '10px',
+                backgroundColor: 'rgba(0,0,0,0.6)', color: '#0f0',
+                fontSize: '12px', padding: '8px', zIndex: 9999, pointerEvents: 'none',
+                whiteSpace: 'pre-wrap', textAlign: 'left', borderRadius: '4px'
+            }}>
+                [DEBUG]<br/>
+                Init: {debugInfo.width}x{debugInfo.height}<br/>
+                Cur: {debugInfo.currentWidth}x{debugInfo.currentHeight}<br/>
+                Loads: {debugInfo.loadCount}<br/>
+                Rotated: {isRotated ? 'YES' : 'NO'}<br/>
+                Idx: {photoIndex} / Cnt: {countdown}
+            </div>
+            */}
+
+
             <div 
-                style={{ ...videoStyle, transform: 'scaleX(-1)' }} 
+                style={{ ...videoStyle }} 
                 className={`video-container ${classNameForRatio}`}
             >
+                {/* PC 등 회전이 필요 없을 땐 비디오를 직접 보여줌 (가장 확실함) */}
                 <video 
                     ref={videoRef} 
                     autoPlay 
                     playsInline 
                     muted 
                     className="camera-video"
-                    // transform removed from video element
+                    style={{ 
+                        display: isRotated ? 'none' : 'block',
+                        transform: 'scaleX(-1)'
+                    }} 
                 ></video>
-            </div>            <div style={videoStyle} className={`canvas-container ${classNameForRatio}`}>
+                
+                {/* 회전 보정이 필요할 때만 캔버스 프리뷰 사용 */}
+                <canvas 
+                    ref={previewCanvasRef} 
+                    className="camera-video"
+                    style={{ 
+                        display: isRotated ? 'block' : 'none',
+                        objectFit: 'cover' 
+                    }}
+                />
+            </div>
+            <div style={videoStyle} className={`canvas-container ${classNameForRatio}`}>
                 <canvas ref={canvasRef} className="captured-image"></canvas>
             </div>
             {countdown !== null && countdown > 0 && !showCanvas && (
