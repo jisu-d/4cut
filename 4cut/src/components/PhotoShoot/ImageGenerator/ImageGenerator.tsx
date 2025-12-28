@@ -39,6 +39,7 @@ const ImageGenerator = () => {
   const [isPrinting, setIsPrinting] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showServerAuthBtn, setShowServerAuthBtn] = useState(false); // 서버 승인 버튼 표시 여부
 
   // 미리 생성된 Blob을 저장할 상태
   const [preGeneratedGifBlob, setPreGeneratedGifBlob] = useState<Blob | null>(null);
@@ -107,6 +108,7 @@ const ImageGenerator = () => {
     if (isPrinting) return;
     setIsPrinting(true);
     setErrorMsg(null);
+    setShowServerAuthBtn(false);
     
     try {
         // 1. GIF Blob 준비 (미리 생성된 것 우선 사용)
@@ -132,6 +134,10 @@ const ImageGenerator = () => {
         console.error("인쇄 실패:", error);
         if (error instanceof Error) {
             setErrorMsg(error.message);
+            // 네트워크 에러(SSL 인증서 문제 등) 감지 시 승인 버튼 표시
+            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError') || error.message.includes('서버 응답 없음')) {
+                setShowServerAuthBtn(true);
+            }
         } else {
             setErrorMsg('알 수 없는 에러가 발생했습니다.');
         }
@@ -158,6 +164,7 @@ const ImageGenerator = () => {
       setQrCodeUrl(null);
       setPrintCount(2);
       setErrorMsg(null);
+      setShowServerAuthBtn(false);
   }
 
   /**
@@ -197,7 +204,33 @@ const ImageGenerator = () => {
                 />
             ) : (
                 <>
-                    {errorMsg && <div className="error-msg" style={{color: '#ff4d4f', marginBottom: '1rem', fontWeight: 'bold'}}>{errorMsg}</div>}
+                    {errorMsg && (
+                        <div className="error-container" style={{marginBottom: '1rem', textAlign: 'center'}}>
+                            <div className="error-msg" style={{color: '#ff4d4f', fontWeight: 'bold', marginBottom: '0.5rem'}}>{errorMsg}</div>
+                            {showServerAuthBtn && (
+                                <button 
+                                    className="server-auth-btn"
+                                    onClick={() => {
+                                        // PWA 컨테이너 내부에서 인증을 받기 위해 현재 창을 이동
+                                        // 인증 후 뒤로가기 제스처로 복귀하거나 앱을 다시 실행해야 함
+                                        alert("서버 페이지로 이동합니다.\n'세부사항 보기 -> 이 웹사이트 방문'을 클릭하여 승인한 뒤,\n다시 앱으로 돌아오세요.");
+                                        window.location.href = 'https://10.42.0.1:8000';
+                                    }}
+                                    style={{
+                                        padding: '8px 16px',
+                                        backgroundColor: '#ff4d4f',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.9rem'
+                                    }}
+                                >
+                                    ⚠️ 서버 연결 승인하기 (앱 내 이동)
+                                </button>
+                            )}
+                        </div>
+                    )}
                     <PrintControls 
                         count={printCount} 
                         isPrinting={isPrinting}
