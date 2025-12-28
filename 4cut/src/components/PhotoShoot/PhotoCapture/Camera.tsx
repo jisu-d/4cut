@@ -32,8 +32,8 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
         const video = videoRef.current;
         const [width, height] = ratio.split(':').map(Number);
 
-        let videoWidth = video.videoWidth;
-        let videoHeight = video.videoHeight;
+        const videoWidth = video.videoWidth;
+        const videoHeight = video.videoHeight;
         if (!videoWidth || !videoHeight) return null;
 
         // [수정] 복잡한 보정 로직 제거: Safari와 Chrome 모두에서 
@@ -58,7 +58,7 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
         }
 
         return { sx, sy, sWidth, sHeight, canvasWidth: sWidth, canvasHeight: sHeight };
-    }, [ratio, orientation]);
+    }, [ratio]);
 
 
     const capturePhoto = useCallback(async () => {
@@ -179,20 +179,6 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
     useEffect(() => {
         if (!isStreamReady) return;
 
-        // [Safari 4번째 컷 회전 버그 수정]
-        // 비디오 디코더 동기화(Desync) 방지를 위한 소프트 리셋
-        // 촬영 회차(photoIndex)가 바뀔 때 비디오를 잠깐 멈췄다 다시 재생하여
-        // 렌더링 파이프라인의 방향 정보가 꼬이는 것을 방지함.
-        if (videoRef.current && !videoRef.current.paused) {
-            videoRef.current.pause();
-            requestAnimationFrame(() => {
-                videoRef.current?.play().catch(() => {
-                    // 사용자가 상호작용하지 않았을 때 play()가 막힐 수 있으나, 
-                    // 이미 stream이 활성화된 상태라 대부분 문제없음.
-                });
-            });
-        }
-
         // Clear any existing intervals before starting new ones for the new photoIndex
         if (intervalRef.current) {
             clearInterval(intervalRef.current);
@@ -212,44 +198,46 @@ function Camera({ ratio, photoIndex, onCapture, onComplete }: CameraProps) {
             setCountdown(prev => (prev !== null && prev > 0 ? prev - 1 : 0));
         }, 1000);
 
-        // GIF 프레임 캡처 (100ms마다)
-        gifIntervalRef.current = window.setInterval(() => {
-            if (!videoRef.current) return;
-            
-            const params = getCaptureParams();
-            if (!params) return;
-
-            // GIF 최적화를 위한 리사이징 (최대 너비 400px)
+        // [최적화] 반복문 내 중복 계산 제거: params 계산을 루프 밖으로 이동
+        const params = getCaptureParams();
+        
+        if (params) {
+            // GIF 최적화를 위한 리사이징 변수 미리 계산
             const MAX_GIF_WIDTH = 400;
             const scale = params.canvasWidth > MAX_GIF_WIDTH ? MAX_GIF_WIDTH / params.canvasWidth : 1;
             const gifWidth = Math.floor(params.canvasWidth * scale);
             const gifHeight = Math.floor(params.canvasHeight * scale);
 
-            // 오프스크린 캔버스 초기화 (한 번만 생성하거나 크기 변경 시 재생성)
-            if (!offscreenCanvasRef.current) {
-                offscreenCanvasRef.current = document.createElement('canvas');
-            }
-            const offCanvas = offscreenCanvasRef.current;
-            if (offCanvas.width !== gifWidth || offCanvas.height !== gifHeight) {
-                offCanvas.width = gifWidth;
-                offCanvas.height = gifHeight;
-            }
+            // GIF 프레임 캡처 (100ms마다)
+            gifIntervalRef.current = window.setInterval(() => {
+                if (!videoRef.current) return;
 
-            // willReadFrequently 옵션으로 getImageData 성능 최적화
-            const ctx = offCanvas.getContext('2d', { willReadFrequently: true });
-            if (ctx) {
-                // 좌우 반전 처리
-                ctx.save();
-                ctx.translate(gifWidth, 0);
-                ctx.scale(-1, 1);
-                // 리사이징하여 그리기
-                ctx.drawImage(videoRef.current, params.sx, params.sy, params.sWidth, params.sHeight, 0, 0, gifWidth, gifHeight);
-                ctx.restore();
+                // 오프스크린 캔버스 초기화 (한 번만 생성하거나 크기 변경 시 재생성)
+                if (!offscreenCanvasRef.current) {
+                    offscreenCanvasRef.current = document.createElement('canvas');
+                }
+                const offCanvas = offscreenCanvasRef.current;
+                if (offCanvas.width !== gifWidth || offCanvas.height !== gifHeight) {
+                    offCanvas.width = gifWidth;
+                    offCanvas.height = gifHeight;
+                }
 
-                const imageData = ctx.getImageData(0, 0, gifWidth, gifHeight);
-                gifFramesRef.current.push(imageData);
-            }
-        }, 100);
+                // willReadFrequently 옵션으로 getImageData 성능 최적화
+                const ctx = offCanvas.getContext('2d', { willReadFrequently: true });
+                if (ctx) {
+                    // 좌우 반전 처리
+                    ctx.save();
+                    ctx.translate(gifWidth, 0);
+                    ctx.scale(-1, 1);
+                    // 리사이징하여 그리기
+                    ctx.drawImage(videoRef.current, params.sx, params.sy, params.sWidth, params.sHeight, 0, 0, gifWidth, gifHeight);
+                    ctx.restore();
+
+                    const imageData = ctx.getImageData(0, 0, gifWidth, gifHeight);
+                    gifFramesRef.current.push(imageData);
+                }
+            }, 100);
+        }
 
         return () => {
             if (intervalRef.current) {

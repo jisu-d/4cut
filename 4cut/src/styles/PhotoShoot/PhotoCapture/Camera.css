@@ -25,9 +25,6 @@
     align-items: center;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    
-    /* Smooth transition for visibility */
-    transition: visibility 0.2s, opacity 0.2s;
 }
 
 .fit-to-width{
@@ -57,11 +54,11 @@
     opacity: 1;
 }
 
-.camera-container.canvas-visible .video-container {
-    /* Do NOT use display: none. Just hide visually. */
-    visibility: hidden;
-    opacity: 0;
-}
+/* [수정] 깜빡임 완전 제거: 비디오를 숨기지 않고 캔버스가 그 위를 덮도록 유지함.
+   display: none이나 visibility: hidden을 사용하면 리플로우로 인해 깜빡임이 발생할 수 있음. */
+/* .camera-container.canvas-visible .video-container {
+    display: none;
+} */
 
 .captured-image {
     width: 100%;
