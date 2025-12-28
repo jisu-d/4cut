@@ -134,13 +134,11 @@ const ImageGenerator = () => {
         console.error("인쇄 실패:", error);
         if (error instanceof Error) {
             setErrorMsg(error.message);
-            // 네트워크 에러(SSL 인증서 문제 등) 감지 시 승인 버튼 표시
-            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError') || error.message.includes('서버 응답 없음')) {
-                setShowServerAuthBtn(true);
-            }
         } else {
             setErrorMsg('알 수 없는 에러가 발생했습니다.');
         }
+        // 에러 종류와 관계없이 연결 문제일 가능성이 높으므로 승인 버튼 표시
+        setShowServerAuthBtn(true);
     } finally {
         setIsPrinting(false);
     }
