@@ -79,8 +79,20 @@ async function generateGif(
 
             if (source) {
                 ctx.save();
-                const scaledLeft = slot.left * scale;
-                const scaledTop = slot.top * scale;
+                
+                let adjustedLeft = slot.left;
+                let adjustedTop = slot.top;
+
+                // 90도 회전 시 좌표 보정
+                if (slot.angle && Math.abs(slot.angle) % 180 === 90) {
+                    const xOffset = (slot.height - slot.width) / 2;
+                    const yOffset = (slot.width - slot.height) / 2;
+                    adjustedLeft += xOffset;
+                    adjustedTop += yOffset;
+                }
+
+                const scaledLeft = adjustedLeft * scale;
+                const scaledTop = adjustedTop * scale;
                 const scaledWidth = slot.width * scale;
                 const scaledHeight = slot.height * scale;
                 const cx = scaledLeft + scaledWidth / 2;
@@ -130,10 +142,32 @@ async function generateStatic(
     if (!ctx) throw new Error("Failed to get OffscreenCanvas context");
 
     // 1. 슬롯 이미지 그리기
-    imgPlaceData.forEach((data, index) => {
+    imgPlaceData.forEach((slot, index) => {
         const img = slotBitmaps[index];
         if (img) {
-            ctx.drawImage(img, data.left, data.top, data.width, data.height);
+            ctx.save();
+
+            let adjustedLeft = slot.left;
+            let adjustedTop = slot.top;
+
+            // 90도 회전 시 좌표 보정
+            if (slot.angle && Math.abs(slot.angle) % 180 === 90) {
+                const xOffset = (slot.height - slot.width) / 2;
+                const yOffset = (slot.width - slot.height) / 2;
+                adjustedLeft += xOffset;
+                adjustedTop += yOffset;
+            }
+
+            // 정적 생성은 scale = 1 (원본 크기)
+            const cx = adjustedLeft + slot.width / 2;
+            const cy = adjustedTop + slot.height / 2;
+
+            ctx.translate(cx, cy);
+            ctx.rotate((slot.angle * Math.PI) / 180);
+            ctx.translate(-cx, -cy);
+            
+            ctx.drawImage(img, adjustedLeft, adjustedTop, slot.width, slot.height);
+            ctx.restore();
         }
     });
 

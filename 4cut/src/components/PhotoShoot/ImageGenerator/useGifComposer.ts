@@ -193,8 +193,20 @@ export const useGifComposer = (
 
                     if (source) {
                         ctx.save();
-                        const scaledLeft = slot.left * scale;
-                        const scaledTop = slot.top * scale;
+                        
+                        let adjustedLeft = slot.left;
+                        let adjustedTop = slot.top;
+
+                        // 90도 회전 시 좌표 보정
+                        if (slot.angle && Math.abs(slot.angle) % 180 === 90) {
+                            const xOffset = (slot.height - slot.width) / 2;
+                            const yOffset = (slot.width - slot.height) / 2;
+                            adjustedLeft += xOffset;
+                            adjustedTop += yOffset;
+                        }
+
+                        const scaledLeft = adjustedLeft * scale;
+                        const scaledTop = adjustedTop * scale;
                         const scaledWidth = slot.width * scale;
                         const scaledHeight = slot.height * scale;
                         const cx = scaledLeft + scaledWidth / 2;
