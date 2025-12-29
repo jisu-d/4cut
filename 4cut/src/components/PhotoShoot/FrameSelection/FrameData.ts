@@ -21,10 +21,10 @@ import saesol4cutPreview from "../../../assets/frame/preview/saesol4cut.png"
 
 export const frameData: Record<string, ImgPlaceData[]> = {
     '1': [
-        {ratio: '4:3', left: 1740, top: 162, width: 1874, height: 1404, angle: 90, imgSrc: null, gifBlob: null},
-        {ratio: '4:3', left: 1739, top: 2098, width: 1874, height: 1404, angle: 90, imgSrc: null, gifBlob: null},
-        {ratio: '4:3', left: 160, top: 922, width: 1874, height: 1404, angle: 90, imgSrc: null, gifBlob: null},
-        {ratio: '4:3', left: 160, top: 2865, width: 1874, height: 1404, angle: 90, imgSrc: null, gifBlob: null},
+        {ratio: '4:3', left: 1740, top: 145, width: 1879, height: 1404, angle: 90, imgSrc: null, gifBlob: null},
+        {ratio: '4:3', left: 1739, top: 2081, width: 1879, height: 1404, angle: 90, imgSrc: null, gifBlob: null},
+        {ratio: '4:3', left: 160, top: 905, width: 1879, height: 1404, angle: 90, imgSrc: null, gifBlob: null},
+        {ratio: '4:3', left: 160, top: 2848, width: 1879, height: 1404, angle: 90, imgSrc: null, gifBlob: null},
 
     ],
     '3': [
