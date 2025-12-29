@@ -22,7 +22,7 @@ export const PrintControls = ({ count, isPrinting, isPreparing = false, onCountC
                     -
                 </button>
                 <span className='print-count'>{count}</span>
-                <button 
+                <button
                     className='count-btn' 
                     onClick={() => onCountChange(1)}
                     disabled={count >= 10 || isPrinting}

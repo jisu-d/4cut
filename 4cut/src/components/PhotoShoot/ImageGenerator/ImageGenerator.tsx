@@ -35,7 +35,7 @@ const ImageGenerator = () => {
 
   const isLoading = imagesLoading; // 프레임 로드만 완료되면 즉시 표시 (GIF는 점진적으로 로딩)
 
-  const [printCount, setPrintCount] = useState(2);
+  const [printCount, setPrintCount] = useState(1);
   const [isPrinting, setIsPrinting] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -160,7 +160,7 @@ const ImageGenerator = () => {
    */
   const resetPrint = () => {
       setQrCodeUrl(null);
-      setPrintCount(2);
+      setPrintCount(1);
       setErrorMsg(null);
       setShowServerAuthBtn(false);
   }
